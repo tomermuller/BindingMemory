@@ -77,20 +77,18 @@ class Messages:
 
 class ParallelPortEnums:
     SHOW_RED = 21
-    SHOW_BLUE = 22
     SHOW_GREEN = 23
     SHOW_YELLOW = 24
     STOP_RED = 31
-    STOP_BLUE = 32
     STOP_GREEN = 33
     STOP_YELLOW = 34
 
     SHOW_LIVING_ROOM = 41
     SHOW_BATHROOM = 42
-    SHOW_CITY = 43
-    SHOW_FOREST = 44
+    SHOW_KITCHEN = 43
     STOP_LIVING_ROOM = 51
     STOP_BATHROOM = 52
+    STOP_KITCHEN = 53
 
     SHOW_BINDING_TRIALS = 61
     SHOW_ATTENTION_QUESTION = 62
@@ -119,16 +117,16 @@ class ParallelPortEnums:
     FEATURE_SHOW_TO_PULSE_CODE = {Features.GREEN: SHOW_GREEN,
                                   Features.YELLOW: SHOW_YELLOW,
                                   Features.RED: SHOW_RED,
-                                  Features.BLUE: SHOW_BLUE,
                                   Features.LIVING_ROOM: SHOW_LIVING_ROOM,
-                                  Features.BATHROOM: SHOW_BATHROOM}
+                                  Features.BATHROOM: SHOW_BATHROOM,
+                                  Features.KITCHEN: SHOW_KITCHEN}
 
     FEATURE_STOP_TO_PULSE_CODE = {Features.GREEN: STOP_GREEN,
                                   Features.YELLOW: STOP_YELLOW,
                                   Features.RED: STOP_RED,
-                                  Features.BLUE: STOP_BLUE,
                                   Features.LIVING_ROOM: STOP_LIVING_ROOM,
-                                  Features.BATHROOM: STOP_BATHROOM}
+                                  Features.BATHROOM: STOP_BATHROOM,
+                                  Features.KITCHEN: STOP_KITCHEN}
 
     CATEGORY_QUESTION_SHOW_TO_PULSE_CODE = {Features.SCENES: SHOW_SCENE_QUESTION,
                                             Features.COLORS: SHOW_COLOR_QUESTION}
