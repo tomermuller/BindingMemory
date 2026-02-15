@@ -1,11 +1,11 @@
 from psychopy import visual, event, parallel, gui
-from tasks.binding_task.enums.Enums import Features, BindingAndTestEnums, Instruction, StringEnums, TimeAttribute
-from binding_learning import BindingLearning
-from tasks.binding_task.functional_localizer import FunctionalLocalizer
-from test_phase import TestPhase
+from src.binding_task.enums.Enums import Features, BindingAndTestEnums, Instruction, StringEnums
+from src.binding_task.binding_learning import BindingLearning
+from src.binding_task.functional_localizer import FunctionalLocalizer
+from src.binding_task.test_phase import TestPhase
 from datetime import datetime
-from break_game import BreakGame
-from utils import show_instruction
+from src.binding_task.break_game import BreakGame
+from src.binding_task.utils import show_instruction
 from pathlib import Path
 import pandas as pd
 

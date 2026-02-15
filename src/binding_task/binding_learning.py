@@ -3,14 +3,13 @@ from datetime import datetime
 import pandas as pd
 import psychopy
 from PIL import Image, ImageDraw
-from tasks.binding_task.enums.Enums import (ParallelPortEnums, BindingAndTestEnums, Features, Paths, StringEnums,
-                                            Instruction, TimeAttribute)
+from src.binding_task.enums.Enums import (ParallelPortEnums, BindingAndTestEnums, Features, Paths, StringEnums,
+                                          Instruction, TimeAttribute)
 import random
 from pathlib import Path
 from psychopy import visual, core, parallel, event
 import json
-from tasks.binding_task.utils import show_instruction, send_to_parallel_port
-from utils import show_fixation, show_nothing, shuffle_trials
+from src.binding_task.utils import show_instruction, send_to_parallel_port, show_fixation, show_nothing, shuffle_trials
 from collections import defaultdict
 
 """
