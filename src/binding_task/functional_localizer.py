@@ -5,8 +5,8 @@ from datetime import datetime
 import pandas as pd
 import psychopy
 from psychopy import visual, core, event, parallel
-from tasks.binding_task.enums.Enums import StringEnums, ParallelPortEnums, Features, Instruction, TimeAttribute
-from tasks.binding_task.utils import shuffle_trials, show_nothing, show_fixation, show_instruction, send_to_parallel_port
+from src.binding_task.enums.Enums import StringEnums, ParallelPortEnums, Features, Instruction, TimeAttribute
+from src.binding_task.utils import shuffle_trials, show_nothing, show_fixation, show_instruction, send_to_parallel_port
 
 """
 IMPORTANT: the categories input to the builder is what will determine what categories will be

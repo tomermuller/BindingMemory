@@ -1,8 +1,8 @@
 from psychopy import visual, core, event
 import psychopy
 import random
-from tasks.binding_task.enums.Enums import BreakGameEnums, Instruction
-from utils import show_instruction
+from src.binding_task.enums.Enums import BreakGameEnums, Instruction
+from src.binding_task.utils import show_instruction
 
 
 class BreakGame:

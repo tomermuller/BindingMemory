@@ -5,9 +5,8 @@ from psychopy import visual, event, parallel, core
 import random
 from pathlib import Path
 from datetime import datetime
-from tasks.binding_task.enums.Enums import Features, BindingAndTestEnums, ParallelPortEnums, Paths, StringEnums
-from tasks.binding_task.utils import show_nothing, send_to_parallel_port
-from utils import shuffle_trials
+from src.binding_task.enums.Enums import Features, BindingAndTestEnums, ParallelPortEnums, Paths, StringEnums
+from src.binding_task.utils import show_nothing, send_to_parallel_port, shuffle_trials
 
 class TestPhase:
     def __init__(self, win: psychopy.visual.window.Window, parallel_port: parallel.ParallelPort, categories: list,
@@ -18,7 +17,7 @@ class TestPhase:
                   objects: list of object paths from BindingLearning (divided by blocks)
                   subject_id: subject identifier
             1. save all inputs as class attributes
-            2. shuffle objects within each blocks (max 1 consecutive same object)
+            2. shuffle objects within each block (max 1 consecutive same object)
             3. init empty dict for subject_answers"""
         self.win = win
         self.parallel_port = parallel_port
