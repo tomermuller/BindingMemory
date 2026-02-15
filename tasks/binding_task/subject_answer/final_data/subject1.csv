@@ -1,0 +1,7 @@
+,subject,trial,object,feature,answer
+0,1,trial_1,animate_60,colors,blue
+1,1,trial_1,animate_60,scenes,living_room
+2,1,trial_2,inanimate_61,colors,red
+3,1,trial_2,inanimate_61,scenes,bedroom
+4,1,trial_3,animate_53,colors,blue
+5,1,trial_3,animate_53,scenes,living_room
