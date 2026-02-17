@@ -34,10 +34,10 @@ class BindingTask:
             3. call second stage"""
         self._general_setting()
         show_instruction(win=self.win, instruction=Instruction.WELLCOME)
-        self._first_stage()
+        #self._first_stage()
         binding, test = self._second_stage()
         self.save_all_data(binding=binding, test=test)
-        show_instruction(win=self.win, instruction=Instruction.GOODBYE)
+        show_instruction(win=self.win, instruction=Instruction.GOODBYE, time=10)
 
     @staticmethod
     def _general_setting():
@@ -70,8 +70,8 @@ class BindingTask:
         test = TestPhase(win=self.win, parallel_port=self.parallel_port, categories=Features.ALL_CATEGORIES,
                          objects=binding.objects, subject_id=self.subject_id)
 
-        binding.run_examples()
-        test.run_example()
+        #binding.run_examples()
+        #test.run_example()
 
         for block_idx in range(BindingAndTestEnums.NUMBER_OF_BLOCKS):
             self._block_learning_and_test(binding=binding, test=test, block=block_idx)

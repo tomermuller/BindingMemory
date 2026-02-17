@@ -9,20 +9,23 @@ def shuffle_trials(items, max_consecutive=2):
                max_consecutive: maximum allowed consecutive identical items (default 2)
         output: shuffled list with no more than max_consecutive identical items in a row
         1. create a copy of items and shuffle randomly
-        2. for each position, swap with a random item further in the list
+        2. shuffle the list in random order.
+        3. check if there are more then max_consecutive identical items in the list, if true, try again, else return
         3. return the shuffled list"""
-    shuffled = items.copy()
-    random.shuffle(shuffled)
+    for _ in range(10000):
+        shuffled = items.copy()
+        random.shuffle(shuffled)
+        if not has_too_many_consecutive(shuffled, max_consecutive):
+            return shuffled
+    raise ValueError("Could not shuffle within constraints")
 
-    for i in range(len(shuffled)):
-        min_idx = i + max_consecutive + 1
-        max_idx = len(shuffled) - 1
-
-        if min_idx <= max_idx:
-            swap_idx = random.randint(min_idx, max_idx)
-            shuffled[i], shuffled[swap_idx] = shuffled[swap_idx], shuffled[i]
-
-    return shuffled
+def has_too_many_consecutive(lst, max_consecutive):
+    count = 1
+    for i in range(1, len(lst)):
+        count = count + 1 if lst[i] == lst[i - 1] else 1
+        if count > max_consecutive:
+            return True
+    return False
 
 def show_instruction(win: psychopy.visual.window.Window, instruction: str, time: float = None):
     """display instruction text on screen and wait for keypress or time:

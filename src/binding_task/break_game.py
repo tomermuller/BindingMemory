@@ -51,7 +51,10 @@ class BreakGame:
 
     def _get_subject_answer_in_break_game(self):
         """ask subject how many times rectangle was brighter"""
-        show_instruction(win=self.win, instruction=Instruction.BREAK_GAME_QUESTION)
+        text = visual.TextStim(self.win, text=Instruction.BREAK_GAME_QUESTION, font='Arial', pos=(0, 0), height=0.03,
+                               languageStyle='rtl', wrapWidth=0.8)
+        text.draw()
+        self.win.flip()
         self.subject_answer = int(event.waitKeys(keyList=['1', '2', '3', '4', '5', '6', '7', '8', '9'])[0])
 
 
