@@ -171,7 +171,7 @@ class FunctionalLocalizer:
 
     def _save_results(self):
         """save final results to JSON and CSV files"""
-        Path(f'subject_answer/subject_{self.subject_id}_{self.time}/function_localizer_stage.json').parent.mkdir(parents=True, exist_ok=True)
+        Path(f'subject_answer/fina_data/subject_{self.subject_id}/subject_{self.subject_id}_{self.time}_functional_localizer.csv').parent.mkdir(parents=True, exist_ok=True)
         with open(f'subject_answer/subject_{self.subject_id}_{self.time}/function_localizer_stage.json', 'w') as f:
             json.dump(self.correctness_score, f)
 

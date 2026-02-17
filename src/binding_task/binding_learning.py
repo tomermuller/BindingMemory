@@ -46,7 +46,7 @@ class BindingLearning:
                 d. show blank screen for 1-2 second before next example
                 e. ask difficulty question
                 f. show blank screen for 3 second before next example"""
-        for example_object, color, scene in BindingAndTestEnums.BINDING_EXAMPLES:
+        for (example_object, color, scene) in BindingAndTestEnums.BINDING_EXAMPLES:
             unified_object = self._create_unified_object(object_image=example_object, color=color, scene_image=scene)
             unified_object.save(Paths.BINDING_EXAMPLE)
             unified_object.close()
@@ -56,8 +56,8 @@ class BindingLearning:
             self.win.flip()
             core.wait(3.0)
             show_nothing(win=self.win, min_time=1.0, max_time=2.0)
-            show_instruction(win=self.win, instruction=Instruction.DIFFICULT_QUESTION)
-            rating = event.waitKeys(keyList=[BindingAndTestEnums.DIFFICULT_RANGE])[0]
+            show_instruction(win=self.win, instruction=Instruction.DIFFICULT_QUESTION, time=0.0001)
+            rating = event.waitKeys(keyList=BindingAndTestEnums.DIFFICULT_RANGE)[0]
             show_nothing(win=self.win, min_time=3.0, max_time=3.0)
 
     def run_block(self, block_index: int):
@@ -97,11 +97,11 @@ class BindingLearning:
 
     def _ask_difficulty_rating(self, trial_index: int, trial_times: dict):
         """Ask the subject to rate how hard it is to remember (1-5)."""
-        show_instruction(win=self.win, instruction=Instruction.DIFFICULT_QUESTION)
+        show_instruction(win=self.win, instruction=Instruction.DIFFICULT_QUESTION, time=0.0001)
         trial_times['difficulty_question_appear'] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
         send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.SHOW_DIFFICULTY_QUESTION)
 
-        rating = event.waitKeys(keyList=[BindingAndTestEnums.DIFFICULT_RANGE])[0]
+        rating = event.waitKeys(keyList=BindingAndTestEnums.DIFFICULT_RANGE)[0]
         trial_times['difficulty_answer_time'] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
         send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.ANSWER_DIFFICULTY_QUESTION)
 

@@ -162,7 +162,7 @@ class Instruction:
                                 "אך לפני הנה 2 דוגמאות:\n"
                                 "(אנא לחץ/י על כל כפתור כדי להתחיל את הדוגמאות)")
 
-    START_X_BLOCK = "כעת את/ה מתחיל את הבלוק "
+    START_X_BLOCK = "לחץ על כל מקש על מנת להתחיל את הבלוק ה "
 
     DIFFICULT_QUESTION = ("עד כמה קשה היה לך לזכור את הצבע והמיקום של האובייקט?\n"
                          "1 (קל) – 5 (קשה)")
@@ -182,7 +182,7 @@ class Instruction:
 
     BREAK = "הפסקה!\n אנא לחץ/י על כל כפתור כאשר אתה מוכן לחזור לניסוי."
 
-    GOODBYE = "תודה רבה על השתתפותך בניסוי. נא לקרוא למריץ הניסוי. ניתן לשאול אותו/ה שאלות על הניסוי"
+    GOODBYE = ("תודה רבה על השתתפותך בניסוי. נא לקרוא למריץ הניסוי. ניתן לשאול אותו/ה שאלות על הניסויֿ")
 
 
 class BreakGameEnums:
@@ -201,7 +201,7 @@ class Paths:
 class BindingAndTestEnums:
     NUMBER_OF_BLOCKS = 5
     NUMBER_OF_BINDING_TRIALS = 45
-    BINDING_EXAMPLES  = zip([[Path(Paths.OBJECT_EXAMPLE_FORK), Path(Paths.OBJECT_EXAMPLE_ROBOT)]],
+    BINDING_EXAMPLES  = zip([Path(Paths.OBJECT_EXAMPLE_FORK), Path(Paths.OBJECT_EXAMPLE_ROBOT)],
                             [Features.COLOR_TO_RGBA[Features.YELLOW], Features.COLOR_TO_RGBA[Features.RED]],
                             [Features.SCENE_TO_IMAGE[Features.KITCHEN], Features.SCENE_TO_IMAGE[Features.LIVING_ROOM]])
 
