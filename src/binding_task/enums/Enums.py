@@ -13,11 +13,12 @@ class StringEnums:
     SUBJECT = 'subject'
     MINUTE_FORMAT = "%m/%d/%Y %I:%M"
     MILI_SEC_FORMAT = "%Y-%m-%d_%H-%M-%S.%f"
-    TRUE = "true"
-    WRONG = "wrong"
+    TRUE = "נכון"
+    WRONG = "לא נכון"
     RIGHT = "right"
     LEFT = "left"
     KEY_OPTIONS_FUNCTIONAL_LOCALIZER = [RIGHT, LEFT]
+    ARIAL_FONT = "Arial"
 
 
 class Features:
@@ -66,6 +67,24 @@ class Features:
                         BATHROOM: [BATHROOM],
                         KITCHEN: [KITCHEN]}
 
+
+class HebrewEnums:
+    RED = 'אדום'
+    BLUE = 'כחול'
+    GREEN = 'ירוק'
+    YELLOW = 'צהוב'
+    LIVING_ROOM = 'סלון'
+    BATHROOM = 'שירותים'
+    KITCHEN = 'מטבח'
+    TRANSLATE = {
+        Features.RED: RED,
+        Features.BLUE: BLUE,
+        Features.GREEN: GREEN,
+        Features.YELLOW: YELLOW,
+        Features.LIVING_ROOM: LIVING_ROOM,
+        Features.BATHROOM: BATHROOM,
+        Features.KITCHEN: KITCHEN
+    }
 
 class Messages:
     START = "welcome, this study have 2 parts"

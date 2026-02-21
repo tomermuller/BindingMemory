@@ -5,7 +5,7 @@ from psychopy import visual, event, parallel, core
 import random
 from pathlib import Path
 from datetime import datetime
-from src.binding_task.enums.Enums import Features, BindingAndTestEnums, ParallelPortEnums, Paths, StringEnums
+from src.binding_task.enums.Enums import Features, BindingAndTestEnums, ParallelPortEnums, Paths, StringEnums, HebrewEnums
 from src.binding_task.utils import show_nothing, send_to_parallel_port, shuffle_trials
 
 class TestPhase:
@@ -98,7 +98,8 @@ class TestPhase:
     def _show_words_arrow_locations(self, words: list, trial_times: dict, category: str):
         """display feature words at arrow key positions (up, left, right) and record timing"""
         positions = [(0, 0.45), (-0.45, 0), (0.45, 0)]
-        texts = [visual.TextStim(self.win, text=word, pos=pos, height=0.1)
+        texts = [visual.TextStim(self.win, text=HebrewEnums.TRANSLATE.get(word), pos=pos, height=0.1,
+                                 languageStyle="rtl", font=StringEnums.ARIAL_FONT)
                  for word, pos in zip(words, positions)]
 
         for text in texts:

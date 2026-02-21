@@ -2,6 +2,7 @@ import random
 import psychopy
 from psychopy import visual, core, event, parallel
 
+from src.binding_task.enums.Enums import StringEnums
 
 def shuffle_trials(items, max_consecutive=2):
     """shuffle items while limiting consecutive identical items:
@@ -35,7 +36,7 @@ def show_instruction(win: psychopy.visual.window.Window, instruction: str, time:
         1. create text stimulus with RTL support for Hebrew
         2. draw and flip to screen
         3. if time provided, wait for that duration; otherwise wait for any keypress"""
-    text = visual.TextStim(win, text=instruction, font='Arial', pos=(0, 0), height=0.03, languageStyle='rtl', wrapWidth=0.8)
+    text = visual.TextStim(win, text=instruction, font=StringEnums.ARIAL_FONT, pos=(0, 0), height=0.03, languageStyle='rtl', wrapWidth=0.8)
     text.draw()
     win.flip()
     if time:

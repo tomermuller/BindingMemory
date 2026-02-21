@@ -34,9 +34,9 @@ class BindingTask:
             3. call second stage"""
         self._general_setting()
         show_instruction(win=self.win, instruction=Instruction.WELLCOME)
-        #self._first_stage()
+        self._first_stage()
         binding, test = self._second_stage()
-        self.save_all_data(binding=binding, test=test)
+        self._save_unified_file_for_all_data(binding=binding, test=test)
         show_instruction(win=self.win, instruction=Instruction.GOODBYE, time=10)
 
     @staticmethod
@@ -70,8 +70,8 @@ class BindingTask:
         test = TestPhase(win=self.win, parallel_port=self.parallel_port, categories=Features.ALL_CATEGORIES,
                          objects=binding.objects, subject_id=self.subject_id)
 
-        #binding.run_examples()
-        #test.run_example()
+        binding.run_examples()
+        test.run_example()
 
         for block_idx in range(BindingAndTestEnums.NUMBER_OF_BLOCKS):
             self._block_learning_and_test(binding=binding, test=test, block=block_idx)
@@ -94,8 +94,16 @@ class BindingTask:
         break_game.run()
         test.run_phase(block)
 
-    def save_all_data(self, binding: BindingLearning, test: TestPhase):
-        """save combined data from binding and test phases to single CSV"""
+    def _save_unified_file_for_all_data(self, binding: BindingLearning, test: TestPhase):
+        """Save a single combined CSV with one row per binding trial, merging binding and test data.
+           Input:  binding - BindingLearning object holding binding.answers and binding.difficulty_ratings
+                   test    - TestPhase object holding test.subject_answers
+           Steps:
+               1. Build a flat lookup dict {object_name -> test results} via _create_test_lookup
+               2. Iterate over every binding trial in binding.answers
+               3. For each trial build one merged row via _build_row
+               4. Write all rows to CSV via _save_combined_csv
+           Output: CSV file at subject_answer/final_data/subject_<id>/subject_<id>_<time>_combined.csv"""
         rows = []
         test_by_object = self._create_test_lookup(test)
 
@@ -108,7 +116,12 @@ class BindingTask:
 
     @staticmethod
     def _create_test_lookup(test: TestPhase):
-        """create lookup dict for test answers by object name"""
+        """create lookup dict for test answers by object name:
+           Input: TestPhase object of the experiment
+           Output:{chair: {trail_number: trial_4,
+                           answers: {colors: yellow, scenes: kitchen},
+                            times: {object appear: 14:00:05}, ....},
+                   closet: ...."""
         test_by_object = {}
         for trial_key, trial_data in test.subject_answers.items():
             test_times = trial_data.get('trial_times', {})
@@ -118,7 +131,22 @@ class BindingTask:
         return test_by_object
 
     def _build_row(self, binding_trial, binding_data, test_by_object, difficulty_ratings):
-        """build a single row combining binding and test data"""
+        """Build one flat dict (CSV row) for a single binding trial by merging binding and test data.
+           Input:  binding_trial      - global trial number (int), e.g. 7
+                   binding_data       - dict with one object entry + 'trial_times',
+                                        e.g. {'cup': {'Colors': 'red', 'Scenes': 'kitchen'}, 'trial_times': {...}}
+                   test_by_object     - lookup dict {object_name -> {trial_key, answers, times}}
+                                        as returned by _create_test_lookup
+                   difficulty_ratings - dict {trial_in_block -> difficulty rating}
+           Steps:
+               1. Extract binding timing data from binding_data
+               2. Find the object entry in binding_data (skip 'trial_times' key)
+               3. Compute block and trial_in_block indices via _calc_trial_indices
+               4. Look up test results for this object from test_by_object
+               5. Build base binding columns via _create_base_row
+               6. Add test correctness / RT / order columns via _create_test_row
+               7. Append prefixed raw timestamps from both phases (binding_<key>, test_<key>)
+           Output: flat dict ready to become one CSV row, or None if binding_data had no object entry"""
         binding_times = binding_data.get(StringEnums.TRAIL_TIMES, {})
 
         for obj, features in binding_data.items():
@@ -139,14 +167,14 @@ class BindingTask:
 
     @staticmethod
     def _calc_trial_indices(binding_trial):
-        """calculate block index and trial index within block"""
+        """Convert a global trial number to (block, trial_in_block) indices."""
         trials_per_block = BindingAndTestEnums.NUMBER_OF_BINDING_TRIALS // BindingAndTestEnums.NUMBER_OF_BLOCKS
         block = (binding_trial - 1) // trials_per_block
         trial_in_block = (binding_trial - 1) % trials_per_block
         return block, trial_in_block
 
     def _create_base_row(self, obj, block, binding_trial, trial_in_block, features, difficulty_ratings):
-        """create base row with binding data"""
+        """Build the binding half of a CSV row (subject identity, trial position, shown features, difficulty)"""
         return {
             'subject': self.subject_id,
             'block': block,
@@ -159,7 +187,19 @@ class BindingTask:
         }
 
     def _create_test_row(self, test_data, test_answers, features, test_times):
-        """create test data portion of row"""
+        """Build the test half of a CSV row (subject answers, correctness, RT, question order).
+           Input:  test_data    - lookup entry for this object {trial_key, answers, times}
+                   test_answers - dict of subject's test answers, e.g. {'Colors': 'blue', 'Scenes': 'kitchen'}
+                   features     - dict of correct features shown in binding (used to compute correctness)
+                   test_times   - timing dict from the test trial (used for RT and order)
+           Steps:
+               1. Compare test_answers vs features for Colors and Scenes to get color_correct / scene_correct
+               2. Calculate RT in ms for each category via _calc_response_time
+               3. Determine which question was presented first via _get_question_order
+           Output: dict with keys: test_trial, subject_color, subject_scene,
+                                   color_correct, scene_correct, both_correct,
+                                   color_rt_ms, scene_rt_ms,
+                                   first_question, color_question_order, scene_question_order"""
         color_correct = test_answers.get(Features.COLORS) == features.get(Features.COLORS)
         scene_correct = test_answers.get(Features.SCENES) == features.get(Features.SCENES)
         color_rt = self._calc_response_time(test_times, Features.COLORS)
