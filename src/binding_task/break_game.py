@@ -1,7 +1,7 @@
 from psychopy import visual, core, event
 import psychopy
 import random
-from src.binding_task.enums.Enums import BreakGameEnums, Instruction
+from src.binding_task.enums.Enums import BreakGameEnums, Instruction, StringEnums
 from src.binding_task.utils import show_instruction
 
 
@@ -51,7 +51,7 @@ class BreakGame:
 
     def _get_subject_answer_in_break_game(self):
         """ask subject how many times rectangle was brighter"""
-        text = visual.TextStim(self.win, text=Instruction.BREAK_GAME_QUESTION, font='Arial', pos=(0, 0), height=0.03,
+        text = visual.TextStim(self.win, text=Instruction.BREAK_GAME_QUESTION, font=StringEnums.ARIAL_FONT, pos=(0, 0), height=0.03,
                                languageStyle='rtl', wrapWidth=0.8)
         text.draw()
         self.win.flip()

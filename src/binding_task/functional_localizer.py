@@ -5,7 +5,7 @@ from datetime import datetime
 import pandas as pd
 import psychopy
 from psychopy import visual, core, event, parallel
-from src.binding_task.enums.Enums import StringEnums, ParallelPortEnums, Features, Instruction, TimeAttribute
+from src.binding_task.enums.Enums import StringEnums, ParallelPortEnums, Features, Instruction, TimeAttribute, HebrewEnums
 from src.binding_task.utils import shuffle_trials, show_nothing, show_fixation, show_instruction, send_to_parallel_port
 
 """
@@ -128,9 +128,9 @@ class FunctionalLocalizer:
         """show the attention question:
             1. create the word and the option to choose
             2. show the subject"""
-        text = visual.TextStim(self.win, text=word_question)
-        true_text = visual.TextStim(self.win, text=StringEnums.TRUE, pos=(0.5, -0.4))
-        false_text = visual.TextStim(self.win, text=StringEnums.WRONG, pos=(-0.5, -0.4))
+        text = visual.TextStim(self.win, text=HebrewEnums.TRANSLATE.get(word_question), font=StringEnums.ARIAL_FONT, languageStyle='rtl')
+        true_text = visual.TextStim(self.win, text=StringEnums.TRUE, pos=(0.5, -0.4), font=StringEnums.ARIAL_FONT, languageStyle='rtl')
+        false_text = visual.TextStim(self.win, text=StringEnums.WRONG, pos=(-0.5, -0.4), font=StringEnums.ARIAL_FONT, languageStyle='rtl')
         for stim in [text, true_text, false_text]:
             stim.draw()
 
