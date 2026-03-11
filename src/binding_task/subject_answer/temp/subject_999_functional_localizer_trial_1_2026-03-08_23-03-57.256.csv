@@ -1,0 +1,3 @@
+,subject,trial_index,feature,word_question,user_answer,is_right,feature_appear,feature_disappear,question_appear,answer_time
+0,999,0,red,red,right,True,2026-03-08_23-03-46.187,2026-03-08_23-03-47.200,2026-03-08_23-03-48.942,2026-03-08_23-03-49.950
+1,999,1,living_room,living_room,right,True,2026-03-08_23-03-53.594,2026-03-08_23-03-54.607,2026-03-08_23-03-56.246,2026-03-08_23-03-57.245

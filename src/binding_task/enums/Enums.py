@@ -1,7 +1,7 @@
 from pathlib import Path
 
 class StringEnums:
-    NUMBER_OF_TRIALS_PER_FEATURE = 4
+    NUMBER_OF_TRIALS_PER_FEATURE = 75
     Y = 'y'
     N = 'n'
     FEATURE = 'feature'
@@ -11,17 +11,26 @@ class StringEnums:
     TRIAL_INDEX = 'trial_index'
     TRAIL_TIMES = 'trial_times'
     SUBJECT = 'subject'
-    MINUTE_FORMAT = "%m/%d/%Y %I:%M"
+    MINUTE_FORMAT = "%m-%d-%Y_%H-%M"
     MILI_SEC_FORMAT = "%Y-%m-%d_%H-%M-%S.%f"
     TRUE = "נכון"
     WRONG = "לא נכון"
     RIGHT = "right"
     LEFT = "left"
+    UP = "up"
+    DOWN = "down"
     KEY_OPTIONS_FUNCTIONAL_LOCALIZER = [RIGHT, LEFT]
     ARIAL_FONT = "Arial"
+    TRUE_ANSWERS = "true_answers"
+    SUBJECT_ANSWER = "subject_answer"
+    QUESTION_APPEAR = "question_appear"
+    TRIAL = "trial"
+    OBJECTS = "objects"
+    BLOCK = "block"
 
 
 class Features:
+    OBJECT = "object"
     SCENES = 'scenes'
     COLORS = 'colors'
     RED = 'red'
@@ -85,13 +94,6 @@ class HebrewEnums:
         Features.BATHROOM: BATHROOM,
         Features.KITCHEN: KITCHEN
     }
-
-class Messages:
-    START = "welcome, this study have 2 parts"
-
-    FIRST_PART_MESSAGE = ("in this part you will see 8 repeats features. \n"
-                          "after each of them you will see a word and you will need to decide if the word related to "
-                          "the feature or not")
 
 
 class ParallelPortEnums:
@@ -215,11 +217,16 @@ class Paths:
     OBJECT_EXAMPLE_FORK = "features/object example/fork.png"
     OBJECT_EXAMPLE_ROBOT = "features/object example/robot.png"
     BINDING_EXAMPLE = "features/binding_photos/example.png"
+    SAVE_DATA_FOLDER = "subject_answer/final_data/"
+    SAVE_TEMP_FOLDER = "subject_answer/temp/"
+
+    OBJECTS_PATH = "features/objects"
+    BINDING_PHOTOS_FOLDER = "features/binding_photos/"
 
 
 class BindingAndTestEnums:
-    NUMBER_OF_BLOCKS = 5
-    NUMBER_OF_BINDING_TRIALS = 45
+    NUMBER_OF_BLOCKS = 2
+    NUMBER_OF_BINDING_TRIALS = 18
     BINDING_EXAMPLES  = zip([Path(Paths.OBJECT_EXAMPLE_FORK), Path(Paths.OBJECT_EXAMPLE_ROBOT)],
                             [Features.COLOR_TO_RGBA[Features.YELLOW], Features.COLOR_TO_RGBA[Features.RED]],
                             [Features.SCENE_TO_IMAGE[Features.KITCHEN], Features.SCENE_TO_IMAGE[Features.LIVING_ROOM]])
@@ -235,6 +242,8 @@ class TimeAttribute:
     ANSWER_TIME = "answer_time"
     OBJECT_APPEAR = "object_appear"
     OBJECT_DISAPPEAR = "object_disappear"
+    DIFFICULTY_QUESTION_APPEAR = "difficulty_question_appear"
+    DIFFICULTY_ANSWER_TIME = "difficulty_answer_time"
 
 
 

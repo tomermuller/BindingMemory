@@ -247,7 +247,7 @@ class BindingTask:
     def _save_combined_csv(self, rows):
         """save rows to combined CSV file"""
         df = pd.DataFrame(rows)
-        save_path = Path(f'subject_answer/final_data/subject_{self.subject_id}')
+        save_path = Path(f'subject_answer/final_data/subject_{self.subject_id}/combined_data')
         save_path.mkdir(parents=True, exist_ok=True)
         df.to_csv(save_path / f'subject_{self.subject_id}_{self.time}_combined.csv', index=False)
 
