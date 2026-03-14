@@ -1,7 +1,7 @@
 from pathlib import Path
 
 class StringEnums:
-    NUMBER_OF_TRIALS_PER_FEATURE = 75
+    NUMBER_OF_TRIALS_PER_FEATURE = 90
     Y = 'y'
     N = 'n'
     FEATURE = 'feature'
@@ -225,8 +225,8 @@ class Paths:
 
 
 class BindingAndTestEnums:
-    NUMBER_OF_BLOCKS = 2
-    NUMBER_OF_BINDING_TRIALS = 18
+    NUMBER_OF_BLOCKS = 5
+    NUMBER_OF_BINDING_TRIALS = 45
     BINDING_EXAMPLES  = zip([Path(Paths.OBJECT_EXAMPLE_FORK), Path(Paths.OBJECT_EXAMPLE_ROBOT)],
                             [Features.COLOR_TO_RGBA[Features.YELLOW], Features.COLOR_TO_RGBA[Features.RED]],
                             [Features.SCENE_TO_IMAGE[Features.KITCHEN], Features.SCENE_TO_IMAGE[Features.LIVING_ROOM]])

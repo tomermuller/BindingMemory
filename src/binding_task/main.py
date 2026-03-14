@@ -88,7 +88,7 @@ class BindingTask:
              3. create and show and break game
              4. run test_phase.run_phase for the tests on the binding"""
 
-        show_instruction(win=self.win, instruction=Instruction.START_X_BLOCK + str(block) + "/5")
+        show_instruction(win=self.win, instruction=Instruction.START_X_BLOCK + str(block + 1) + "/5")
         binding.run_block(block_index=block)
         break_game = BreakGame(win=self.win)
         break_game.run()
