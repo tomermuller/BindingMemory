@@ -5,7 +5,8 @@ from datetime import datetime
 import pandas as pd
 import psychopy
 from psychopy import visual, core, event, parallel
-from src.binding_task.enums.Enums import StringEnums, ParallelPortEnums, Features, Instruction, TimeAttribute, HebrewEnums
+from src.binding_task.enums.Enums import StringEnums, ParallelPortEnums, Features, Instruction, TimeAttribute, \
+    HebrewEnums, Paths
 from src.binding_task.utils import shuffle_trials, show_nothing, show_fixation, show_instruction, send_to_parallel_port
 
 """
@@ -161,22 +162,26 @@ class FunctionalLocalizer:
 
     def _temp_save(self, trial: int):
         """save temporary backup after each trial for crash recovery"""
-        Path('subject_answer/temp').mkdir(parents=True, exist_ok=True)
+        temp_save_path = f'{Paths.SAVE_TEMP_FOLDER}subject_{self.subject_id}/'
+        Path(temp_save_path).mkdir(parents=True, exist_ok=True)
         curr_time = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
-        with open(f'subject_answer/temp/subject_{self.subject_id}_functional_localizer_trial_{trial}_{curr_time}.json', 'w') as f:
+
+        with open(f'{temp_save_path}functional_localizer_trial_{trial}_{curr_time}.json', 'w') as f:
             json.dump(self.correctness_score, f)
 
         answer_df = self.convert_answer_to_df()
-        answer_df.to_csv(f'subject_answer/temp/subject_{self.subject_id}_functional_localizer_trial_{trial}_{curr_time}.csv')
+        answer_df.to_csv(f'{temp_save_path}functional_localizer_trial_{trial}_{curr_time}.csv')
 
     def _save_results(self):
         """save final results to JSON and CSV files"""
-        Path(f'subject_answer/fina_data/subject_{self.subject_id}/subject_{self.subject_id}_{self.time}_functional_localizer.csv').parent.mkdir(parents=True, exist_ok=True)
-        with open(f'subject_answer/subject_{self.subject_id}_{self.time}/function_localizer_stage.json', 'w') as f:
+        functional_localizer_folder = f"{Paths.SAVE_DATA_FOLDER}subject_{self.subject_id}/functional_localizer/"
+        Path(functional_localizer_folder).mkdir(parents=True, exist_ok=True)
+
+        with open(f'{functional_localizer_folder}subject_{self.subject_id}_{self.time}_function_localizer_stage.json', 'w') as f:
             json.dump(self.correctness_score, f)
 
         answer_df = self.convert_answer_to_df()
-        answer_df.to_csv(f'subject_answer/subject_{self.subject_id}_{self.time}/function_localizer_stage.csv')
+        answer_df.to_csv(f'{functional_localizer_folder}subject_{self.subject_id}_{self.time}_function_localizer_stage.csv')
 
     def convert_answer_to_df(self):
         """convert correctness_score list to pandas DataFrame with one row per trial"""

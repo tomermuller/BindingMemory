@@ -98,11 +98,11 @@ class BindingLearning:
     def _ask_difficulty_rating(self, trial_index: int, trial_times: dict):
         """Ask the subject to rate how hard it is to remember (1-5)."""
         show_instruction(win=self.win, instruction=Instruction.DIFFICULT_QUESTION, time=0.0001)
-        trial_times['difficulty_question_appear'] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
+        trial_times[TimeAttribute.DIFFICULTY_QUESTION_APPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
         send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.SHOW_DIFFICULTY_QUESTION)
 
         rating = event.waitKeys(keyList=BindingAndTestEnums.DIFFICULT_RANGE)[0]
-        trial_times['difficulty_answer_time'] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
+        trial_times[TimeAttribute.DIFFICULTY_ANSWER_TIME] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
         send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.ANSWER_DIFFICULTY_QUESTION)
 
         self.difficulty_ratings[trial_index] = int(rating)
@@ -138,15 +138,16 @@ class BindingLearning:
             3. create unified object (colored object on scene background)
             4. save to features/binding_photos/trial_{trial_index}.png
             5. write answers (correct color and scene) for this trial"""
+        binding_photo_path = f"{Paths.BINDING_PHOTOS_FOLDER}{StringEnums.BLOCK}_{block_index}_{StringEnums.TRIAL}_{trial_index}.png"
         object_image = self.objects[block_index][trial_index]
         color = Features.COLOR_TO_RGBA[self.blocks[block_index][Features.COLORS][trial_index]]
         scene = Features.SCENE_TO_IMAGE[self.blocks[block_index][Features.SCENES][trial_index]]
         unified_object = self._create_unified_object(object_image=object_image, color=color, scene_image=scene)
-        unified_object.save(f"features/binding_photos/trial_{trial_index}.png")
+        unified_object.save(binding_photo_path)
         unified_object.close()
 
         self._write_answers(phase_index=block_index, trial_index=trial_index, trial_times=trial_times)
-        return f"features/binding_photos/trial_{trial_index}.png"
+        return binding_photo_path
 
     def _create_unified_object(self, object_image, color, scene_image):
         """create and save the unified object for a trial:
@@ -187,7 +188,7 @@ class BindingLearning:
         """save the correct answers (color, scene) for a trial to self.answers"""
         color_name = self.blocks[phase_index][Features.COLORS][trial_index]
         scene_name = self.blocks[phase_index][Features.SCENES][trial_index]
-        object_name = str(self.objects[phase_index][trial_index]).split(".png")[0].split("objects/")[1]
+        object_name = Path(self.objects[phase_index][trial_index]).stem
 
         self.answers[len(self.answers) + 1] = {object_name: {Features.COLORS: color_name, Features.SCENES: scene_name},
                                                StringEnums.TRAIL_TIMES: trial_times}
@@ -202,10 +203,15 @@ class BindingLearning:
             4. divide into NUMBER_OF_PHASES equal groups
             5. return list structure: [[phase1_objects], [phase2_objects], ...]"""
 
-        objects = sorted(list(Path(f'features/objects').glob('*.png')))
-        random.shuffle(objects)
-        n = len(objects) // BindingAndTestEnums.NUMBER_OF_BLOCKS
-        return [objects[i * n:(i + 1) * n] for i in range(BindingAndTestEnums.NUMBER_OF_BLOCKS)]
+        objects = sorted(list(Path(Paths.OBJECTS_PATH).glob('*.png')))
+        real_objects = []
+        for one_object in objects:
+            if "_" not in one_object.name:
+                real_objects.append(one_object)
+
+        random.shuffle(real_objects)
+        n = len(real_objects) // BindingAndTestEnums.NUMBER_OF_BLOCKS
+        return [real_objects[i * n:(i + 1) * n] for i in range(BindingAndTestEnums.NUMBER_OF_BLOCKS)]
 
     @staticmethod
     def _create_blocks(categories: list):
@@ -232,40 +238,44 @@ class BindingLearning:
 
     def save_subject(self, time):
         """save final subject data (answers, difficulty ratings) to JSON and CSV files"""
-        Path(f'subject_answer/final_data/subject_{self.subject_id}/true_answers').mkdir(parents=True, exist_ok=True)
+        true_answer_folder = f"{Paths.SAVE_DATA_FOLDER}subject_{self.subject_id}/{StringEnums.TRUE_ANSWERS}/"
+        Path(true_answer_folder).mkdir(parents=True, exist_ok=True)
 
-        with open(f'subject_answer/final_data/subject_{self.subject_id}/true_answers/subject_{self.subject_id}_{time}.json', 'w') as f:
+        with open(f'{true_answer_folder}subject_{self.subject_id}_{time}_{StringEnums.TRUE_ANSWERS}.json', 'w') as f:
             json.dump(self.answers, f)
 
-        with open(f'subject_answer/final_data/subject_{self.subject_id}/true_answers//subject_{self.subject_id}_{time}_difficulty.json', 'w') as f:
+        with open(f'{true_answer_folder}subject_{self.subject_id}_{time}_difficulty.json', 'w') as f:
             json.dump(self.difficulty_ratings, f)
 
         answer_df = self.convert_answer_to_df()
-        answer_df.to_csv(f'subject_answer/final_data/subject_{self.subject_id}/true_answers/subject_{self.subject_id}_{time}.csv')
+        answer_df.to_csv(f'{true_answer_folder}subject_{self.subject_id}_{time}_{StringEnums.TRUE_ANSWERS}.csv')
 
     def _temp_save(self, trial: int):
         """save temporary backup after each trial for crash recovery"""
+        temp_save_path = f'{Paths.SAVE_TEMP_FOLDER}subject_{self.subject_id}/'
+        Path(temp_save_path).mkdir(parents=True, exist_ok=True)
         curr_time = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
-        with open(f'subject_answer/temp/subject_{self.subject_id}_true_answers_trial_{trial}_{curr_time}.json', 'w') as f:
+
+        with open(f'{temp_save_path}true_answers_trial_{trial}_{curr_time}.json', 'w') as f:
             json.dump(self.answers, f)
 
-        with open(f'subject_answer/temp/subject_{self.subject_id}_true_answers_trial_{trial}_{curr_time}_difficulty.json', 'w') as f:
+        with open(f'{temp_save_path}true_answers_trial_{trial}_{curr_time}_difficulty.json', 'w') as f:
             json.dump(self.difficulty_ratings, f)
 
         answer_df = self.convert_answer_to_df()
-        answer_df.to_csv(f'subject_answer/temp/subject_{self.subject_id}_true_answers_trial_{trial}_{curr_time}.csv')
+        answer_df.to_csv(f'{temp_save_path}true_answers_trial_{trial}_{curr_time}.csv')
 
     def convert_answer_to_df(self):
         """convert self.answers dict to pandas DataFrame with one row per trial"""
         rows = []
         for trial_index, trial_data in self.answers.items():
-            trial_times = trial_data.get('trial_times', {})
+            trial_times = trial_data.get(StringEnums.TRAIL_TIMES, {})
             for obj, features in trial_data.items():
-                if obj != 'trial_times':
+                if obj != StringEnums.TRAIL_TIMES:
                     row = {
-                        'subject': self.subject_id,
-                        'trial': trial_index,
-                        'object': obj,
+                        StringEnums.SUBJECT: self.subject_id,
+                        StringEnums.TRIAL: trial_index,
+                        Features.OBJECT: obj,
                         Features.COLORS: features.get(Features.COLORS),
                         Features.SCENES: features.get(Features.SCENES)
                     }

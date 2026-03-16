@@ -5,7 +5,8 @@ from psychopy import visual, event, parallel, core
 import random
 from pathlib import Path
 from datetime import datetime
-from src.binding_task.enums.Enums import Features, BindingAndTestEnums, ParallelPortEnums, Paths, StringEnums, HebrewEnums
+from src.binding_task.enums.Enums import Features, BindingAndTestEnums, ParallelPortEnums, Paths, StringEnums, \
+    HebrewEnums, TimeAttribute
 from src.binding_task.utils import show_nothing, send_to_parallel_port, shuffle_trials
 
 class TestPhase:
@@ -27,7 +28,6 @@ class TestPhase:
         for block_index, block_objects in enumerate(objects):
             self.blocks[block_index] = shuffle_trials(items=block_objects, max_consecutive=1)
         self.subject_answers = {}
-
 
     def run_example(self):
         """run examples for test phase"""
@@ -70,13 +70,13 @@ class TestPhase:
         img = visual.ImageStim(self.win, image=image_path, size=(0.4, 0.4), pos=(0, 0))
         img.draw()
 
-        trial_times['object_appear'] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
+        trial_times[TimeAttribute.OBJECT_APPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
         send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.SHOW_OBJECT_IN_TEST_TRIAL)
         self.win.flip()
 
         core.wait(3.0)
 
-        trial_times['object_disappear'] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
+        trial_times[TimeAttribute.OBJECT_DISAPPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
         send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.STOP_OBJECT_IN_TEST_TRIAL)
         show_nothing(win=self.win, min_time=3.0, max_time=3.0)
 
@@ -105,7 +105,7 @@ class TestPhase:
         for text in texts:
             text.draw()
 
-        trial_times[f'{category}_question_appear'] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
+        trial_times[f'{category}_{StringEnums.QUESTION_APPEAR}'] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
         send_to_parallel_port(parallel_port=self.parallel_port,
                               pulse_number=ParallelPortEnums.CATEGORY_ANSWERS_SHOW_TO_PULSE_CODE[category])
 
@@ -113,9 +113,9 @@ class TestPhase:
 
     def _subject_choose(self, question_answers: list, category: str, trial_times: dict):
         """wait for subject to press arrow key and return the corresponding feature answer"""
-        keyboard_answer = event.waitKeys(keyList=['up', 'left', 'right'])[0]
+        keyboard_answer = event.waitKeys(keyList=list(BindingAndTestEnums.ARROW_TO_LOCATION.keys()))[0]
 
-        trial_times[f'{category}_answer_time'] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
+        trial_times[f'{category}_{TimeAttribute.ANSWER_TIME}'] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
         send_to_parallel_port(parallel_port=self.parallel_port,
                               pulse_number=ParallelPortEnums.CATEGORY_QUESTION_ANSWER_TO_PULSE_CODE[category])
 
@@ -124,44 +124,47 @@ class TestPhase:
 
     def _write_subject_answers(self, object_path: Path, subject_answer: dict, trial_times: dict):
         """save subject's answers and timing data to self.subject_answers dict"""
-        #object_name = str(object_path).split(".png")[0].split("objects/")[1]
         object_name = object_path.stem
         trial_answer = {}
         for category in self.categories:
             trial_answer[category] = subject_answer[category]
-        self.subject_answers[f"trial_{len(self.subject_answers) + 1}"] = {object_name: trial_answer, 'trial_times': trial_times}
+        self.subject_answers[f"{StringEnums.TRIAL}_{len(self.subject_answers) + 1}"] = {object_name: trial_answer,
+                                                                                        StringEnums.TRAIL_TIMES: trial_times}
 
     def save_subject_answer(self, time):
         """save final subject answers to JSON and CSV files"""
-        Path(f'subject_answer/final_data/subject_{self.subject_id}/subject_answers').mkdir(parents=True, exist_ok=True)
+        subject_answer_folder = f"{Paths.SAVE_DATA_FOLDER}subject_{self.subject_id}/{StringEnums.SUBJECT_ANSWER}/"
+        Path(subject_answer_folder).mkdir(parents=True, exist_ok=True)
 
-        with open(f'subject_answer/final_data/subject_{self.subject_id}/subject_answers/subject_{self.subject_id}_{time}.json', 'w') as f:
+        with open(f'{subject_answer_folder}subject_{self.subject_id}_{time}_{StringEnums.SUBJECT_ANSWER}.json', 'w') as f:
             json.dump(self.subject_answers, f)
 
         subject_answer_df = self.convert_answer_to_df()
-        subject_answer_df.to_csv(f'subject_answer/final_data/subject_{self.subject_id}/subject_answers/subject_{self.subject_id}_{time}.csv')
+        subject_answer_df.to_csv(f'{subject_answer_folder}subject_{self.subject_id}_{time}_{StringEnums.SUBJECT_ANSWER}.csv')
 
     def _temp_save(self, trial: int):
         """save temporary backup after each trial for crash recovery"""
-        Path('subject_answer/temp').mkdir(parents=True, exist_ok=True)
+        temp_save_path = f'{Paths.SAVE_TEMP_FOLDER}subject_{self.subject_id}/'
+
+        Path(temp_save_path).mkdir(parents=True, exist_ok=True)
         curr_time = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
-        with open(f'subject_answer/temp/subject_{self.subject_id}_subject_answers_trial_{trial}_{curr_time}.json', 'w') as f:
+        with open(f'{temp_save_path}subject_{self.subject_id}_subject_answers_trial_{trial}_{curr_time}.json', 'w') as f:
             json.dump(self.subject_answers, f)
 
         subject_answer_df = self.convert_answer_to_df()
-        subject_answer_df.to_csv(f'subject_answer/temp/subject_{self.subject_id}_subject_answers_trial_{trial}_{curr_time}.csv')
+        subject_answer_df.to_csv(f'{temp_save_path}subject_{self.subject_id}_subject_answers_trial_{trial}_{curr_time}.csv')
 
     def convert_answer_to_df(self):
         """convert self.subject_answers dict to pandas DataFrame with one row per trial"""
         rows = []
         for trial_index, trial_data in self.subject_answers.items():
-            trial_times = trial_data.get('trial_times', {})
+            trial_times = trial_data.get(StringEnums.TRAIL_TIMES, {})
             for obj, features in trial_data.items():
-                if obj not in ['trial_times']:
+                if obj not in [StringEnums.TRAIL_TIMES]:
                     row = {
-                        'subject': self.subject_id,
-                        'trial': trial_index,
-                        'object': obj,
+                        StringEnums.SUBJECT: self.subject_id,
+                        StringEnums.TRIAL: trial_index,
+                        Features.OBJECT: obj,
                         Features.COLORS: features.get(Features.COLORS),
                         Features.SCENES: features.get(Features.SCENES)
                     }

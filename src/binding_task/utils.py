@@ -9,24 +9,28 @@ def shuffle_trials(items, max_consecutive=2):
         input: items: list of items to shuffle
                max_consecutive: maximum allowed consecutive identical items (default 2)
         output: shuffled list with no more than max_consecutive identical items in a row
-        1. create a copy of items and shuffle randomly
-        2. shuffle the list in random order.
-        3. check if there are more then max_consecutive identical items in the list, if true, try again, else return
-        3. return the shuffled list"""
-    for _ in range(10000):
-        shuffled = items.copy()
-        random.shuffle(shuffled)
-        if not has_too_many_consecutive(shuffled, max_consecutive):
-            return shuffled
-    raise ValueError("Could not shuffle within constraints")
+        uses weighted random selection at each step to guarantee a valid arrangement
+        even for large lists with many repeats."""
+    from collections import Counter
+    counts = Counter(items)
+    result = []
 
-def has_too_many_consecutive(lst, max_consecutive):
-    count = 1
-    for i in range(1, len(lst)):
-        count = count + 1 if lst[i] == lst[i - 1] else 1
-        if count > max_consecutive:
-            return True
-    return False
+    for _ in range(len(items)):
+        forbidden = None
+        if len(result) >= max_consecutive and len(set(result[-max_consecutive:])) == 1:
+            forbidden = result[-1]
+
+        available = [item for item, cnt in counts.items() if cnt > 0 and item != forbidden]
+        weights = [counts[item] for item in available]
+
+        if not available:
+            raise ValueError("Cannot arrange items within constraints")
+
+        chosen = random.choices(available, weights=weights, k=1)[0]
+        result.append(chosen)
+        counts[chosen] -= 1
+
+    return result
 
 def show_instruction(win: psychopy.visual.window.Window, instruction: str, time: float = None):
     """display instruction text on screen and wait for keypress or time:
@@ -36,7 +40,7 @@ def show_instruction(win: psychopy.visual.window.Window, instruction: str, time:
         1. create text stimulus with RTL support for Hebrew
         2. draw and flip to screen
         3. if time provided, wait for that duration; otherwise wait for any keypress"""
-    text = visual.TextStim(win, text=instruction, font=StringEnums.ARIAL_FONT, pos=(0, 0), height=0.03, languageStyle='rtl', wrapWidth=0.8)
+    text = visual.TextStim(win, text=instruction, font=StringEnums.ARIAL_FONT, pos=(0, 0), height=0.03, languageStyle='rtl', wrapWidth=1.8)
     text.draw()
     win.flip()
     if time:
