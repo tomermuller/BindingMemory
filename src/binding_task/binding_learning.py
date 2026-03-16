@@ -188,7 +188,7 @@ class BindingLearning:
         """save the correct answers (color, scene) for a trial to self.answers"""
         color_name = self.blocks[phase_index][Features.COLORS][trial_index]
         scene_name = self.blocks[phase_index][Features.SCENES][trial_index]
-        object_name = str(self.objects[phase_index][trial_index]).split(".png")[0].split(F"{StringEnums.OBJECTS}/")[1]
+        object_name = Path(self.objects[phase_index][trial_index]).stem
 
         self.answers[len(self.answers) + 1] = {object_name: {Features.COLORS: color_name, Features.SCENES: scene_name},
                                                StringEnums.TRAIL_TIMES: trial_times}
@@ -204,9 +204,14 @@ class BindingLearning:
             5. return list structure: [[phase1_objects], [phase2_objects], ...]"""
 
         objects = sorted(list(Path(Paths.OBJECTS_PATH).glob('*.png')))
-        random.shuffle(objects)
-        n = len(objects) // BindingAndTestEnums.NUMBER_OF_BLOCKS
-        return [objects[i * n:(i + 1) * n] for i in range(BindingAndTestEnums.NUMBER_OF_BLOCKS)]
+        real_objects = []
+        for one_object in objects:
+            if "_" not in one_object.name:
+                real_objects.append(one_object)
+
+        random.shuffle(real_objects)
+        n = len(real_objects) // BindingAndTestEnums.NUMBER_OF_BLOCKS
+        return [real_objects[i * n:(i + 1) * n] for i in range(BindingAndTestEnums.NUMBER_OF_BLOCKS)]
 
     @staticmethod
     def _create_blocks(categories: list):
@@ -248,6 +253,7 @@ class BindingLearning:
     def _temp_save(self, trial: int):
         """save temporary backup after each trial for crash recovery"""
         temp_save_path = f'{Paths.SAVE_TEMP_FOLDER}subject_{self.subject_id}/'
+        Path(temp_save_path).mkdir(parents=True, exist_ok=True)
         curr_time = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
 
         with open(f'{temp_save_path}true_answers_trial_{trial}_{curr_time}.json', 'w') as f:

@@ -165,6 +165,7 @@ class FunctionalLocalizer:
         temp_save_path = f'{Paths.SAVE_TEMP_FOLDER}subject_{self.subject_id}/'
         Path(temp_save_path).mkdir(parents=True, exist_ok=True)
         curr_time = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
+
         with open(f'{temp_save_path}functional_localizer_trial_{trial}_{curr_time}.json', 'w') as f:
             json.dump(self.correctness_score, f)
 
