@@ -6,7 +6,7 @@ import pandas as pd
 import psychopy
 from psychopy import visual, core, event, parallel
 from src.binding_task.enums.Enums import StringEnums, ParallelPortEnums, Features, Instruction, TimeAttribute, \
-    HebrewEnums, Paths
+    HebrewEnums, Paths, TaskManage
 from src.binding_task.utils import shuffle_trials, show_nothing, show_fixation, show_instruction, send_to_parallel_port
 
 """
@@ -37,7 +37,7 @@ class FunctionalLocalizer:
         self.correctness_score = []
 
         self.category_to_features = {category: Features.CATEGORY_TO_FEATURES[category] for category in categories}
-        self.all_trials = [key for category in self.category_to_features.values() for key in category.keys()] * StringEnums.NUMBER_OF_TRIALS_PER_FEATURE
+        self.all_trials = [key for category in self.category_to_features.values() for key in category.keys()] * TaskManage.NUMBER_OF_TRIALS_PER_FEATURE
         self.all_trials = shuffle_trials(items=self.all_trials, max_consecutive=2)
 
         self.feature_to_image_file = {key: value for category in self.category_to_features.values() for key, value in category.items()}
@@ -53,6 +53,7 @@ class FunctionalLocalizer:
             3. save the attention questions results"""
 
         self._run_examples()
+        send_to_parallel_port(parallel_port=self.parallel_port,pulse_number=ParallelPortEnums.START_FUNCTIONAL_LOCALIZER)
 
         for trial_index, trial_feature in enumerate(self.all_trials):
             trial_times = {}
@@ -68,14 +69,14 @@ class FunctionalLocalizer:
     def _run_examples(self):
         """Run 2 example trials to familiarize the subject with the task."""
         for (feature, word_question, is_true) in Features.FUNCTIONAL_LOCALIZER_EXAMPLES:
-            self._fixation_and_show_feature(trial_feature=feature, trial_times= {})
-            self._show_attention_question(word_question=word_question, trial_times={})
-            self._get_subject_answer(is_true=is_true, trial_times={})
+            self._fixation_and_show_feature(trial_feature=feature, trial_times={}, is_example=True)
+            self._show_attention_question(word_question=word_question, trial_times={}, is_example=True)
+            self._get_subject_answer(is_true=is_true, trial_times={}, is_example=True)
             show_nothing(win=self.win, min_time=1.0, max_time=3.0)
 
         show_instruction(win=self.win, instruction=Instruction.FINISH_EXAMPLES)
 
-    def _fixation_and_show_feature(self, trial_feature: str, trial_times: dict):
+    def _fixation_and_show_feature(self, trial_feature: str, trial_times: dict, is_example: bool = False):
         """show the feature in 1 trial:
             1. show fixation for 1 second
             2. show nothing for 1 to 2 seconds
@@ -83,22 +84,25 @@ class FunctionalLocalizer:
             4. give break for 1 to 2 features"""
         show_fixation(win=self.win, min_time=1.0, max_time=1.0)
         show_nothing(win=self.win, min_time=1.0, max_time=2.0)
-        self._show_feature(trial_feature=trial_feature, trial_times=trial_times)
+        self._show_feature(trial_feature=trial_feature, trial_times=trial_times, is_example=is_example)
         show_nothing(win=self.win, min_time=1.0, max_time=2.0)
 
-    def _show_feature(self, trial_feature: str, trial_times: dict = None):
+    def _show_feature(self, trial_feature: str, trial_times: dict = None, is_example: bool = False):
         """display the feature image on screen for 1 second and record timing"""
         img = visual.ImageStim(self.win, image=str(self.feature_to_image_file[trial_feature]), size=1)
         img.draw()
 
-        trial_times[TimeAttribute.FEATURE_APPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
-        send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.FEATURE_SHOW_TO_PULSE_CODE[trial_feature])
+        if not is_example:
+            trial_times[TimeAttribute.FEATURE_APPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
+            send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.FEATURE_SHOW_TO_PULSE_CODE[trial_feature])
+
         self.win.flip()
         core.wait(1.0)
 
         # after this function finished, there is a call to show nothing
-        trial_times[TimeAttribute.FEATURE_DISAPPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
-        send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.FEATURE_STOP_TO_PULSE_CODE[trial_feature])
+        if not is_example:
+            trial_times[TimeAttribute.FEATURE_DISAPPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
+            send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.FEATURE_STOP_TO_PULSE_CODE[trial_feature])
 
     def _attention_question(self, trial_index: int, trial_feature: str, trial_times: dict = None):
         """ 1. flip a coin for true or false word
@@ -125,7 +129,7 @@ class FunctionalLocalizer:
 
         return word_question
 
-    def _show_attention_question(self, word_question: str, trial_times: dict)-> None:
+    def _show_attention_question(self, word_question: str, trial_times: dict, is_example: bool = False)-> None:
         """show the attention question:
             1. create the word and the option to choose
             2. show the subject"""
@@ -135,16 +139,18 @@ class FunctionalLocalizer:
         for stim in [text, true_text, false_text]:
             stim.draw()
 
-        trial_times[TimeAttribute.QUESTION_APPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
-        send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.SHOW_ATTENTION_QUESTION)
+        if not is_example:
+            trial_times[TimeAttribute.QUESTION_APPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
+            send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.SHOW_ATTENTION_QUESTION)
         self.win.flip()
 
-    def _get_subject_answer(self, is_true: bool, trial_times: dict)-> tuple:
+    def _get_subject_answer(self, is_true: bool, trial_times: dict, is_example: bool = False)-> tuple:
         """wait for subject answer and check if correct"""
 
         user_answer = event.waitKeys(keyList=StringEnums.KEY_OPTIONS_FUNCTIONAL_LOCALIZER)[0]
-        trial_times[TimeAttribute.ANSWER_TIME] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
-        send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.ANSWER_ATTENTION_QUESTION)
+        if not is_example:
+            trial_times[TimeAttribute.ANSWER_TIME] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
+            send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.ANSWER_ATTENTION_QUESTION)
 
         if (is_true and user_answer == StringEnums.RIGHT) or (not is_true and user_answer == StringEnums.LEFT):
             is_right = True

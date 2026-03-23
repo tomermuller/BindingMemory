@@ -1,10 +1,10 @@
 from psychopy import visual, event, parallel, gui
-from src.binding_task.enums.Enums import Features, BindingAndTestEnums, Instruction, StringEnums
+from src.binding_task.enums.Enums import Features, Instruction, StringEnums, TaskManage
 from src.binding_task.binding_learning import BindingLearning
 from src.binding_task.functional_localizer import FunctionalLocalizer
 from src.binding_task.test_phase import TestPhase
-from datetime import datetime
 from src.binding_task.break_game import BreakGame
+from datetime import datetime
 from src.binding_task.utils import show_instruction
 from pathlib import Path
 import pandas as pd
@@ -73,7 +73,7 @@ class BindingTask:
         binding.run_examples()
         test.run_example()
 
-        for block_idx in range(BindingAndTestEnums.NUMBER_OF_BLOCKS):
+        for block_idx in range(TaskManage.NUMBER_OF_BLOCKS):
             self._block_learning_and_test(binding=binding, test=test, block=block_idx)
 
         binding.save_subject(time=self.time)
@@ -90,9 +90,9 @@ class BindingTask:
 
         show_instruction(win=self.win, instruction=Instruction.START_X_BLOCK + str(block + 1) + "/5")
         binding.run_block(block_index=block)
-        break_game = BreakGame(win=self.win)
+        break_game = BreakGame(win=self.win, parallel_port=self.parallel_port)
         break_game.run()
-        test.run_phase(block)
+        test.run_block(block_index=block)
 
     def _save_unified_file_for_all_data(self, binding: BindingLearning, test: TestPhase):
         """Save a single combined CSV with one row per binding trial, merging binding and test data.
@@ -121,7 +121,7 @@ class BindingTask:
            Output:{chair: {trail_number: trial_4,
                            answers: {colors: yellow, scenes: kitchen},
                             times: {object appear: 14:00:05}, ....},
-                   closet: ...."""
+                   closet: ....}"""
         test_by_object = {}
         for trial_key, trial_data in test.subject_answers.items():
             test_times = trial_data.get('trial_times', {})
@@ -168,7 +168,7 @@ class BindingTask:
     @staticmethod
     def _calc_trial_indices(binding_trial):
         """Convert a global trial number to (block, trial_in_block) indices."""
-        trials_per_block = BindingAndTestEnums.NUMBER_OF_BINDING_TRIALS // BindingAndTestEnums.NUMBER_OF_BLOCKS
+        trials_per_block = TaskManage.NUMBER_OF_BINDING_TRIALS // TaskManage.NUMBER_OF_BLOCKS
         block = (binding_trial - 1) // trials_per_block
         trial_in_block = (binding_trial - 1) % trials_per_block
         return block, trial_in_block

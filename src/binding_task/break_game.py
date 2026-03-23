@@ -1,24 +1,28 @@
-from psychopy import visual, core, event
+from psychopy import visual, core, event, parallel
 import psychopy
 import random
-from src.binding_task.enums.Enums import BreakGameEnums, Instruction, StringEnums
-from src.binding_task.utils import show_instruction
+from src.binding_task.enums.Enums import BreakGameEnums, Instruction, StringEnums, ParallelPortEnums
+from src.binding_task.utils import show_instruction, send_to_parallel_port
 
 
 class BreakGame:
-    def __init__(self, win: psychopy.visual.window.Window):
+    def __init__(self, win: psychopy.visual.window.Window, parallel_port: parallel.ParallelPort):
         """init break game where subject counts brightness changes"""
         self.game_duration = BreakGameEnums.GAME_DURATION  # seconds
         self.change_interval = BreakGameEnums.CHANGE_INTERVAL
         self.brightness = BreakGameEnums.BASE_BRIGHTNESS
         self.trial_change = BreakGameEnums.TRIAL_CHANGE
 
+        self.parallel_port = parallel_port
         self.win = win
         self.brighter_count = 0
         self.num_changes = self.game_duration // self.change_interval
         self.rect = visual.Rect(self.win, width=0.5, height=0.5, fillColor=[self.brightness] * 3)
 
     def run(self):
+
+        send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.START_BREAK_GAME)
+
         """run the break game and return subject answer and actual brighter count"""
         show_instruction(win=self.win, instruction=Instruction.BREAK_GAME_INSTRUCTION)
         for i in range(self.num_changes):

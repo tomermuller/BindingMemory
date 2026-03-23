@@ -4,7 +4,7 @@ import pandas as pd
 import psychopy
 from PIL import Image, ImageDraw
 from src.binding_task.enums.Enums import (ParallelPortEnums, BindingAndTestEnums, Features, Paths, StringEnums,
-                                          Instruction, TimeAttribute)
+                                          Instruction, TimeAttribute, TaskManage)
 import random
 from pathlib import Path
 from psychopy import visual, core, parallel, event
@@ -69,7 +69,10 @@ class BindingLearning:
                 b. show blank screen for 1-2 seconds
                 c. ask difficulty rating (1-5)
                 d. save temporary backup of answers"""
-        for trial_index in range(BindingAndTestEnums.NUMBER_OF_BINDING_TRIALS // BindingAndTestEnums.NUMBER_OF_BLOCKS):
+
+        send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.START_BINDING_LEARNING_BLOCK)
+
+        for trial_index in range(TaskManage.NUMBER_OF_BINDING_TRIALS // TaskManage.NUMBER_OF_BLOCKS):
             trial_times = dict()
             self._show_binding_learning(block_index=block_index, trial_index=trial_index, trial_times=trial_times)
             show_nothing(win=self.win, min_time=1.0, max_time=2.0)
@@ -210,8 +213,8 @@ class BindingLearning:
                 real_objects.append(one_object)
 
         random.shuffle(real_objects)
-        n = len(real_objects) // BindingAndTestEnums.NUMBER_OF_BLOCKS
-        return [real_objects[i * n:(i + 1) * n] for i in range(BindingAndTestEnums.NUMBER_OF_BLOCKS)]
+        n = len(real_objects) // TaskManage.NUMBER_OF_BLOCKS
+        return [real_objects[i * n:(i + 1) * n] for i in range(TaskManage.NUMBER_OF_BLOCKS)]
 
     @staticmethod
     def _create_blocks(categories: list):
@@ -226,11 +229,15 @@ class BindingLearning:
         blocks = defaultdict(dict)
         for category in categories:
             number_of_features = len(Features.CATEGORY_TO_FEATURES[category])
-            number_of_feature_repeats_in_block = int(BindingAndTestEnums.NUMBER_OF_BINDING_TRIALS / (number_of_features * BindingAndTestEnums.NUMBER_OF_BLOCKS))
+            number_of_feature_repeats_in_block = int(TaskManage.NUMBER_OF_BINDING_TRIALS / (number_of_features * TaskManage.NUMBER_OF_BLOCKS))
 
             features_of_category = Features.CATEGORY_TO_FEATURES[category].keys()
-            for block_index in range(BindingAndTestEnums.NUMBER_OF_BLOCKS):
+            for block_index in range(TaskManage.NUMBER_OF_BLOCKS):
                 block_category_features = list(features_of_category) * number_of_feature_repeats_in_block
+                print(number_of_features)
+                print(number_of_feature_repeats_in_block)
+                print(features_of_category)
+                print(len(block_category_features))
                 block_category_features = shuffle_trials(items=block_category_features, max_consecutive=2)
                 blocks[block_index][category] = block_category_features
 

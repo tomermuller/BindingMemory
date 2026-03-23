@@ -1,7 +1,12 @@
 from pathlib import Path
 
+class TaskManage:
+    NUMBER_OF_TRIALS_PER_FEATURE = 1
+    NUMBER_OF_BLOCKS = 5
+    NUMBER_OF_BINDING_TRIALS = 45
+
+
 class StringEnums:
-    NUMBER_OF_TRIALS_PER_FEATURE = 90
     Y = 'y'
     N = 'n'
     FEATURE = 'feature'
@@ -27,7 +32,12 @@ class StringEnums:
     TRIAL = "trial"
     OBJECTS = "objects"
     BLOCK = "block"
-
+    RETRIVAL_SUCCESS = "retrival_success"
+    RETRIVAL_REPORT_COLOR = "retrival_report_color"
+    RETRIVAL_REPORT_SCENE = "retrival_report_scene"
+    TEXT = "text"
+    LIST = "list"
+    LOCATION = "location"
 
 class Features:
     OBJECT = "object"
@@ -95,45 +105,58 @@ class HebrewEnums:
         Features.KITCHEN: KITCHEN
     }
 
+    NOTHING = 'כלום'
+    COLOR = 'צבע'
+    SCENE = 'סצנה'
+    BOTH = 'צבע וסצנה'
+
 
 class ParallelPortEnums:
-    SHOW_RED = 21
-    SHOW_GREEN = 23
-    SHOW_YELLOW = 24
-    STOP_RED = 31
-    STOP_GREEN = 33
-    STOP_YELLOW = 34
 
-    SHOW_LIVING_ROOM = 41
-    SHOW_BATHROOM = 42
-    SHOW_KITCHEN = 43
-    STOP_LIVING_ROOM = 51
-    STOP_BATHROOM = 52
-    STOP_KITCHEN = 53
+    # general
+    START_FUNCTIONAL_LOCALIZER = 1
+    START_BINDING_LEARNING_BLOCK = 2
+    START_TESH_PHASE_BLOCK = 3
+    START_BREAK_GAME = 4
+    START_PARTIAL_RETRIVAL = 5
 
-    SHOW_BINDING_TRIALS = 61
-    SHOW_ATTENTION_QUESTION = 62
-    SHOW_COLOR_QUESTION = 63
-    SHOW_SCENE_QUESTION = 64
-    SHOW_DIFFICULTY_QUESTION = 65
-    SHOW_COLORS_ANSWERS = 66
-    SHOW_SCENES_ANSWERS = 67
-    SHOW_OBJECT_IN_TEST_TRIAL = 68
+    # functional localizer parallel port numbers
+    SHOW_RED = 11
+    SHOW_GREEN = 12
+    SHOW_YELLOW = 13
 
-    STOP_BINDING_TRIALS = 71
-    STOP_ATTENTION_QUESTION = 72
-    STOP_COLOR_QUESTION = 73
-    STOP_SCENE_QUESTION = 74
-    STOP_DIFFICULTY_QUESTION = 75
-    STOP_OBJECT_IN_TEST_TRIAL = 78
+    SHOW_LIVING_ROOM = 16
+    SHOW_BATHROOM = 17
+    SHOW_KITCHEN = 18
 
-    ANSWER_ATTENTION_QUESTION = 82
-    ANSWER_COLOR_QUESTION = 83
-    ANSWER_SCENE_QUESTION = 84
-    ANSWER_DIFFICULTY_QUESTION = 85
+    STOP_RED = 21
+    STOP_GREEN = 22
+    STOP_YELLOW = 23
 
-    START_BREAK = 91
-    STOP_BREAK = 92
+    STOP_LIVING_ROOM = 26
+    STOP_BATHROOM = 27
+    STOP_KITCHEN = 28
+
+    SHOW_ATTENTION_QUESTION = 31
+    ANSWER_ATTENTION_QUESTION = 32
+
+    # binding learning parallel port numbers
+    SHOW_BINDING_TRIALS = 41
+    STOP_BINDING_TRIALS = 42
+    SHOW_DIFFICULTY_QUESTION = 43
+    ANSWER_DIFFICULTY_QUESTION = 44
+
+    # test phase parallel port numbers
+    SHOW_OBJECT_IN_TEST_TRIAL = 51
+    START_RETRIVAL_TIME = 53
+    ANSWER_ON_RETRIVAL_TIME = 54
+    SHOW_RETRIVAL_QUESTION = 55
+    ANSWER_RETRIVAL_QUESTION = 56
+
+    SHOW_COLORS_ANSWERS = 61
+    ANSWER_COLOR_QUESTION = 62
+    SHOW_SCENES_ANSWERS = 66
+    ANSWER_SCENE_QUESTION = 67
 
     FEATURE_SHOW_TO_PULSE_CODE = {Features.GREEN: SHOW_GREEN,
                                   Features.YELLOW: SHOW_YELLOW,
@@ -149,12 +172,6 @@ class ParallelPortEnums:
                                   Features.BATHROOM: STOP_BATHROOM,
                                   Features.KITCHEN: STOP_KITCHEN}
 
-    CATEGORY_QUESTION_SHOW_TO_PULSE_CODE = {Features.SCENES: SHOW_SCENE_QUESTION,
-                                            Features.COLORS: SHOW_COLOR_QUESTION}
-
-    CATEGORY_QUESTION_STOP_TO_PULSE_CODE = {Features.SCENES: STOP_SCENE_QUESTION,
-                                            Features.COLORS: STOP_COLOR_QUESTION}
-
     CATEGORY_ANSWERS_SHOW_TO_PULSE_CODE = {Features.SCENES: SHOW_SCENES_ANSWERS,
                                             Features.COLORS: SHOW_COLORS_ANSWERS}
 
@@ -169,7 +186,7 @@ class Instruction:
                 "בשלב השני תראה/י אובייקטים בצבעים ומקומות ותצטרך/י לזכור איזה אובייקט הופיעו היכן ומהו צבעם.")
 
     FIRST_PHASE_INSTRUCTION = ("\nבשלב הראשון תראה/י תמונות החוזרות על עצמן."
-                               "אחרי כל תמונה תופיע מילה\n"
+                               "\nאחרי כל תמונה תופיע מילה"
                                "\n ותצטרך/י ללחוץ על המקש החץ שיתאר האם המילה מתארת את התמונה או לא."
                                "\nאך לפני הנה 2 דוגמאות:"
                                "(אנא לחץ/י על כל כפתור כדי להתחיל את הדוגמאות)")
@@ -204,7 +221,9 @@ class Instruction:
 
     BREAK = "הפסקה!\n אנא לחץ/י על כל כפתור כאשר אתה מוכן לחזור לניסוי."
 
-    GOODBYE = ("תודה רבה על השתתפותך בניסוי. נא לקרוא למריץ הניסוי. ניתן לשאול אותו/ה שאלות על הניסויֿ")
+    TRY_TO_RETRIVAL =  "לחץ על כל מקש במידה ונזכרת"
+
+    GOODBYE = "תודה רבה על השתתפותך בניסוי. נא לקרוא למריץ הניסוי. ניתן לשאול אותו/ה שאלות על הניסויֿ"
 
 
 class BreakGameEnums:
@@ -226,14 +245,35 @@ class Paths:
 
 
 class BindingAndTestEnums:
-    NUMBER_OF_BLOCKS = 5
-    NUMBER_OF_BINDING_TRIALS = 45
     BINDING_EXAMPLES  = zip([Path(Paths.OBJECT_EXAMPLE_FORK), Path(Paths.OBJECT_EXAMPLE_ROBOT)],
                             [Features.COLOR_TO_RGBA[Features.YELLOW], Features.COLOR_TO_RGBA[Features.RED]],
                             [Features.SCENE_TO_IMAGE[Features.KITCHEN], Features.SCENE_TO_IMAGE[Features.LIVING_ROOM]])
 
     DIFFICULT_RANGE = ["1", "2", "3", "4", "5"]
-    ARROW_TO_LOCATION = {'up': 0, 'left': 1, 'right': 2}
+    ARROW_TO_LOCATION = {StringEnums.UP: 0, StringEnums.LEFT: 1, StringEnums.RIGHT: 2}
+
+    RETRIVAL_OPTION = {
+        StringEnums.UP: {
+            StringEnums.TEXT: HebrewEnums.NOTHING,
+            StringEnums.LIST: [],
+            StringEnums.LOCATION: (0, 0.45)
+        },
+        StringEnums.LEFT: {
+            StringEnums.TEXT: HebrewEnums.COLOR,
+            StringEnums.LIST: [Features.COLORS],
+            StringEnums.LOCATION: (-0.45, 0)
+        },
+        StringEnums.RIGHT: {
+            StringEnums.TEXT: HebrewEnums.SCENE,
+            StringEnums.LIST: [Features.SCENES],
+            StringEnums.LOCATION: (0.45, 0)
+        },
+        StringEnums.DOWN: {
+            StringEnums.TEXT: HebrewEnums.BOTH,
+            StringEnums.LIST: [Features.COLORS, Features.SCENES],
+            StringEnums.LOCATION: (0, -0.45)
+        },
+    }
 
 
 class TimeAttribute:
@@ -245,6 +285,9 @@ class TimeAttribute:
     OBJECT_DISAPPEAR = "object_disappear"
     DIFFICULTY_QUESTION_APPEAR = "difficulty_question_appear"
     DIFFICULTY_ANSWER_TIME = "difficulty_answer_time"
+    RETRIVAL_TIME = "retrival_time"
+    RETRIVAL_QUESTION_APPEAR = "retrival_question_appear"
+    RETRIVAL_REPORT_TIME = "retrival_report_time"
 
 
 
