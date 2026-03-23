@@ -234,10 +234,6 @@ class BindingLearning:
             features_of_category = Features.CATEGORY_TO_FEATURES[category].keys()
             for block_index in range(TaskManage.NUMBER_OF_BLOCKS):
                 block_category_features = list(features_of_category) * number_of_feature_repeats_in_block
-                print(number_of_features)
-                print(number_of_feature_repeats_in_block)
-                print(features_of_category)
-                print(len(block_category_features))
                 block_category_features = shuffle_trials(items=block_category_features, max_consecutive=2)
                 blocks[block_index][category] = block_category_features
 

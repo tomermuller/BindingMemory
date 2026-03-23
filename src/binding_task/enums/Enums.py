@@ -1,9 +1,28 @@
 from pathlib import Path
 
 class TaskManage:
-    NUMBER_OF_TRIALS_PER_FEATURE = 1
+    NUMBER_OF_TRIALS_PER_FEATURE = 90
     NUMBER_OF_BLOCKS = 5
     NUMBER_OF_BINDING_TRIALS = 45
+
+
+class Paths:
+    OBJECT_EXAMPLE_FORK = "features/object example/fork.png"
+    OBJECT_EXAMPLE_ROBOT = "features/object example/robot.png"
+    BINDING_EXAMPLE = "features/binding_photos/example.png"
+    SAVE_DATA_FOLDER = "subject_answer/final_data/"
+    SAVE_TEMP_FOLDER = "subject_answer/temp/"
+
+    OBJECTS_PATH = "features/objects"
+    BINDING_PHOTOS_FOLDER = "features/binding_photos/"
+
+    COLOR_PROBE_PATH = "features/probes/color probe.jpeg"
+    SCENE_PROBE_PATH = "features/probes/scene probe.jpeg"
+
+    COLORS_IMAGE_PATH = 'features/colors/{}_image.png'
+    SCENE_IMAGE_PATH = 'features/scenes/{}_image.png'
+
+    OBJECT_PATH = 'features/objects/{}.png'
 
 
 class StringEnums:
@@ -38,6 +57,8 @@ class StringEnums:
     TEXT = "text"
     LIST = "list"
     LOCATION = "location"
+    IS_REMEMBER = "is_remember"
+    PROBE = "probe"
 
 class Features:
     OBJECT = "object"
@@ -59,22 +80,22 @@ class Features:
     COLOR_TO_RGBA = {RED: (255,0,0), BLUE : (0,0,255), GREEN : (0,255,0), YELLOW : (255,255,0)}
 
     COLOR_TO_IMAGE = {
-        RED: Path(f'features/colors/{RED}_image.png'),
-        GREEN: Path(f'features/colors/{GREEN}_image.png'),
-        YELLOW: Path(f'features/colors/{YELLOW}_image.png')
+        RED: Path(Paths.COLORS_IMAGE_PATH.format(RED)),
+        GREEN: Path(Paths.COLORS_IMAGE_PATH.format(GREEN)),
+        YELLOW: Path(Paths.COLORS_IMAGE_PATH.format(YELLOW))
     }
 
-    SCENE_TO_IMAGE = {LIVING_ROOM: Path(f"features/scenes/{LIVING_ROOM}_image.png"),
-                      BATHROOM: Path(f"features/scenes/{BATHROOM}_image.png"),
-                      KITCHEN: Path(f"features/scenes/{KITCHEN}_image.png")}
+    SCENE_TO_IMAGE = {LIVING_ROOM: Path(Paths.SCENE_IMAGE_PATH.format(LIVING_ROOM)),
+                      BATHROOM: Path(Paths.SCENE_IMAGE_PATH.format(BATHROOM)),
+                      KITCHEN: Path(Paths.SCENE_IMAGE_PATH.format(KITCHEN))}
 
 
-    IMAGE_TO_FEATURE = {Path(f'features/colors/{RED}_image.png'): RED,
-                        Path(f'features/colors/{GREEN}_image.png'): GREEN,
-                        Path(f'features/colors/{YELLOW}_image.png'): YELLOW,
-                        Path(f'features/scenes/{BATHROOM}_image.png'): BATHROOM,
-                        Path(f'features/scenes/{LIVING_ROOM}_image.png'): LIVING_ROOM,
-                        Path(f'features/scenes/{KITCHEN}_image.png'): KITCHEN}
+    IMAGE_TO_FEATURE = {Path(Paths.COLORS_IMAGE_PATH.format(RED)): RED,
+                        Path(Paths.COLORS_IMAGE_PATH.format(GREEN)): GREEN,
+                        Path(Paths.COLORS_IMAGE_PATH.format(YELLOW)): YELLOW,
+                        Path(Paths.SCENE_IMAGE_PATH.format(BATHROOM)): BATHROOM,
+                        Path(Paths.SCENE_IMAGE_PATH.format(LIVING_ROOM)): LIVING_ROOM,
+                        Path(Paths.SCENE_IMAGE_PATH.format(KITCHEN)): KITCHEN}
 
     CATEGORY_TO_FEATURES = {SCENES: SCENE_TO_IMAGE, COLORS: COLOR_TO_IMAGE}
 
@@ -85,6 +106,9 @@ class Features:
                         LIVING_ROOM: [LIVING_ROOM],
                         BATHROOM: [BATHROOM],
                         KITCHEN: [KITCHEN]}
+
+    PROBE_TO_PATH = {COLORS: Paths.COLOR_PROBE_PATH,
+                     SCENES: Paths.SCENE_PROBE_PATH}
 
 
 class HebrewEnums:
@@ -110,6 +134,8 @@ class HebrewEnums:
     SCENE = 'סצנה'
     BOTH = 'צבע וסצנה'
 
+    REMEMBER = "זוכר"
+    NOT_REMEMBER = "לא זוכר"
 
 class ParallelPortEnums:
 
@@ -178,6 +204,12 @@ class ParallelPortEnums:
     CATEGORY_QUESTION_ANSWER_TO_PULSE_CODE = {Features.SCENES: ANSWER_SCENE_QUESTION,
                                             Features.COLORS: ANSWER_COLOR_QUESTION}
 
+    # partial retrieval phase parallel port numbers
+    SHOW_PROBE = 71
+    STOP_PROBE = 72
+    SHOW_PARTIAL_RETRIVAL_REMEMBER_QUESTION = 73
+    ANSWER_PARTIAL_RETRIVAL_REMEMBER_QUESTION = 74
+
 
 class Instruction:
     WELLCOME = ("ברוך הבא/ה לניסוי!\n"
@@ -223,6 +255,11 @@ class Instruction:
 
     TRY_TO_RETRIVAL =  "לחץ על כל מקש במידה ונזכרת"
 
+    PARTIAL_RETRIVAL = ("ברוך הבא לחלק השלישי בניסוי!\n"
+                        "בחלק הזה לפני כל תמונה יופיע סימון של צבע או סצנה\n"
+                        "תצטרכ/י לענות רק עבור הסימון שיופיע.\n"
+                        "אנא לחץ/י על כל כפתור כדי להתחיל בניסוי.")
+
     GOODBYE = "תודה רבה על השתתפותך בניסוי. נא לקרוא למריץ הניסוי. ניתן לשאול אותו/ה שאלות על הניסויֿ"
 
 
@@ -231,17 +268,6 @@ class BreakGameEnums:
     CHANGE_INTERVAL = 10  # seconds
     BASE_BRIGHTNESS = 0.5
     TRIAL_CHANGE = 0.2
-
-
-class Paths:
-    OBJECT_EXAMPLE_FORK = "features/object example/fork.png"
-    OBJECT_EXAMPLE_ROBOT = "features/object example/robot.png"
-    BINDING_EXAMPLE = "features/binding_photos/example.png"
-    SAVE_DATA_FOLDER = "subject_answer/final_data/"
-    SAVE_TEMP_FOLDER = "subject_answer/temp/"
-
-    OBJECTS_PATH = "features/objects"
-    BINDING_PHOTOS_FOLDER = "features/binding_photos/"
 
 
 class BindingAndTestEnums:
@@ -275,6 +301,19 @@ class BindingAndTestEnums:
         },
     }
 
+    RETRIVAL_OPTION_BONUS = {
+        StringEnums.LEFT: {
+            StringEnums.TEXT: HebrewEnums.NOT_REMEMBER,
+            StringEnums.IS_REMEMBER: False,
+            StringEnums.LOCATION: (-0.45, 0)
+        },
+        StringEnums.RIGHT: {
+            StringEnums.TEXT: HebrewEnums.REMEMBER,
+            StringEnums.IS_REMEMBER: True,
+            StringEnums.LOCATION: (0.45, 0)
+        }
+    }
+
 
 class TimeAttribute:
     FEATURE_APPEAR = "feature_appear"
@@ -288,6 +327,8 @@ class TimeAttribute:
     RETRIVAL_TIME = "retrival_time"
     RETRIVAL_QUESTION_APPEAR = "retrival_question_appear"
     RETRIVAL_REPORT_TIME = "retrival_report_time"
+    PROBE_APPEAR = "probe_appear"
+    PROBE_DISAPPEAR = "probe_disappear"
 
 
 

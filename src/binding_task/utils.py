@@ -5,28 +5,58 @@ from psychopy import visual, core, event, parallel
 from src.binding_task.enums.Enums import StringEnums
 
 def shuffle_trials(items, max_consecutive=2):
-    """shuffle items while limiting consecutive identical items:
-        input: items: list of items to shuffle
-               max_consecutive: maximum allowed consecutive identical items (default 2)
-        output: shuffled list with no more than max_consecutive identical items in a row
-        uses weighted random selection at each step to guarantee a valid arrangement
-        even for large lists with many repeats."""
+    """Shuffle items ensuring no more than max_consecutive identical items in a row.
+
+    Uses a greedy algorithm with a mandatory-placement safety check: before doing a
+    random weighted pick, it detects whether any available item *must* be placed now
+    (because skipping it would make its remaining count impossible to fit later).
+    This prevents the greedy from painting itself into a corner and guarantees a valid
+    arrangement is always found whenever one mathematically exists.
+
+    The feasibility limit per step is: floor(remaining * k / (k+1))
+    where k = max_consecutive. Any item whose count exceeds this limit must be placed
+    immediately.
+
+    input:  items          - list of items to shuffle (may contain duplicates)
+            max_consecutive - max allowed identical items in a row (default 2)
+    output: shuffled list satisfying the constraint
+    raises: ValueError if no valid arrangement exists (e.g. one item dominates too much)
+    """
     from collections import Counter
     counts = Counter(items)
+    n = len(items)
     result = []
 
-    for _ in range(len(items)):
+    while len(result) < n:
+        remaining = n - len(result)
+
         forbidden = None
         if len(result) >= max_consecutive and len(set(result[-max_consecutive:])) == 1:
             forbidden = result[-1]
 
-        available = [item for item, cnt in counts.items() if cnt > 0 and item != forbidden]
-        weights = [counts[item] for item in available]
+        available = [(item, cnt) for item, cnt in counts.items()
+                     if cnt > 0 and item != forbidden]
 
         if not available:
-            raise ValueError("Cannot arrange items within constraints")
+            raise ValueError("Cannot arrange items within the max_consecutive constraint — impossible input")
 
-        chosen = random.choices(available, weights=weights, k=1)[0]
+        # Safety check: if any item's count exceeds the maximum it could ever occupy
+        # in the remaining slots, we MUST place it now or we'll never fit all of them.
+        # Maximum slots one item can fill in `remaining-1` future positions = floor((remaining-1+1)*k/(k+1))
+        # simplified to floor(remaining * k / (k+1)).
+        limit = (remaining * max_consecutive) // (max_consecutive + 1)
+        must_place = None
+        for item, cnt in sorted(available, key=lambda x: -x[1]):
+            if cnt > limit:
+                must_place = item
+                break  # only the single most-frequent item can exceed the limit
+
+        if must_place is not None:
+            chosen = must_place
+        else:
+            chosen = random.choices([i for i, _ in available],
+                                    weights=[c for _, c in available])[0]
+
         result.append(chosen)
         counts[chosen] -= 1
 

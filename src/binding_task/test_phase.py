@@ -11,7 +11,7 @@ from src.binding_task.utils import show_nothing, send_to_parallel_port, shuffle_
 
 class TestPhase:
     def __init__(self, win: psychopy.visual.window.Window, parallel_port: parallel.ParallelPort, categories: list,
-                 objects: dict, subject_id: str) -> None:
+                 objects: list, subject_id: str) -> None:
         """input: win: psychopy window to display stimuli
                   parallel_port: parallel port for sending EEG/fMRI triggers
                   categories: list of feature categories to test (e.g., Colors, Scenes)
@@ -43,7 +43,7 @@ class TestPhase:
                 c. save temporary backup"""
         send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.START_TESH_PHASE_BLOCK)
 
-        for trial_index in range(TaskManage.NUMBER_OF_BINDING_TRIALS // TaskManage.NUMBER_OF_BLOCKS):
+        for trial_index in range(len(self.blocks[block_index])):
             trial_times = {}
             subject_answer = self.run_test(image_path=self.blocks[block_index][trial_index], trial_times=trial_times)
             self._write_subject_answers(object_path=self.blocks[block_index][trial_index], subject_answer=subject_answer, trial_times=trial_times)

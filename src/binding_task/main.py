@@ -2,6 +2,8 @@ from psychopy import visual, event, parallel, gui
 from src.binding_task.enums.Enums import Features, Instruction, StringEnums, TaskManage
 from src.binding_task.binding_learning import BindingLearning
 from src.binding_task.functional_localizer import FunctionalLocalizer
+from src.binding_task.partial_retrival_test import PartialRetrivalTest
+from src.binding_task.second_day_task import SecondDayTask
 from src.binding_task.test_phase import TestPhase
 from src.binding_task.break_game import BreakGame
 from datetime import datetime
@@ -10,24 +12,30 @@ from pathlib import Path
 import pandas as pd
 
 
-def get_subject_id() -> str:
-    """open Gui window to get subject ID and return it"""
-    info = {'Subject ID': ''}
+def get_subject_info() -> tuple:
+    """open GUI window to get subject ID and experiment day, return (subject_id, day)"""
+    info = {'Subject ID': '', 'Day': ['1', '2']}
     dlg = gui.DlgFromDict(dictionary=info, title='Experiment')
     if dlg.OK:
-        return info['Subject ID']
+        return info['Subject ID'], info['Day']
     else:
-        return "-1"
+        return "-1", "-1"
 
 
 class BindingTask:
     def __init__(self, subject_id: str):
         self.subject_id = subject_id
         self.win = visual.Window(fullscr=True)
-        self.parallel_port = parallel.ParallelPort(address=0x0378)
+        self.parallel_port = parallel.ParallelPort(address=0x5EFC)
         self.time = datetime.now().strftime(StringEnums.MINUTE_FORMAT)
 
-    def main(self):
+    def main(self, day: int):
+        if day == 1:
+            self._first_day()
+        elif day == 2:
+            self._second_day()
+
+    def _first_day(self):
         """run the experiment:
             1. set the screen and psychopy window to experiment
             2. call first stage
@@ -37,7 +45,15 @@ class BindingTask:
         self._first_stage()
         binding, test = self._second_stage()
         self._save_unified_file_for_all_data(binding=binding, test=test)
+        self._third_stage()
         show_instruction(win=self.win, instruction=Instruction.GOODBYE, time=10)
+
+    def _second_day(self):
+        """run the experiment:"""
+        second_day = SecondDayTask(win=self.win, parallel_port=self.parallel_port,
+                                   categories=Features.ALL_CATEGORIES, subject_id=subject)
+        second_day.run()
+        second_day.save_subject_answer(time=self.time)
 
     @staticmethod
     def _general_setting():
@@ -80,6 +96,13 @@ class BindingTask:
         test.save_subject_answer(time=self.time)
 
         return binding, test
+
+    def _third_stage(self):
+        """the third part of the experiment:"""
+        show_instruction(win=self.win, instruction = Instruction.PARTIAL_RETRIVAL)
+        partial_retrival = PartialRetrivalTest(win=self.win, parallel_port=self.parallel_port,
+                                               categories=Features.ALL_CATEGORIES, subject_id=self.subject_id)
+        partial_retrival.run()
 
     def _block_learning_and_test(self, binding: BindingLearning, test: TestPhase, block: int):
         """run one block of the second stage:
@@ -252,8 +275,9 @@ class BindingTask:
         df.to_csv(save_path / f'subject_{self.subject_id}_{self.time}_combined.csv', index=False)
 
 if __name__ == '__main__':
-    subject = get_subject_id()
-    if subject!= "-1":
+    subject, current_day = get_subject_info()
+    if subject != "-1":
         task = BindingTask(subject_id=subject)
-        task.main()
+        task.main(day=current_day)
+
 
