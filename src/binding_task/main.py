@@ -1,49 +1,75 @@
 from psychopy import visual, event, parallel, gui
-from src.binding_task.enums.Enums import Features, BindingAndTestEnums, Instruction, StringEnums
+from src.binding_task.enums.Enums import Features, Instruction, StringEnums, TaskManage
 from src.binding_task.binding_learning import BindingLearning
 from src.binding_task.functional_localizer import FunctionalLocalizer
+from src.binding_task.partial_retrival_test import PartialRetrivalTest
+from src.binding_task.second_day_task import SecondDayTask
 from src.binding_task.test_phase import TestPhase
-from datetime import datetime
 from src.binding_task.break_game import BreakGame
+from datetime import datetime
 from src.binding_task.utils import show_instruction
 from pathlib import Path
 import pandas as pd
 
 
-def get_subject_id() -> str:
-    """open Gui window to get subject ID and return it"""
-    info = {'Subject ID': ''}
-    dlg = gui.DlgFromDict(dictionary=info, title='Experiment')
+def get_subject_info() -> tuple:
+    """open GUI window to get subject ID and experiment day, return (subject_id, day)"""
+    info = {StringEnums.SUBJECT_ID: '', StringEnums.DAY: TaskManage.DAYS_OF_EXPERIMENTS}
+    dlg = gui.DlgFromDict(dictionary=info, title=StringEnums.EXPERIMENT_TITLE)
     if dlg.OK:
-        return info['Subject ID']
+        return info[StringEnums.SUBJECT_ID], info[StringEnums.DAY]
     else:
-        return "-1"
+        return "-1", "-1"
 
 
 class BindingTask:
     def __init__(self, subject_id: str):
+        """initialize the experiment with a subject ID, psychopy window, parallel port, and timestamp"""
         self.subject_id = subject_id
         self.win = visual.Window(fullscr=True)
-        self.parallel_port = parallel.ParallelPort(address=0x0378)
+        self.parallel_port = parallel.ParallelPort(address=0x5EFC)
         self.time = datetime.now().strftime(StringEnums.MINUTE_FORMAT)
 
-    def main(self):
-        """run the experiment:
-            1. set the screen and psychopy window to experiment
-            2. call first stage
-            3. call second stage"""
+    def main(self, day: int):
+        """entry point for the experiment — routes to day 1 or day 2 flow based on the GUI selection"""
+        if day == '1':
+            self._first_day()
+        elif day == '2':
+            self._second_day()
+
+    def _first_day(self):
+        """run the full first day of the experiment:
+            1. general settings (hide mouse)
+            2. welcome instruction
+            3. first stage - functional localizer
+            4. second stage - binding learning + test phase (5 blocks)
+            5. save unified combined CSV
+            6. third stage - partial retrieval test
+            7. goodbye instruction"""
         self._general_setting()
         show_instruction(win=self.win, instruction=Instruction.WELLCOME)
         self._first_stage()
         binding, test = self._second_stage()
         self._save_unified_file_for_all_data(binding=binding, test=test)
+        self._third_stage()
         show_instruction(win=self.win, instruction=Instruction.GOODBYE, time=10)
+
+    def _second_day(self):
+        """run the second day of the experiment:
+            1. init SecondDayTask with objects from the partial retrieval CSV
+            2. run examples
+            3. run all trials
+            4. save results"""
+        second_day = SecondDayTask(win=self.win, parallel_port=self.parallel_port,
+                                   categories=Features.ALL_CATEGORIES, subject_id=self.subject_id)
+        second_day.run_example()
+        second_day.run()
+        second_day.save_subject_answer(time=self.time)
 
     @staticmethod
     def _general_setting():
         """set setting for experiment:
             1. disappear the mouse"""
-
         event.Mouse(visible=False)
 
     def _first_stage(self):
@@ -52,9 +78,10 @@ class BindingTask:
             2. init and call run func of FunctionalLocalizer"""
 
         show_instruction(win=self.win, instruction=Instruction.FIRST_PHASE_INSTRUCTION)
-        functional_localizer = FunctionalLocalizer(categories=Features.ALL_CATEGORIES, win=self.win, time=self.time,
+        functional_localizer = FunctionalLocalizer(categories=Features.ALL_CATEGORIES, win=self.win,
                                                    parallel_port=self.parallel_port, subject_id=self.subject_id)
         functional_localizer.run()
+        functional_localizer.save_results(time=self.time)
 
     def _second_stage(self):
         """the second part of the experiment:
@@ -73,13 +100,27 @@ class BindingTask:
         binding.run_examples()
         test.run_example()
 
-        for block_idx in range(BindingAndTestEnums.NUMBER_OF_BLOCKS):
+        for block_idx in range(TaskManage.NUMBER_OF_BLOCKS):
             self._block_learning_and_test(binding=binding, test=test, block=block_idx)
 
         binding.save_subject(time=self.time)
         test.save_subject_answer(time=self.time)
 
         return binding, test
+
+    def _third_stage(self):
+        """the third part of the experiment:
+            1. show instruction
+            2. init PartialRetrivalTest with only the correctly retrieved objects from the test phase
+            3. run examples
+            4. run all trials
+            5. save results"""
+        show_instruction(win=self.win, instruction = Instruction.PARTIAL_RETRIVAL)
+        partial_retrival = PartialRetrivalTest(win=self.win, parallel_port=self.parallel_port,
+                                               categories=Features.ALL_CATEGORIES, subject_id=self.subject_id)
+        partial_retrival.run_example()
+        partial_retrival.run()
+        partial_retrival.save_subject_answer(time=self.time)
 
     def _block_learning_and_test(self, binding: BindingLearning, test: TestPhase, block: int):
         """run one block of the second stage:
@@ -90,9 +131,9 @@ class BindingTask:
 
         show_instruction(win=self.win, instruction=Instruction.START_X_BLOCK + str(block + 1) + "/5")
         binding.run_block(block_index=block)
-        break_game = BreakGame(win=self.win)
+        break_game = BreakGame(win=self.win, parallel_port=self.parallel_port)
         break_game.run()
-        test.run_phase(block)
+        test.run_block(block_index=block)
 
     def _save_unified_file_for_all_data(self, binding: BindingLearning, test: TestPhase):
         """Save a single combined CSV with one row per binding trial, merging binding and test data.
@@ -121,12 +162,12 @@ class BindingTask:
            Output:{chair: {trail_number: trial_4,
                            answers: {colors: yellow, scenes: kitchen},
                             times: {object appear: 14:00:05}, ....},
-                   closet: ...."""
+                   closet: ....}"""
         test_by_object = {}
         for trial_key, trial_data in test.subject_answers.items():
-            test_times = trial_data.get('trial_times', {})
+            test_times = trial_data.get(StringEnums.TRAIL_TIMES, {})
             for obj, answers in trial_data.items():
-                if obj != 'trial_times':
+                if obj != StringEnums.TRAIL_TIMES:
                     test_by_object[obj] = {'trial_key': trial_key, 'answers': answers, 'times': test_times}
         return test_by_object
 
@@ -168,7 +209,7 @@ class BindingTask:
     @staticmethod
     def _calc_trial_indices(binding_trial):
         """Convert a global trial number to (block, trial_in_block) indices."""
-        trials_per_block = BindingAndTestEnums.NUMBER_OF_BINDING_TRIALS // BindingAndTestEnums.NUMBER_OF_BLOCKS
+        trials_per_block = TaskManage.NUMBER_OF_BINDING_TRIALS // TaskManage.NUMBER_OF_BLOCKS
         block = (binding_trial - 1) // trials_per_block
         trial_in_block = (binding_trial - 1) % trials_per_block
         return block, trial_in_block
@@ -252,8 +293,9 @@ class BindingTask:
         df.to_csv(save_path / f'subject_{self.subject_id}_{self.time}_combined.csv', index=False)
 
 if __name__ == '__main__':
-    subject = get_subject_id()
-    if subject!= "-1":
+    subject, current_day = get_subject_info()
+    if subject != "-1":
         task = BindingTask(subject_id=subject)
-        task.main()
+        task.main(day=current_day)
+
 
