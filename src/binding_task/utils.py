@@ -1,4 +1,5 @@
 import random
+from collections import Counter
 import psychopy
 from psychopy import visual, core, event, parallel
 
@@ -22,7 +23,6 @@ def shuffle_trials(items, max_consecutive=2):
     output: shuffled list satisfying the constraint
     raises: ValueError if no valid arrangement exists (e.g. one item dominates too much)
     """
-    from collections import Counter
     counts = Counter(items)
     n = len(items)
     result = []
@@ -66,14 +66,14 @@ def show_instruction(win: psychopy.visual.window.Window, instruction: str, time:
     """display instruction text on screen and wait for keypress or time:
         input: win: psychopy window to display on
                instruction: text string to display
-               time: optional duration in seconds (if None, wait for keypress)
+               time: optional duration in seconds (if None, waits for keypress; 0 returns immediately)
         1. create text stimulus with RTL support for Hebrew
         2. draw and flip to screen
         3. if time provided, wait for that duration; otherwise wait for any keypress"""
     text = visual.TextStim(win, text=instruction, font=StringEnums.ARIAL_FONT, pos=(0, 0), height=0.03, languageStyle='rtl', wrapWidth=1.8)
     text.draw()
     win.flip()
-    if time:
+    if time is not None:
         core.wait(time)
     else:
         event.waitKeys()

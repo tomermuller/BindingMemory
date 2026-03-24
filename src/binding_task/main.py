@@ -14,32 +14,38 @@ import pandas as pd
 
 def get_subject_info() -> tuple:
     """open GUI window to get subject ID and experiment day, return (subject_id, day)"""
-    info = {'Subject ID': '', 'Day': ['1', '2']}
-    dlg = gui.DlgFromDict(dictionary=info, title='Experiment')
+    info = {StringEnums.SUBJECT_ID: '', StringEnums.DAY: TaskManage.DAYS_OF_EXPERIMENTS}
+    dlg = gui.DlgFromDict(dictionary=info, title=StringEnums.EXPERIMENT_TITLE)
     if dlg.OK:
-        return info['Subject ID'], info['Day']
+        return info[StringEnums.SUBJECT_ID], info[StringEnums.DAY]
     else:
         return "-1", "-1"
 
 
 class BindingTask:
     def __init__(self, subject_id: str):
+        """initialize the experiment with a subject ID, psychopy window, parallel port, and timestamp"""
         self.subject_id = subject_id
         self.win = visual.Window(fullscr=True)
         self.parallel_port = parallel.ParallelPort(address=0x5EFC)
         self.time = datetime.now().strftime(StringEnums.MINUTE_FORMAT)
 
     def main(self, day: int):
-        if day == 1:
+        """entry point for the experiment — routes to day 1 or day 2 flow based on the GUI selection"""
+        if day == '1':
             self._first_day()
-        elif day == 2:
+        elif day == '2':
             self._second_day()
 
     def _first_day(self):
-        """run the experiment:
-            1. set the screen and psychopy window to experiment
-            2. call first stage
-            3. call second stage"""
+        """run the full first day of the experiment:
+            1. general settings (hide mouse)
+            2. welcome instruction
+            3. first stage - functional localizer
+            4. second stage - binding learning + test phase (5 blocks)
+            5. save unified combined CSV
+            6. third stage - partial retrieval test
+            7. goodbye instruction"""
         self._general_setting()
         show_instruction(win=self.win, instruction=Instruction.WELLCOME)
         self._first_stage()
@@ -49,9 +55,14 @@ class BindingTask:
         show_instruction(win=self.win, instruction=Instruction.GOODBYE, time=10)
 
     def _second_day(self):
-        """run the experiment:"""
+        """run the second day of the experiment:
+            1. init SecondDayTask with objects from the partial retrieval CSV
+            2. run examples
+            3. run all trials
+            4. save results"""
         second_day = SecondDayTask(win=self.win, parallel_port=self.parallel_port,
-                                   categories=Features.ALL_CATEGORIES, subject_id=subject)
+                                   categories=Features.ALL_CATEGORIES, subject_id=self.subject_id)
+        second_day.run_example()
         second_day.run()
         second_day.save_subject_answer(time=self.time)
 
@@ -59,7 +70,6 @@ class BindingTask:
     def _general_setting():
         """set setting for experiment:
             1. disappear the mouse"""
-
         event.Mouse(visible=False)
 
     def _first_stage(self):
@@ -68,9 +78,10 @@ class BindingTask:
             2. init and call run func of FunctionalLocalizer"""
 
         show_instruction(win=self.win, instruction=Instruction.FIRST_PHASE_INSTRUCTION)
-        functional_localizer = FunctionalLocalizer(categories=Features.ALL_CATEGORIES, win=self.win, time=self.time,
+        functional_localizer = FunctionalLocalizer(categories=Features.ALL_CATEGORIES, win=self.win,
                                                    parallel_port=self.parallel_port, subject_id=self.subject_id)
         functional_localizer.run()
+        functional_localizer.save_results(time=self.time)
 
     def _second_stage(self):
         """the second part of the experiment:
@@ -98,11 +109,18 @@ class BindingTask:
         return binding, test
 
     def _third_stage(self):
-        """the third part of the experiment:"""
+        """the third part of the experiment:
+            1. show instruction
+            2. init PartialRetrivalTest with only the correctly retrieved objects from the test phase
+            3. run examples
+            4. run all trials
+            5. save results"""
         show_instruction(win=self.win, instruction = Instruction.PARTIAL_RETRIVAL)
         partial_retrival = PartialRetrivalTest(win=self.win, parallel_port=self.parallel_port,
                                                categories=Features.ALL_CATEGORIES, subject_id=self.subject_id)
+        partial_retrival.run_example()
         partial_retrival.run()
+        partial_retrival.save_subject_answer(time=self.time)
 
     def _block_learning_and_test(self, binding: BindingLearning, test: TestPhase, block: int):
         """run one block of the second stage:
@@ -147,9 +165,9 @@ class BindingTask:
                    closet: ....}"""
         test_by_object = {}
         for trial_key, trial_data in test.subject_answers.items():
-            test_times = trial_data.get('trial_times', {})
+            test_times = trial_data.get(StringEnums.TRAIL_TIMES, {})
             for obj, answers in trial_data.items():
-                if obj != 'trial_times':
+                if obj != StringEnums.TRAIL_TIMES:
                     test_by_object[obj] = {'trial_key': trial_key, 'answers': answers, 'times': test_times}
         return test_by_object
 

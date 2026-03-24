@@ -4,6 +4,7 @@ class TaskManage:
     NUMBER_OF_TRIALS_PER_FEATURE = 90
     NUMBER_OF_BLOCKS = 5
     NUMBER_OF_BINDING_TRIALS = 45
+    DAYS_OF_EXPERIMENTS = [1, 2]
 
 
 class Paths:
@@ -37,8 +38,6 @@ class StringEnums:
     SUBJECT = 'subject'
     MINUTE_FORMAT = "%m-%d-%Y_%H-%M"
     MILI_SEC_FORMAT = "%Y-%m-%d_%H-%M-%S.%f"
-    TRUE = "נכון"
-    WRONG = "לא נכון"
     RIGHT = "right"
     LEFT = "left"
     UP = "up"
@@ -52,6 +51,7 @@ class StringEnums:
     OBJECTS = "objects"
     BLOCK = "block"
     RETRIVAL_SUCCESS = "retrival_success"
+    BOTH_CORRECT = "both_correct"
     RETRIVAL_REPORT_COLOR = "retrival_report_color"
     RETRIVAL_REPORT_SCENE = "retrival_report_scene"
     TEXT = "text"
@@ -59,6 +59,9 @@ class StringEnums:
     LOCATION = "location"
     IS_REMEMBER = "is_remember"
     PROBE = "probe"
+    SUBJECT_ID = "subject_id"
+    DAY = "day"
+    EXPERIMENT_TITLE = "remember_experiment"
 
 class Features:
     OBJECT = "object"
@@ -133,7 +136,8 @@ class HebrewEnums:
     COLOR = 'צבע'
     SCENE = 'סצנה'
     BOTH = 'צבע וסצנה'
-
+    TRUE = "נכון"
+    WRONG = "לא נכון"
     REMEMBER = "זוכר"
     NOT_REMEMBER = "לא זוכר"
 
@@ -268,6 +272,7 @@ class BreakGameEnums:
     CHANGE_INTERVAL = 10  # seconds
     BASE_BRIGHTNESS = 0.5
     TRIAL_CHANGE = 0.2
+    ANSWER_KEY_LIST = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
 
 
 class BindingAndTestEnums:
@@ -300,6 +305,13 @@ class BindingAndTestEnums:
             StringEnums.LOCATION: (0, -0.45)
         },
     }
+
+    ATTENTION_QUESTION_OPTIONS = {
+        StringEnums.RIGHT: {StringEnums.TEXT: HebrewEnums.TRUE,  StringEnums.LOCATION: (0.5, -0.4)},
+        StringEnums.LEFT:  {StringEnums.TEXT: HebrewEnums.WRONG, StringEnums.LOCATION: (-0.5, -0.4)},
+    }
+
+    FEATURE_QUESTION_POSITIONS = [(0, 0.45), (-0.45, 0), (0.45, 0)]
 
     RETRIVAL_OPTION_BONUS = {
         StringEnums.LEFT: {

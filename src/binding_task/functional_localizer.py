@@ -6,34 +6,29 @@ import pandas as pd
 import psychopy
 from psychopy import visual, core, event, parallel
 from src.binding_task.enums.Enums import StringEnums, ParallelPortEnums, Features, Instruction, TimeAttribute, \
-    HebrewEnums, Paths, TaskManage
+    HebrewEnums, Paths, TaskManage, BindingAndTestEnums
 from src.binding_task.utils import shuffle_trials, show_nothing, show_fixation, show_instruction, send_to_parallel_port
-
-"""
-IMPORTANT: the categories input to the builder is what will determine what categories will be
-            and the features are determine by the dict Features.CATEGORY_TO_FEATURES
-"""
 
 class FunctionalLocalizer:
 
     def __init__(self, categories: list, win: psychopy.visual.window.Window, parallel_port: parallel.ParallelPort,
-                 subject_id: str, time: str) -> None:
-        """input: categories: list of the categories show in the functional localizer
-                  win: window of psychopy.visual.window.Window to show all the features on it.
-                  parallel_port: parallel port of psychopy.parallel.ParallelPort that will send all the pulses
-                  subject_id: id of the subject of the trial
-                  time: time of the start of the experiment
-            1. save as the attribute of the class all the inputs
-            2. init the correction score of the attention questions
-            3. create dict between the categories given as input to theirs features
-            4. create all the trials of the functional localizer, multiply the feature by the const
-               NUMBER_OF_TRIALS_PER_FEATURE and shuffle those trials
-            5. create dict between features to theirs image path"""
+                 subject_id: str) -> None:
+        """*** IMPORTANT: the categories input determines what categories will be shown.
+                          features are determined by Features.CATEGORY_TO_FEATURES ***
+
+            input: categories: list of the categories to show in the functional localizer
+                   win: psychopy window to display stimuli on
+                   parallel_port: psychopy parallel port for sending EEG triggers
+                   subject_id: id of the subject
+            1. save all inputs as class attributes
+            2. init correctness_score list for storing attention question results
+            3. build category_to_features dict from the given categories
+            4. build all_trials by repeating each feature NUMBER_OF_TRIALS_PER_FEATURE times and shuffling
+            5. build feature_to_image_file dict mapping each feature to its image path"""
 
         self.win = win
         self.parallel_port = parallel_port
         self.subject_id = subject_id
-        self.time = time
         self.correctness_score = []
 
         self.category_to_features = {category: Features.CATEGORY_TO_FEATURES[category] for category in categories}
@@ -45,26 +40,17 @@ class FunctionalLocalizer:
     def run(self):
         """run the functional localizer:
             1. run the examples
-            2. run all the trials and for each trial:
-                a. show features
-                b. show attention question
-                c. give 1-3 seconds break to next feature
-                d. give break each 50 features
-            3. save the attention questions results"""
+            2. send START_FUNCTIONAL_LOCALIZER trigger
+            3. run all trials
+            4. show a rest break instruction every 50 trials"""
 
         self._run_examples()
         send_to_parallel_port(parallel_port=self.parallel_port,pulse_number=ParallelPortEnums.START_FUNCTIONAL_LOCALIZER)
 
         for trial_index, trial_feature in enumerate(self.all_trials):
-            trial_times = {}
-            self._fixation_and_show_feature(trial_feature=trial_feature, trial_times=trial_times)
-            self._attention_question(trial_index=trial_index, trial_feature=trial_feature, trial_times=trial_times)
-            self._temp_save(trial=trial_index)
-            show_nothing(win=self.win, min_time=1.0, max_time=3.0)
+            self._run_trial(trial_index=trial_index, trial_feature=trial_feature)
             if (trial_index + 1) % 50 == 0:
                 show_instruction(win=self.win, instruction=Instruction.BREAK)
-
-        self._save_results()
 
     def _run_examples(self):
         """Run 2 example trials to familiarize the subject with the task."""
@@ -76,12 +62,24 @@ class FunctionalLocalizer:
 
         show_instruction(win=self.win, instruction=Instruction.FINISH_EXAMPLES)
 
+    def _run_trial(self, trial_index: int, trial_feature: str):
+        """run a single trial:
+            1. show fixation and feature image
+            2. show attention question and get subject answer
+            3. temp save
+            4. blank screen for 1-3 seconds"""
+        trial_times = {}
+        self._fixation_and_show_feature(trial_feature=trial_feature, trial_times=trial_times)
+        self._attention_question(trial_index=trial_index, trial_feature=trial_feature, trial_times=trial_times)
+        self._temp_save(trial=trial_index)
+        show_nothing(win=self.win, min_time=1.0, max_time=3.0)
+
     def _fixation_and_show_feature(self, trial_feature: str, trial_times: dict, is_example: bool = False):
-        """show the feature in 1 trial:
+        """show fixation cross then feature image with blank screens between:
             1. show fixation for 1 second
-            2. show nothing for 1 to 2 seconds
-            3. show the feature for 1 seconds
-            4. give break for 1 to 2 features"""
+            2. blank screen for 1 to 2 seconds
+            3. show the feature image for 1 second
+            4. blank screen for 1 to 2 seconds"""
         show_fixation(win=self.win, min_time=1.0, max_time=1.0)
         show_nothing(win=self.win, min_time=1.0, max_time=2.0)
         self._show_feature(trial_feature=trial_feature, trial_times=trial_times, is_example=is_example)
@@ -104,11 +102,12 @@ class FunctionalLocalizer:
             trial_times[TimeAttribute.FEATURE_DISAPPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
             send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.FEATURE_STOP_TO_PULSE_CODE[trial_feature])
 
-    def _attention_question(self, trial_index: int, trial_feature: str, trial_times: dict = None):
-        """ 1. flip a coin for true or false word
-            2. get the word by the flip results.
-            3. show the attention question.
-            4. received the answer from subject and update the correctness score"""
+    def _attention_question(self, trial_index: int, trial_feature: str, trial_times: dict):
+        """run the attention question for a single trial:
+            1. randomly decide whether to show a true or false word
+            2. pick the word based on the decision
+            3. display the attention question screen
+            4. get subject answer and save the result to correctness_score"""
         is_true = random.choice([True, False])
         word_question = self._get_word_question(is_true=is_true, trial_feature=trial_feature)
         self._show_attention_question(word_question=word_question, trial_times=trial_times)
@@ -130,13 +129,16 @@ class FunctionalLocalizer:
         return word_question
 
     def _show_attention_question(self, word_question: str, trial_times: dict, is_example: bool = False)-> None:
-        """show the attention question:
-            1. create the word and the option to choose
-            2. show the subject"""
-        text = visual.TextStim(self.win, text=HebrewEnums.TRANSLATE.get(word_question), font=StringEnums.ARIAL_FONT, languageStyle='rtl')
-        true_text = visual.TextStim(self.win, text=StringEnums.TRUE, pos=(0.5, -0.4), font=StringEnums.ARIAL_FONT, languageStyle='rtl')
-        false_text = visual.TextStim(self.win, text=StringEnums.WRONG, pos=(-0.5, -0.4), font=StringEnums.ARIAL_FONT, languageStyle='rtl')
-        for stim in [text, true_text, false_text]:
+        """display the attention question screen:
+            - center: the word to judge (translated to Hebrew)
+            - bottom-right: correct option (נכון)
+            - bottom-left: incorrect option (לא נכון)
+            records QUESTION_APPEAR timestamp and sends SHOW_ATTENTION_QUESTION trigger"""
+        stims = [visual.TextStim(self.win, text=HebrewEnums.TRANSLATE.get(word_question), font=StringEnums.ARIAL_FONT, languageStyle='rtl')]
+        for option in BindingAndTestEnums.ATTENTION_QUESTION_OPTIONS.values():
+            stims.append(visual.TextStim(self.win, text=option[StringEnums.TEXT], pos=option[StringEnums.LOCATION],
+                                         font=StringEnums.ARIAL_FONT, languageStyle='rtl'))
+        for stim in stims:
             stim.draw()
 
         if not is_example:
@@ -145,7 +147,12 @@ class FunctionalLocalizer:
         self.win.flip()
 
     def _get_subject_answer(self, is_true: bool, trial_times: dict, is_example: bool = False)-> tuple:
-        """wait for subject answer and check if correct"""
+        """wait for subject to press right (correct) or left (incorrect) and evaluate the answer:
+            - right key = subject says the word matches the image
+            - left key  = subject says the word does not match the image
+            records ANSWER_TIME timestamp and sends ANSWER_ATTENTION_QUESTION trigger
+            if wrong: shows a mistake instruction for 3 seconds
+            output: (is_right: bool, user_answer: str)"""
 
         user_answer = event.waitKeys(keyList=StringEnums.KEY_OPTIONS_FUNCTIONAL_LOCALIZER)[0]
         if not is_example:
@@ -160,10 +167,11 @@ class FunctionalLocalizer:
 
         return is_right, user_answer
 
-    def _update_subject_score(self, trial_feature: str, is_right: bool, word_question: str, user_answer: str, trial_index: int, trial_times: dict = None):
+    def _update_subject_score(self, trial_feature: str, is_right: bool, word_question: str, user_answer: str, trial_index: int, trial_times: dict):
         """append trial data to correctness_score list"""
-        trial_data = {StringEnums.FEATURE: trial_feature, StringEnums.WORD_QUESTION: word_question, StringEnums.USER_ANSWER: user_answer,
-                      StringEnums.IS_RIGHT: is_right, StringEnums.TRIAL_INDEX: trial_index, StringEnums.TRAIL_TIMES: trial_times or {}}
+        trial_data = {StringEnums.FEATURE: trial_feature, StringEnums.WORD_QUESTION: word_question,
+                      StringEnums.USER_ANSWER: user_answer, StringEnums.IS_RIGHT: is_right,
+                      StringEnums.TRIAL_INDEX: trial_index, StringEnums.TRAIL_TIMES: trial_times}
         self.correctness_score.append(trial_data)
 
     def _temp_save(self, trial: int):
@@ -178,25 +186,25 @@ class FunctionalLocalizer:
         answer_df = self.convert_answer_to_df()
         answer_df.to_csv(f'{temp_save_path}functional_localizer_trial_{trial}_{curr_time}.csv')
 
-    def _save_results(self):
+    def save_results(self, time):
         """save final results to JSON and CSV files"""
         functional_localizer_folder = f"{Paths.SAVE_DATA_FOLDER}subject_{self.subject_id}/functional_localizer/"
         Path(functional_localizer_folder).mkdir(parents=True, exist_ok=True)
 
-        with open(f'{functional_localizer_folder}subject_{self.subject_id}_{self.time}_function_localizer_stage.json', 'w') as f:
+        with open(f'{functional_localizer_folder}subject_{self.subject_id}_{time}_function_localizer_stage.json', 'w') as f:
             json.dump(self.correctness_score, f)
 
         answer_df = self.convert_answer_to_df()
-        answer_df.to_csv(f'{functional_localizer_folder}subject_{self.subject_id}_{self.time}_function_localizer_stage.csv')
+        answer_df.to_csv(f'{functional_localizer_folder}subject_{self.subject_id}_{time}_function_localizer_stage.csv')
 
     def convert_answer_to_df(self):
         """convert correctness_score list to pandas DataFrame with one row per trial"""
         rows = []
-        for trial_index, trial_data in enumerate(self.correctness_score):
+        for trial_data in self.correctness_score:
             trial_times = trial_data.get(StringEnums.TRAIL_TIMES, {})
             row = {
                 StringEnums.SUBJECT: self.subject_id,
-                StringEnums.TRIAL_INDEX: trial_index,
+                StringEnums.TRIAL_INDEX: trial_data[StringEnums.TRIAL_INDEX],
                 StringEnums.FEATURE: trial_data[StringEnums.FEATURE],
                 StringEnums.WORD_QUESTION: trial_data[StringEnums.WORD_QUESTION],
                 StringEnums.USER_ANSWER: trial_data[StringEnums.USER_ANSWER],

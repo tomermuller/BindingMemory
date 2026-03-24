@@ -37,7 +37,8 @@ class TestPhase:
     def run_block(self, block_index: int):
         """run all test trials in a single block:
             input: block_index: index of the current block
-            1. for each trial in the block:
+            1. send START_TESH_PHASE_BLOCK trigger
+            2. for each trial in the block:
                 a. run the test (show object, ask questions)
                 b. write subject answers to self.subject_answers
                 c. save temporary backup"""
@@ -55,8 +56,12 @@ class TestPhase:
                    trial_times: dict to store timing data
                    is_example: if True, skip EEG triggers
             output: dict of subject answers {category: answer}
-            1. show object image for 3 seconds
-            3. for each category (randomized order), ask subject to choose the feature"""
+            1. show object image for 2 seconds
+            2. show retrieval prompt (subject presses key when they remember, or times out after 3s)
+            3. blank screen for 0.5 seconds
+            4. ask subject to report what they remember (nothing / color / scene / both)
+            5. blank screen for 0.5 seconds
+            6. for each reported category (randomized order), ask subject to choose the feature"""
         trial_answers = {}
 
         self._show_object(image_path=image_path, trial_times=trial_times, is_example=is_example)
@@ -73,7 +78,7 @@ class TestPhase:
         return trial_answers
 
     def _show_object(self, image_path: Path, trial_times: dict, is_example: bool = False):
-        """display the object image on screen for 3 seconds and record timing, after that show nothing for 3 seconds"""
+        """display the object image on screen for 2 seconds, record OBJECT_APPEAR timestamp, and send SHOW_OBJECT_IN_TEST_TRIAL trigger"""
         img = visual.ImageStim(self.win, image=image_path, size=(0.4, 0.4), pos=(0, 0))
         img.draw()
 
@@ -111,7 +116,7 @@ class TestPhase:
                    [Features.COLORS, Features.SCENES], or [] for nothing)"""
 
         for key, option in BindingAndTestEnums.RETRIVAL_OPTION.items():
-            visual.TextStim(self.win, text=option["text"], pos=option["location"], height=0.1,
+            visual.TextStim(self.win, text=option[StringEnums.TEXT], pos=option[StringEnums.LOCATION], height=0.1,
                             languageStyle='rtl', font=StringEnums.ARIAL_FONT).draw()
 
         if not is_example:
@@ -125,10 +130,10 @@ class TestPhase:
             trial_times[TimeAttribute.RETRIVAL_REPORT_TIME] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
             send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.ANSWER_RETRIVAL_QUESTION)
 
-        trial_answers[StringEnums.RETRIVAL_REPORT_COLOR] = Features.COLORS in BindingAndTestEnums.RETRIVAL_OPTION[remember_choose]["list"]
-        trial_answers[StringEnums.RETRIVAL_REPORT_SCENE] = Features.SCENES in BindingAndTestEnums.RETRIVAL_OPTION[remember_choose]["list"]
+        trial_answers[StringEnums.RETRIVAL_REPORT_COLOR] = Features.COLORS in BindingAndTestEnums.RETRIVAL_OPTION[remember_choose][StringEnums.LIST]
+        trial_answers[StringEnums.RETRIVAL_REPORT_SCENE] = Features.SCENES in BindingAndTestEnums.RETRIVAL_OPTION[remember_choose][StringEnums.LIST]
 
-        return BindingAndTestEnums.RETRIVAL_OPTION[remember_choose]["list"]
+        return BindingAndTestEnums.RETRIVAL_OPTION[remember_choose][StringEnums.LIST]
 
     def _show_question(self, category: str, trial_times: dict, is_example: bool = False):
         """ask subject to choose the correct feature for a category:
@@ -147,7 +152,7 @@ class TestPhase:
 
     def _show_words_arrow_locations(self, words: list, trial_times: dict, category: str, is_example: bool = False):
         """display feature words at arrow key positions (up, left, right) and record timing"""
-        positions = [(0, 0.45), (-0.45, 0), (0.45, 0)]
+        positions = BindingAndTestEnums.FEATURE_QUESTION_POSITIONS
         texts = [visual.TextStim(self.win, text=HebrewEnums.TRANSLATE.get(word), pos=pos, height=0.1,
                                  languageStyle="rtl", font=StringEnums.ARIAL_FONT)
                  for word, pos in zip(words, positions)]
@@ -166,8 +171,8 @@ class TestPhase:
         """wait for subject to press arrow key and return the corresponding feature answer"""
         keyboard_answer = event.waitKeys(keyList=list(BindingAndTestEnums.ARROW_TO_LOCATION.keys()))[0]
 
-        trial_times[f'{category}_{TimeAttribute.ANSWER_TIME}'] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
         if not is_example:
+            trial_times[f'{category}_{TimeAttribute.ANSWER_TIME}'] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
             send_to_parallel_port(parallel_port=self.parallel_port,
                                   pulse_number=ParallelPortEnums.CATEGORY_QUESTION_ANSWER_TO_PULSE_CODE[category])
 
