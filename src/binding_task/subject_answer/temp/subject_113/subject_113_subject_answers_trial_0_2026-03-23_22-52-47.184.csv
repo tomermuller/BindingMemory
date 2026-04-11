@@ -1,2 +1,0 @@
-,subject,trial,object,colors,scenes,retrival_success,retrival_report_color,retrival_report_scene,object_appear,object_disappear,retrival_time,retrival_question_appear,retrival_report_time,colors_question_appear,colors_answer_time,scenes_question_appear,scenes_answer_time
-0,113,trial_1,bulb,green,bathroom,False,True,True,2026-03-23_22-52-32.819,2026-03-23_22-52-34.833,2026-03-23_22-52-37.847,2026-03-23_22-52-38.369,2026-03-23_22-52-39.771,2026-03-23_22-52-40.287,2026-03-23_22-52-41.947,2026-03-23_22-52-43.964,2026-03-23_22-52-45.172

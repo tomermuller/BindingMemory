@@ -55,22 +55,23 @@ class PartialRetrivalTest(TestPhase):
             3. show object image for 2 seconds
             4. show retrieval prompt (subject presses key when they remember, or times out after 3s)
             5. blank screen for 0.5 seconds
-            6. ask subject whether they remember (remember / don't remember)
-            7. if remembered: ask subject to choose the feature for the probe category"""
+            6. if no click: automatically move to next trial
+            7. if clicked: treat as remembered and ask subject to choose the feature for the probe category"""
         retrival_category = random.choice(self.categories)
         trial_answers = {StringEnums.PROBE: retrival_category}
 
         self._show_probe(retrival_category=retrival_category, trial_times=trial_times, is_example=is_example)
+        show_nothing(win=self.win, min_time=0.3, max_time=0.3)
         self._show_object(image_path=image_path, trial_times=trial_times, is_example=is_example)
         self._subject_retrival(trial_times=trial_times, trial_answers=trial_answers, is_example=is_example)
         show_nothing(win=self.win, min_time=0.5, max_time=0.5)
 
-        is_remember = self._subject_report_retrival_success(trial_times=trial_times, trial_answers=trial_answers,
-                                                            is_example=is_example)
-        if is_remember:
-            trial_answers[retrival_category] = self._show_question(category=retrival_category,
-                                                                   trial_times=trial_times, is_example=is_example)
+        if not trial_answers.get(StringEnums.RETRIVAL_SUCCESS):
+            return trial_answers
 
+        trial_answers[StringEnums.IS_REMEMBER] = True
+        trial_answers[retrival_category] = self._show_question(category=retrival_category,
+                                                               trial_times=trial_times, is_example=is_example)
         return trial_answers
 
     def _show_probe(self, retrival_category: str, trial_times: dict, is_example: bool = False):
@@ -101,8 +102,8 @@ class PartialRetrivalTest(TestPhase):
             saves IS_REMEMBER to trial_answers.
             output: True if subject pressed remember, False otherwise"""
         for key, option in BindingAndTestEnums.RETRIVAL_OPTION_BONUS.items():
-            visual.TextStim(self.win, text=option[StringEnums.TEXT], pos=option[StringEnums.LOCATION], height=0.1,
-                            languageStyle='rtl', font=StringEnums.ARIAL_FONT).draw()
+            visual.TextStim(self.win, text=option[StringEnums.TEXT], pos=option[StringEnums.LOCATION],
+                            height=BindingAndTestEnums.TEXT_HEIGHT, languageStyle='rtl', font=StringEnums.ARIAL_FONT).draw()
 
         if not is_example:
             trial_times[TimeAttribute.RETRIVAL_QUESTION_APPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]

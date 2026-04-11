@@ -1,10 +1,9 @@
 from pathlib import Path
 
 class TaskManage:
-    NUMBER_OF_TRIALS_PER_FEATURE = 90
+    NUMBER_OF_TRIALS_PER_FEATURE = 70
     NUMBER_OF_BLOCKS = 5
     NUMBER_OF_BINDING_TRIALS = 45
-    DAYS_OF_EXPERIMENTS = [1, 2]
 
 
 class Paths:
@@ -62,6 +61,8 @@ class StringEnums:
     SUBJECT_ID = "subject_id"
     DAY = "day"
     EXPERIMENT_TITLE = "remember_experiment"
+    FIVE_MINUTES = 300
+
 
 class Features:
     OBJECT = "object"
@@ -134,21 +135,23 @@ class HebrewEnums:
 
     NOTHING = 'כלום'
     COLOR = 'צבע'
-    SCENE = 'סצנה'
-    BOTH = 'צבע וסצנה'
+    SCENE = 'חדר'
+    BOTH = 'צבע וחדר'
     TRUE = "נכון"
     WRONG = "לא נכון"
     REMEMBER = "זוכר"
     NOT_REMEMBER = "לא זוכר"
 
+
 class ParallelPortEnums:
 
     # general
-    START_FUNCTIONAL_LOCALIZER = 1
-    START_BINDING_LEARNING_BLOCK = 2
-    START_TESH_PHASE_BLOCK = 3
-    START_BREAK_GAME = 4
-    START_PARTIAL_RETRIVAL = 5
+    START_RECORD_BASELINE = 1
+    START_FUNCTIONAL_LOCALIZER = 2
+    START_BINDING_LEARNING_BLOCK = 3
+    START_TESH_PHASE_BLOCK = 4
+    START_BREAK_GAME = 5
+    START_PARTIAL_RETRIVAL = 6
 
     # functional localizer parallel port numbers
     SHOW_RED = 11
@@ -217,37 +220,53 @@ class ParallelPortEnums:
 
 class Instruction:
     WELLCOME = ("ברוך הבא/ה לניסוי!\n"
-                "המחקר מורכב מ2 שלבים\n"
-                "בשלב הראשון תראה/י תמונות חוזרות על עצמן ותצטרך/י לענות על שאלה אחרי כל תמונה.\n"
-                "בשלב השני תראה/י אובייקטים בצבעים ומקומות ותצטרך/י לזכור איזה אובייקט הופיעו היכן ומהו צבעם.")
+                "הניסוי מורכב מ3 שלבים:\n\n"
+                "1.שלב התמונות החוזרות- צבעים וחדרים.\n"
+                "2.שלב הלמידה והמבחן.\n"
+                "3.שלב המבחן החלקי.\n\n"
+                "(אנא לחץ/י על כל כפתור כדי להתחיל את הדוגמאות)")
 
-    FIRST_PHASE_INSTRUCTION = ("\nבשלב הראשון תראה/י תמונות החוזרות על עצמן."
-                               "\nאחרי כל תמונה תופיע מילה"
-                               "\n ותצטרך/י ללחוץ על המקש החץ שיתאר האם המילה מתארת את התמונה או לא."
-                               "\nאך לפני הנה 2 דוגמאות:"
+    BASELINE = ("אך קודם, ב5 דקות הקרובות אנחנו נקליט את גלי המוח שלך במצב מנוחה\n"
+                "אנא השתדל להתמקד ב + שיופיע על המסך. לאחר מכן יתחיל הניסוי\n\n"
+                "(אנא לחץ/י על כל כפתור כדי להתחיל את הדוגמאות)")
+
+
+    FIRST_PHASE_INSTRUCTION = ("\n\nבשלב הראשון תראה/י תמונות החוזרות על עצמן."
+                               "\n\nאחרי כל תמונה תופיע מילה."
+                               "\n\n באמצעות מקשי החצים במקלדת תצטרך לבחור האם המילה מתארת את התמונה או לא."
+                               "\n\nאך לפני הנה 2 דוגמאות:"
                                "(אנא לחץ/י על כל כפתור כדי להתחיל את הדוגמאות)")
+
+    SECOND_PHASE_INSTRUCTION = ("כעת השלב השני מחולק לכ 5 בלוקים. כל בלוק מורכב מ2 חלקים שביניהם משחקון.\n"
+                                "תחילה תראה אובייקטים בצבע בחדר ואחר כך תצטרך לענות באיזה צבע וחדר הופיע כל אובייקט.\n"
+                                "אך לפני הנה 2 דוגמאות:\n"
+                                "(אנא לחץ/י על כל כפתור כדי להתחיל את הדוגמאות)")
+
+    THIRD_STAGE_INSTRUCTION = ("ברוך הבא לחלק השלישי בניסוי!\n"
+                               "בחלק הזה בתחילת כל סיבוב יופיע סימון של צבע או חדר\n"
+                               "תצטרכ/י לענות רק עבור הסימון שיופיע.\n"
+                               "אך לפני הנה 2 דוגמאות:\n"
+                               "(אנא לחץ/י על כל כפתור כדי להתחיל את הדוגמאות)")
+
+    BREAK_GAME_INSTRUCTION = ("להלן משחקון של דקה וחצי: המלבן המשתנה.\n"
+                              "כל כמה שניות המלבן יהפוך להיות כהה או בהיר יותר ויחזור למצב ההתחלה.\n"
+                              "עליך לספור כמה פעמים המלבן הופך להיות בהיר יותר מאשר מצבו בהתחלה.\n"
+                              "אנא לחץ/י על כל כפתור כדי להתחיל.")
+
     MISTAKE = "טעות! שים לב עליך לבחור האם המילה מתארת את התמונה שראית"
 
     FIRST_PHASE_END = ("כל הכבוד! סיימת את השלב הראשון בניסוי.\n"
                        "לחץ/י על כל כפתור כדי להמשיך לשלב הבא. ")
 
-    SECOND_PHASE_INSTRUCTION = ("כעת בשלב השני יופיעו לך 5 בלוקים. כל בלוק מורכב מ2 חלקים שביניהם משחקון.\n"
-                                "בחלק הראשון תראה/י אובייקטים בצבע בסצנה ותצטרך/י לזכור אותם.\n"
-                                "בחלק השני תצטרך/י להתאים לכל אובייקט באיזה צבע ובאיזו סצנה הוא הופיע.\n"
-                                "אך לפני הנה 2 דוגמאות:\n"
-                                "(אנא לחץ/י על כל כפתור כדי להתחיל את הדוגמאות)")
+    SECOND_PHASE_END = ("כל הכבוד! סיימת את השלב השני בניסוי.\n"
+                        "לחץ/י על כל כפתור כדי להמשיך לשלב הבא. ")
 
     START_X_BLOCK = "לחץ על כל מקש על מנת להתחיל את הבלוק ה "
 
-    DIFFICULT_QUESTION = ("עד כמה קשה היה לך לזכור את הצבע והמיקום של האובייקט?\n"
-                         "1 (קל) – 5 (קשה)")
+    DIFFICULT_QUESTION = ("עד כמה קשה היה לך לזכור את הצבע והחדר של האובייקט?\n"
+                         "5 (קשה) – 1 (קל)")
 
-    BREAK_GAME_INSTRUCTION = ("להלן משחקון של דקה וחצי: הריבוע המשתנה.\n"
-                              "כל כמה שניות הריבוע יהפוך להיות כהה או בהיר יותר ויחזור למצב ההתחלה.\n"
-                              "עליך לספור כמה פעמים הריבוע הופך להיות בהיר יותר מאשר מצבו בהתחלה.\n"
-                              "אנא לחץ/י על כל כפתור כדי להתחיל.")
-
-    BREAK_GAME_QUESTION = "כמה פעמים הקיבוע הפך לבהיר יותר?"
+    BREAK_GAME_QUESTION = "כמה פעמים המלבן הפך לבהיר יותר?"
 
     BREAK_GAME_FINISH = ("סיימת את המשחקון. ברוך הבא לשלב המבחן.\n"
                          "לחץ/י על כל כפתור כדי להתחיל")
@@ -256,13 +275,6 @@ class Instruction:
                        "אנא לחץ/י על כל כפתור כדי להתחיל בניסוי.")
 
     BREAK = "הפסקה!\n אנא לחץ/י על כל כפתור כאשר אתה מוכן לחזור לניסוי."
-
-    TRY_TO_RETRIVAL =  "לחץ על כל מקש במידה ונזכרת"
-
-    PARTIAL_RETRIVAL = ("ברוך הבא לחלק השלישי בניסוי!\n"
-                        "בחלק הזה לפני כל תמונה יופיע סימון של צבע או סצנה\n"
-                        "תצטרכ/י לענות רק עבור הסימון שיופיע.\n"
-                        "אנא לחץ/י על כל כפתור כדי להתחיל בניסוי.")
 
     GOODBYE = "תודה רבה על השתתפותך בניסוי. נא לקרוא למריץ הניסוי. ניתן לשאול אותו/ה שאלות על הניסויֿ"
 
@@ -274,8 +286,9 @@ class BreakGameEnums:
     TRIAL_CHANGE = 0.2
     ANSWER_KEY_LIST = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
 
-
 class BindingAndTestEnums:
+    TEXT_HEIGHT = 0.07
+
     BINDING_EXAMPLES  = zip([Path(Paths.OBJECT_EXAMPLE_FORK), Path(Paths.OBJECT_EXAMPLE_ROBOT)],
                             [Features.COLOR_TO_RGBA[Features.YELLOW], Features.COLOR_TO_RGBA[Features.RED]],
                             [Features.SCENE_TO_IMAGE[Features.KITCHEN], Features.SCENE_TO_IMAGE[Features.LIVING_ROOM]])
@@ -284,11 +297,6 @@ class BindingAndTestEnums:
     ARROW_TO_LOCATION = {StringEnums.UP: 0, StringEnums.LEFT: 1, StringEnums.RIGHT: 2}
 
     RETRIVAL_OPTION = {
-        StringEnums.UP: {
-            StringEnums.TEXT: HebrewEnums.NOTHING,
-            StringEnums.LIST: [],
-            StringEnums.LOCATION: (0, 0.45)
-        },
         StringEnums.LEFT: {
             StringEnums.TEXT: HebrewEnums.COLOR,
             StringEnums.LIST: [Features.COLORS],
@@ -341,6 +349,7 @@ class TimeAttribute:
     RETRIVAL_REPORT_TIME = "retrival_report_time"
     PROBE_APPEAR = "probe_appear"
     PROBE_DISAPPEAR = "probe_disappear"
+    START_RETRIVAL_TIME = "start_retrival_time"
 
 
 

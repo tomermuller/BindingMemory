@@ -1,7 +1,8 @@
 from psychopy import visual, core, event, parallel
 import psychopy
 import random
-from src.binding_task.enums.Enums import BreakGameEnums, Instruction, StringEnums, ParallelPortEnums
+from src.binding_task.enums.Enums import BreakGameEnums, Instruction, StringEnums, ParallelPortEnums, \
+    BindingAndTestEnums
 from src.binding_task.utils import show_instruction, send_to_parallel_port
 
 
@@ -48,7 +49,6 @@ class BreakGame:
         self.rect.fillColor = [self.brightness] * 3
         self.rect.draw()
         self.win.flip()
-
         core.wait(0.5)
         self.rect.fillColor = [BreakGameEnums.BASE_BRIGHTNESS] * 3
         self.rect.draw()
@@ -65,8 +65,8 @@ class BreakGame:
 
     def _get_subject_answer_in_break_game(self):
         """ask subject how many times rectangle was brighter"""
-        text = visual.TextStim(self.win, text=Instruction.BREAK_GAME_QUESTION, font=StringEnums.ARIAL_FONT, pos=(0, 0), height=0.03,
-                               languageStyle='rtl', wrapWidth=0.8)
+        text = visual.TextStim(self.win, text=Instruction.BREAK_GAME_QUESTION, font=StringEnums.ARIAL_FONT, pos=(0, 0),
+                               height=BindingAndTestEnums.TEXT_HEIGHT, languageStyle='rtl', wrapWidth=0.8)
         text.draw()
         self.win.flip()
         self.subject_answer = int(event.waitKeys(keyList=BreakGameEnums.ANSWER_KEY_LIST)[0])

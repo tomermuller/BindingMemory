@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import numpy as np
 import pandas as pd
 import psychopy
 from PIL import Image, ImageDraw
@@ -160,12 +161,12 @@ class BindingLearning:
                    color: RGBA tuple to apply to the object
                    scene_image: path to the scene background image
             1. color the object pixels using the given RGBA color
-            2. resize the colored object to 400x300
+            2. resize the colored object to 40% of the scene dimensions
             3. open the scene image and paste the object centered on it
             output: PIL Image (scene with object — caller is responsible for saving)"""
         colored_object = self._color_object(object_image, color)
-        colored_object = colored_object.resize((400, 300))
         scene_image = Image.open(scene_image)
+        colored_object = colored_object.resize((int(scene_image.width * 0.4), int(scene_image.height * 0.4)))
         x = (scene_image.width - colored_object.width) // 2
         y = (scene_image.height - colored_object.height) // 2
 
@@ -174,19 +175,19 @@ class BindingLearning:
 
     @staticmethod
     def _color_object(input_path, color):
-        """recolor all non-black, non-transparent pixels of an object image to the given RGBA color:
-            input: input_path: path to the object PNG
-                   color: RGBA tuple (r, g, b) to apply
-            1. open image and convert to RGBA
-            2. flood-fill background from (0,0) with transparent
-            3. for each pixel: skip transparent and near-black pixels (outlines), recolor the rest
-            output: recolored PIL Image with alpha=210 on colored pixels"""
+        """color the object in the color input:
+            flood-fills background transparent from all 4 corners with a threshold to catch
+            near-white pixels, preserves dark outlines (r,g,b < 50), and colors all remaining
+            pixels with the given color at alpha 210"""
         image = Image.open(input_path).convert('RGBA')
+        width, height = image.size
 
-        ImageDraw.floodfill(image, (0, 0), (0, 0, 0, 0))
+        for corner in [(0, 0), (width - 1, 0), (0, height - 1), (width - 1, height - 1)]:
+            ImageDraw.floodfill(image, corner, (0, 0, 0, 0), thresh=30)
+
         pixels = image.load()
-        for i in range(image.width):
-            for j in range(image.height):
+        for i in range(width):
+            for j in range(height):
                 r, g, b, a = pixels[i, j]
                 if a == 0:
                     continue
