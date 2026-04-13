@@ -1,12 +1,12 @@
 from psychopy import visual, event, parallel, gui
-from src.binding_task.enums.Enums import Features, Instruction, StringEnums, TaskManage, ParallelPortEnums
+from src.binding_task.enums.Enums import Features, Instruction, StringEnums, TaskManage
 from src.binding_task.binding_learning import BindingLearning
 from src.binding_task.functional_localizer import FunctionalLocalizer
 from src.binding_task.partial_retrival_test import PartialRetrivalTest
 from src.binding_task.test_phase import TestPhase
 from src.binding_task.break_game import BreakGame
 from datetime import datetime
-from src.binding_task.utils import show_instruction, show_fixation, send_to_parallel_port
+from src.binding_task.utils import show_instruction
 from pathlib import Path
 import pandas as pd
 
@@ -78,7 +78,7 @@ class BindingTask:
                          objects=binding.objects, subject_id=self.subject_id)
 
         binding.run_examples()
-        test.run_example()
+        test.run_examples()
         show_instruction(win=self.win,instruction=Instruction.FINISH_EXAMPLES)
 
         for block_idx in range(TaskManage.NUMBER_OF_BLOCKS):
@@ -100,7 +100,7 @@ class BindingTask:
         show_instruction(win=self.win, instruction = Instruction.THIRD_STAGE_INSTRUCTION)
         partial_retrival = PartialRetrivalTest(win=self.win, parallel_port=self.parallel_port,
                                                categories=Features.ALL_CATEGORIES, subject_id=self.subject_id)
-        partial_retrival.run_example()
+        partial_retrival.run_examples()
         show_instruction(win=self.win, instruction=Instruction.FINISH_EXAMPLES)
         partial_retrival.run()
         partial_retrival.save_subject_answer(time=self.time)
@@ -112,7 +112,7 @@ class BindingTask:
              3. create and show and break game
              4. run test_phase.run_phase for the tests on the binding"""
 
-        show_instruction(win=self.win, instruction=Instruction.START_X_BLOCK + str(block + 1) + "/5")
+        show_instruction(win=self.win, instruction=(Instruction.START_X_BLOCK + str(block + 1) + "/" + str(TaskManage.NUMBER_OF_BLOCKS)))
         binding.run_block(block_index=block)
         break_game = BreakGame(win=self.win, parallel_port=self.parallel_port)
         break_game.run()

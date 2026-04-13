@@ -6,7 +6,7 @@ import random
 from pathlib import Path
 from datetime import datetime
 from src.binding_task.enums.Enums import Features, BindingAndTestEnums, ParallelPortEnums, Paths, StringEnums, \
-    HebrewEnums, TimeAttribute, Instruction, TaskManage
+    HebrewEnums, TimeAttribute
 from src.binding_task.utils import show_nothing, send_to_parallel_port, shuffle_trials
 
 class TestPhase:
@@ -29,7 +29,7 @@ class TestPhase:
             self.blocks[block_index] = shuffle_trials(items=block_objects, max_consecutive=1)
         self.subject_answers = {}
 
-    def run_example(self):
+    def run_examples(self):
         """run examples for test phase"""
         self.run_test(image_path=Path(Paths.OBJECT_EXAMPLE_FORK), trial_times={}, is_example=True)
         self.run_test(image_path=Path(Paths.OBJECT_EXAMPLE_ROBOT), trial_times={}, is_example=True)
