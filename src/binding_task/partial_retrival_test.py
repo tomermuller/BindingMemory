@@ -28,11 +28,6 @@ class PartialRetrivalTest(TestPhase):
         super().__init__(win=win, parallel_port=parallel_port, categories=categories,
                          objects=[correct_objects], subject_id=subject_id)
 
-    def run_example(self):
-        """run 2 example trials using the fork and robot example objects"""
-        self.run_test(image_path=Path(Paths.OBJECT_EXAMPLE_FORK), trial_times={}, is_example=True)
-        self.run_test(image_path=Path(Paths.OBJECT_EXAMPLE_ROBOT), trial_times={}, is_example=True)
-
     def run(self):
         """run all partial retrieval trials:
             1. send START_PARTIAL_RETRIVAL trigger
