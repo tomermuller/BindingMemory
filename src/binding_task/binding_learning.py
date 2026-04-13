@@ -70,11 +70,13 @@ class BindingLearning:
 
         send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.START_BINDING_LEARNING_BLOCK)
 
-        for trial_index in range(TaskManage.NUMBER_OF_BINDING_TRIALS // TaskManage.NUMBER_OF_BLOCKS):
+        trials_per_block = TaskManage.NUMBER_OF_BINDING_TRIALS // TaskManage.NUMBER_OF_BLOCKS
+        for trial_index in range(trials_per_block):
             trial_times = dict()
             self._show_binding_learning(block_index=block_index, trial_index=trial_index, trial_times=trial_times)
             show_nothing(win=self.win, min_time=1.0, max_time=2.0)
-            self._ask_difficulty_rating(trial_index=trial_index, trial_times=trial_times)
+            trial_num = block_index * trials_per_block + trial_index + 1
+            self._ask_difficulty_rating(trial_num=trial_num, trial_times=trial_times)
             self._temp_save(trial=trial_index)
 
     def _show_binding_learning(self, block_index: int, trial_index: int, trial_times: dict):
@@ -95,13 +97,13 @@ class BindingLearning:
         trial_times[TimeAttribute.FEATURE_DISAPPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
         send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.STOP_BINDING_TRIALS)
 
-    def _ask_difficulty_rating(self, trial_index: int, trial_times: dict):
+    def _ask_difficulty_rating(self, trial_num: int, trial_times: dict):
         """ask the subject to rate how hard it was to remember the object (1=easy, 5=hard):
             1. show difficulty question and record DIFFICULTY_QUESTION_APPEAR timestamp
             2. send SHOW_DIFFICULTY_QUESTION trigger
             3. wait for key press (1-5)
             4. record DIFFICULTY_ANSWER_TIME timestamp and send ANSWER_DIFFICULTY_QUESTION trigger
-            5. save rating to difficulty_ratings"""
+            5. save rating to difficulty_ratings keyed by global trial_num"""
         show_instruction(win=self.win, instruction=Instruction.DIFFICULT_QUESTION, time=0)
         trial_times[TimeAttribute.DIFFICULTY_QUESTION_APPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
         send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.SHOW_DIFFICULTY_QUESTION)
@@ -110,7 +112,7 @@ class BindingLearning:
         trial_times[TimeAttribute.DIFFICULTY_ANSWER_TIME] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
         send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.ANSWER_DIFFICULTY_QUESTION)
 
-        self.difficulty_ratings[trial_index] = int(rating)
+        self.difficulty_ratings[trial_num] = int(rating)
 
     def _show_binding_object(self, block_index: int, trail_index: int, trial_times: dict):
         """display the binding object on screen:

@@ -40,7 +40,6 @@ class BindingTask:
             7. goodbye instruction"""
         self._general_setting()
         show_instruction(win=self.win, instruction=Instruction.WELLCOME)
-        self._record_baseline()
         self._first_stage()
         binding, test = self._second_stage()
         self._save_unified_file_for_all_data(binding=binding, test=test)
@@ -52,11 +51,6 @@ class BindingTask:
         """set setting for experiment:
             1. disappear the mouse"""
         event.Mouse(visible=False)
-
-    def _record_baseline(self):
-        show_instruction(win=self.win, instruction=Instruction.BASELINE)
-        send_to_parallel_port(parallel_port=self.parallel_port,pulse_number=ParallelPortEnums.START_RECORD_BASELINE)
-        show_fixation(win=self.win, min_time=StringEnums.FIVE_MINUTES, max_time=StringEnums.FIVE_MINUTES)
 
     def _first_stage(self):
         """the first part of the experiment:

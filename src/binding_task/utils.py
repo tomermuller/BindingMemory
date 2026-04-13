@@ -41,7 +41,7 @@ def shuffle_trials(items, max_consecutive=2):
             raise ValueError("Cannot arrange items within the max_consecutive constraint — impossible input")
 
         # Safety check: if any item's count exceeds the maximum it could ever occupy
-        # in the remaining slots, we MUST place it now or we'll never fit all of them.
+        # in the remaining slots, we MUST place it now, or we'll never fit all of them.
         # Maximum slots one item can fill in `remaining-1` future positions = floor((remaining-1+1)*k/(k+1))
         # simplified to floor(remaining * k / (k+1)).
         limit = (remaining * max_consecutive) // (max_consecutive + 1)
@@ -109,7 +109,7 @@ def send_to_parallel_port(parallel_port: parallel.ParallelPort, pulse_number):
         1. set data on parallel port (currently commented for testing)
         2. wait 10ms for pulse duration
         3. reset parallel port to 0"""
-    #parallel_port.setData(pulse_number)
-    print(f"pulse_number: {pulse_number}")
+    parallel_port.setData(pulse_number)
+    # print(f"pulse_number: {pulse_number}")
     core.wait(0.01)
-    #parallel_port.setData(0)
+    parallel_port.setData(0)
