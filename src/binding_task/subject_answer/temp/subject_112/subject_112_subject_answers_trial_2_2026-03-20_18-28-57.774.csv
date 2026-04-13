@@ -1,4 +1,0 @@
-,subject,trial,object,colors,scenes,retrival_success,retrival_report_color,retrival_report_scene,object_appear,object_disappear,retrival_time,retrival_report_time,scenes_question_appear,scenes_answer_time,colors_question_appear,colors_answer_time
-0,112,trial_1,man,,,False,False,False,2026-03-20_18-28-31.939,2026-03-20_18-28-33.953,2026-03-20_18-28-36.967,2026-03-20_18-28-40.678,,,,
-1,112,trial_2,candle,,bathroom,True,False,True,2026-03-20_18-28-41.195,2026-03-20_18-28-43.212,2026-03-20_18-28-44.934,2026-03-20_18-28-45.837,2026-03-20_18-28-46.342,2026-03-20_18-28-46.876,,
-2,112,trial_3,ball,red,,True,True,False,2026-03-20_18-28-48.901,2026-03-20_18-28-50.918,2026-03-20_18-28-52.413,2026-03-20_18-28-54.073,,,2026-03-20_18-28-54.579,2026-03-20_18-28-55.761

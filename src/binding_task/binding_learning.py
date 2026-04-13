@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import numpy as np
 import pandas as pd
 import psychopy
 from PIL import Image, ImageDraw
@@ -69,11 +70,13 @@ class BindingLearning:
 
         send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.START_BINDING_LEARNING_BLOCK)
 
-        for trial_index in range(TaskManage.NUMBER_OF_BINDING_TRIALS // TaskManage.NUMBER_OF_BLOCKS):
+        trials_per_block = TaskManage.NUMBER_OF_BINDING_TRIALS // TaskManage.NUMBER_OF_BLOCKS
+        for trial_index in range(trials_per_block):
             trial_times = dict()
             self._show_binding_learning(block_index=block_index, trial_index=trial_index, trial_times=trial_times)
             show_nothing(win=self.win, min_time=1.0, max_time=2.0)
-            self._ask_difficulty_rating(trial_index=trial_index, trial_times=trial_times)
+            trial_num = block_index * trials_per_block + trial_index + 1
+            self._ask_difficulty_rating(trial_num=trial_num, trial_times=trial_times)
             self._temp_save(trial=trial_index)
 
     def _show_binding_learning(self, block_index: int, trial_index: int, trial_times: dict):
@@ -94,13 +97,13 @@ class BindingLearning:
         trial_times[TimeAttribute.FEATURE_DISAPPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
         send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.STOP_BINDING_TRIALS)
 
-    def _ask_difficulty_rating(self, trial_index: int, trial_times: dict):
+    def _ask_difficulty_rating(self, trial_num: int, trial_times: dict):
         """ask the subject to rate how hard it was to remember the object (1=easy, 5=hard):
             1. show difficulty question and record DIFFICULTY_QUESTION_APPEAR timestamp
             2. send SHOW_DIFFICULTY_QUESTION trigger
             3. wait for key press (1-5)
             4. record DIFFICULTY_ANSWER_TIME timestamp and send ANSWER_DIFFICULTY_QUESTION trigger
-            5. save rating to difficulty_ratings"""
+            5. save rating to difficulty_ratings keyed by global trial_num"""
         show_instruction(win=self.win, instruction=Instruction.DIFFICULT_QUESTION, time=0)
         trial_times[TimeAttribute.DIFFICULTY_QUESTION_APPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
         send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.SHOW_DIFFICULTY_QUESTION)
@@ -109,7 +112,7 @@ class BindingLearning:
         trial_times[TimeAttribute.DIFFICULTY_ANSWER_TIME] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
         send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.ANSWER_DIFFICULTY_QUESTION)
 
-        self.difficulty_ratings[trial_index] = int(rating)
+        self.difficulty_ratings[trial_num] = int(rating)
 
     def _show_binding_object(self, block_index: int, trail_index: int, trial_times: dict):
         """display the binding object on screen:
@@ -160,12 +163,12 @@ class BindingLearning:
                    color: RGBA tuple to apply to the object
                    scene_image: path to the scene background image
             1. color the object pixels using the given RGBA color
-            2. resize the colored object to 400x300
+            2. resize the colored object to 40% of the scene dimensions
             3. open the scene image and paste the object centered on it
             output: PIL Image (scene with object — caller is responsible for saving)"""
         colored_object = self._color_object(object_image, color)
-        colored_object = colored_object.resize((400, 300))
         scene_image = Image.open(scene_image)
+        colored_object = colored_object.resize((int(scene_image.width * 0.4), int(scene_image.height * 0.4)))
         x = (scene_image.width - colored_object.width) // 2
         y = (scene_image.height - colored_object.height) // 2
 
@@ -174,19 +177,19 @@ class BindingLearning:
 
     @staticmethod
     def _color_object(input_path, color):
-        """recolor all non-black, non-transparent pixels of an object image to the given RGBA color:
-            input: input_path: path to the object PNG
-                   color: RGBA tuple (r, g, b) to apply
-            1. open image and convert to RGBA
-            2. flood-fill background from (0,0) with transparent
-            3. for each pixel: skip transparent and near-black pixels (outlines), recolor the rest
-            output: recolored PIL Image with alpha=210 on colored pixels"""
+        """color the object in the color input:
+            flood-fills background transparent from all 4 corners with a threshold to catch
+            near-white pixels, preserves dark outlines (r,g,b < 50), and colors all remaining
+            pixels with the given color at alpha 210"""
         image = Image.open(input_path).convert('RGBA')
+        width, height = image.size
 
-        ImageDraw.floodfill(image, (0, 0), (0, 0, 0, 0))
+        for corner in [(0, 0), (width - 1, 0), (0, height - 1), (width - 1, height - 1)]:
+            ImageDraw.floodfill(image, corner, (0, 0, 0, 0), thresh=30)
+
         pixels = image.load()
-        for i in range(image.width):
-            for j in range(image.height):
+        for i in range(width):
+            for j in range(height):
                 r, g, b, a = pixels[i, j]
                 if a == 0:
                     continue

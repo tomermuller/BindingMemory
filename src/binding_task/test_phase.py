@@ -59,18 +59,25 @@ class TestPhase:
             1. show object image for 2 seconds
             2. show retrieval prompt (subject presses key when they remember, or times out after 3s)
             3. blank screen for 0.5 seconds
-            4. ask subject to report what they remember (nothing / color / scene / both)
-            5. blank screen for 0.5 seconds
-            6. for each reported category (randomized order), ask subject to choose the feature"""
+            4. if no click: automatically move to next trial
+            5. ask subject to report what they remember (color / scene / both)
+            6. blank screen for 0.5 seconds
+            7. for each reported category (randomized order), ask subject to choose the feature"""
         trial_answers = {}
 
         self._show_object(image_path=image_path, trial_times=trial_times, is_example=is_example)
         self._subject_retrival(trial_times=trial_times, trial_answers=trial_answers, is_example=is_example)
         show_nothing(win=self.win, min_time=0.5, max_time=0.5)
 
+        if not trial_answers.get(StringEnums.RETRIVAL_SUCCESS):
+            return trial_answers
+
         retrival_report_list = self._subject_report_retrival_success(trial_times=trial_times,
                                                                      trial_answers=trial_answers, is_example=is_example)
         show_nothing(win=self.win, min_time=0.5, max_time=0.5)
+
+        if retrival_report_list is not None and len(retrival_report_list) > 0:
+            random.shuffle(retrival_report_list)
 
         for question in retrival_report_list:
             trial_answers[question] = self._show_question(category=question, trial_times=trial_times, is_example=is_example)
@@ -92,12 +99,13 @@ class TestPhase:
         """show blank screen for up to 3 seconds; stops early if subject presses any arrow key.
            saves RETRIVAL_TIME to trial_times.
            returns True if subject pressed a key, False if timed out."""
-        text = visual.TextStim(self.win, text=Instruction.TRY_TO_RETRIVAL, font=StringEnums.ARIAL_FONT, pos=(0, 0), height=0.03,
-                               languageStyle='rtl', wrapWidth=1.8)
+        text = visual.TextStim(self.win, text="+", font=StringEnums.ARIAL_FONT, pos=(0, 0),
+                               height=BindingAndTestEnums.TEXT_HEIGHT, languageStyle='rtl', wrapWidth=1.8)
         text.draw()
 
         if not is_example:
             trial_times[TimeAttribute.OBJECT_DISAPPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
+            trial_times[TimeAttribute.START_RETRIVAL_TIME] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
             send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.START_RETRIVAL_TIME)
 
         self.win.flip()
@@ -108,7 +116,7 @@ class TestPhase:
         trial_answers[StringEnums.RETRIVAL_SUCCESS] = keys is not None
 
     def _subject_report_retrival_success(self, trial_times: dict, trial_answers: dict, is_example: bool = False) -> list:
-        """show 4 options for what the subject remembers (nothing / color / scene / both).
+        """show 3 options for what the subject remembers (color / scene / both).
            options are displayed at arrow key positions:
                up=nothing, left=color, right=scene, down=both
            saves RETRIVAL_REPORT_TIME to trial_times.
@@ -116,8 +124,8 @@ class TestPhase:
                    [Features.COLORS, Features.SCENES], or [] for nothing)"""
 
         for key, option in BindingAndTestEnums.RETRIVAL_OPTION.items():
-            visual.TextStim(self.win, text=option[StringEnums.TEXT], pos=option[StringEnums.LOCATION], height=0.1,
-                            languageStyle='rtl', font=StringEnums.ARIAL_FONT).draw()
+            visual.TextStim(self.win, text=option[StringEnums.TEXT], pos=option[StringEnums.LOCATION],
+                            height=BindingAndTestEnums.TEXT_HEIGHT, languageStyle='rtl', font=StringEnums.ARIAL_FONT).draw()
 
         if not is_example:
             trial_times[TimeAttribute.RETRIVAL_QUESTION_APPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
@@ -147,13 +155,13 @@ class TestPhase:
         random.shuffle(question_answers)
         self._show_words_arrow_locations(words=question_answers, trial_times=trial_times, category=category, is_example=is_example)
         answer = self._subject_choose(question_answers=question_answers, category=category, trial_times=trial_times, is_example=is_example)
-        show_nothing(win=self.win, min_time=2.0, max_time=2.0)
+        show_nothing(win=self.win, min_time=1.0, max_time=1.0)
         return answer
 
     def _show_words_arrow_locations(self, words: list, trial_times: dict, category: str, is_example: bool = False):
         """display feature words at arrow key positions (up, left, right) and record timing"""
         positions = BindingAndTestEnums.FEATURE_QUESTION_POSITIONS
-        texts = [visual.TextStim(self.win, text=HebrewEnums.TRANSLATE.get(word), pos=pos, height=0.1,
+        texts = [visual.TextStim(self.win, text=HebrewEnums.TRANSLATE.get(word), pos=pos, height=BindingAndTestEnums.TEXT_HEIGHT,
                                  languageStyle="rtl", font=StringEnums.ARIAL_FONT)
                  for word, pos in zip(words, positions)]
 

@@ -78,7 +78,7 @@ class FunctionalLocalizer:
         """show fixation cross then feature image with blank screens between:
             1. show fixation for 1 second
             2. blank screen for 1 to 2 seconds
-            3. show the feature image for 1 second
+            3. show the feature image for 1.5 second
             4. blank screen for 1 to 2 seconds"""
         show_fixation(win=self.win, min_time=1.0, max_time=1.0)
         show_nothing(win=self.win, min_time=1.0, max_time=2.0)
@@ -86,8 +86,10 @@ class FunctionalLocalizer:
         show_nothing(win=self.win, min_time=1.0, max_time=2.0)
 
     def _show_feature(self, trial_feature: str, trial_times: dict = None, is_example: bool = False):
-        """display the feature image on screen for 1 second and record timing"""
-        img = visual.ImageStim(self.win, image=str(self.feature_to_image_file[trial_feature]), size=1)
+        """display the feature image on screen for 1.5 seconds and record timing.
+            color features are displayed at size 0.33, all other features at size 1."""
+        size = 0.33 if trial_feature in Features.COLOR_TO_IMAGE else 1
+        img = visual.ImageStim(self.win, image=str(self.feature_to_image_file[trial_feature]), size=size)
         img.draw()
 
         if not is_example:
@@ -95,7 +97,7 @@ class FunctionalLocalizer:
             send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.FEATURE_SHOW_TO_PULSE_CODE[trial_feature])
 
         self.win.flip()
-        core.wait(1.0)
+        core.wait(1.5)
 
         # after this function finished, there is a call to show nothing
         if not is_example:

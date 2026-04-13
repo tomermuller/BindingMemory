@@ -1,2 +1,0 @@
-,subject,trial,object,probe,retrival_success,is_remember,subject_answer,probe_appear,probe_disappear,object_appear,object_disappear,retrival_time,retrival_question_appear,retrival_report_time,colors_question_appear,colors_answer_time
-0,101,trial_1,bulb,colors,False,True,yellow,2026-03-23_23-12-15.906,2026-03-23_23-12-16.918,2026-03-23_23-12-16.941,2026-03-23_23-12-18.969,2026-03-23_23-12-21.983,2026-03-23_23-12-22.521,2026-03-23_23-12-23.799,2026-03-23_23-12-23.815,2026-03-23_23-12-24.729

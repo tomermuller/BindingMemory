@@ -3,7 +3,7 @@ from collections import Counter
 import psychopy
 from psychopy import visual, core, event, parallel
 
-from src.binding_task.enums.Enums import StringEnums
+from src.binding_task.enums.Enums import StringEnums, BindingAndTestEnums
 
 def shuffle_trials(items, max_consecutive=2):
     """Shuffle items ensuring no more than max_consecutive identical items in a row.
@@ -41,7 +41,7 @@ def shuffle_trials(items, max_consecutive=2):
             raise ValueError("Cannot arrange items within the max_consecutive constraint — impossible input")
 
         # Safety check: if any item's count exceeds the maximum it could ever occupy
-        # in the remaining slots, we MUST place it now or we'll never fit all of them.
+        # in the remaining slots, we MUST place it now, or we'll never fit all of them.
         # Maximum slots one item can fill in `remaining-1` future positions = floor((remaining-1+1)*k/(k+1))
         # simplified to floor(remaining * k / (k+1)).
         limit = (remaining * max_consecutive) // (max_consecutive + 1)
@@ -70,7 +70,8 @@ def show_instruction(win: psychopy.visual.window.Window, instruction: str, time:
         1. create text stimulus with RTL support for Hebrew
         2. draw and flip to screen
         3. if time provided, wait for that duration; otherwise wait for any keypress"""
-    text = visual.TextStim(win, text=instruction, font=StringEnums.ARIAL_FONT, pos=(0, 0), height=0.03, languageStyle='rtl', wrapWidth=1.8)
+    text = visual.TextStim(win, text=instruction, font=StringEnums.ARIAL_FONT, pos=(0, 0),
+                           height=BindingAndTestEnums.TEXT_HEIGHT, languageStyle='rtl', wrapWidth=1.8)
     text.draw()
     win.flip()
     if time is not None:
@@ -108,7 +109,7 @@ def send_to_parallel_port(parallel_port: parallel.ParallelPort, pulse_number):
         1. set data on parallel port (currently commented for testing)
         2. wait 10ms for pulse duration
         3. reset parallel port to 0"""
-    #parallel_port.setData(pulse_number)
-    print(f"pulse_number: {pulse_number}")
+    parallel_port.setData(pulse_number)
+    # print(f"pulse_number: {pulse_number}")
     core.wait(0.01)
-    #parallel_port.setData(0)
+    parallel_port.setData(0)

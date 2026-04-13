@@ -1,25 +1,24 @@
 from psychopy import visual, event, parallel, gui
-from src.binding_task.enums.Enums import Features, Instruction, StringEnums, TaskManage
+from src.binding_task.enums.Enums import Features, Instruction, StringEnums, TaskManage, ParallelPortEnums
 from src.binding_task.binding_learning import BindingLearning
 from src.binding_task.functional_localizer import FunctionalLocalizer
 from src.binding_task.partial_retrival_test import PartialRetrivalTest
-from src.binding_task.second_day_task import SecondDayTask
 from src.binding_task.test_phase import TestPhase
 from src.binding_task.break_game import BreakGame
 from datetime import datetime
-from src.binding_task.utils import show_instruction
+from src.binding_task.utils import show_instruction, show_fixation, send_to_parallel_port
 from pathlib import Path
 import pandas as pd
 
 
-def get_subject_info() -> tuple:
-    """open GUI window to get subject ID and experiment day, return (subject_id, day)"""
-    info = {StringEnums.SUBJECT_ID: '', StringEnums.DAY: TaskManage.DAYS_OF_EXPERIMENTS}
+def get_subject_info() -> str:
+    """open GUI window to get subject ID, return subject_id (or '-1' if cancelled)"""
+    info = {StringEnums.SUBJECT_ID: ''}
     dlg = gui.DlgFromDict(dictionary=info, title=StringEnums.EXPERIMENT_TITLE)
     if dlg.OK:
-        return info[StringEnums.SUBJECT_ID], info[StringEnums.DAY]
+        return str(info[StringEnums.SUBJECT_ID])
     else:
-        return "-1", "-1"
+        return "-1"
 
 
 class BindingTask:
@@ -30,15 +29,8 @@ class BindingTask:
         self.parallel_port = parallel.ParallelPort(address=0x5EFC)
         self.time = datetime.now().strftime(StringEnums.MINUTE_FORMAT)
 
-    def main(self, day: int):
-        """entry point for the experiment — routes to day 1 or day 2 flow based on the GUI selection"""
-        if day == '1':
-            self._first_day()
-        elif day == '2':
-            self._second_day()
-
-    def _first_day(self):
-        """run the full first day of the experiment:
+    def main(self):
+        """run the experiment:
             1. general settings (hide mouse)
             2. welcome instruction
             3. first stage - functional localizer
@@ -53,18 +45,6 @@ class BindingTask:
         self._save_unified_file_for_all_data(binding=binding, test=test)
         self._third_stage()
         show_instruction(win=self.win, instruction=Instruction.GOODBYE, time=10)
-
-    def _second_day(self):
-        """run the second day of the experiment:
-            1. init SecondDayTask with objects from the partial retrieval CSV
-            2. run examples
-            3. run all trials
-            4. save results"""
-        second_day = SecondDayTask(win=self.win, parallel_port=self.parallel_port,
-                                   categories=Features.ALL_CATEGORIES, subject_id=self.subject_id)
-        second_day.run_example()
-        second_day.run()
-        second_day.save_subject_answer(time=self.time)
 
     @staticmethod
     def _general_setting():
@@ -99,12 +79,14 @@ class BindingTask:
 
         binding.run_examples()
         test.run_example()
+        show_instruction(win=self.win,instruction=Instruction.FINISH_EXAMPLES)
 
         for block_idx in range(TaskManage.NUMBER_OF_BLOCKS):
             self._block_learning_and_test(binding=binding, test=test, block=block_idx)
 
         binding.save_subject(time=self.time)
         test.save_subject_answer(time=self.time)
+        show_instruction(win=self.win, instruction=Instruction.SECOND_PHASE_END)
 
         return binding, test
 
@@ -115,10 +97,11 @@ class BindingTask:
             3. run examples
             4. run all trials
             5. save results"""
-        show_instruction(win=self.win, instruction = Instruction.PARTIAL_RETRIVAL)
+        show_instruction(win=self.win, instruction = Instruction.THIRD_STAGE_INSTRUCTION)
         partial_retrival = PartialRetrivalTest(win=self.win, parallel_port=self.parallel_port,
                                                categories=Features.ALL_CATEGORIES, subject_id=self.subject_id)
         partial_retrival.run_example()
+        show_instruction(win=self.win, instruction=Instruction.FINISH_EXAMPLES)
         partial_retrival.run()
         partial_retrival.save_subject_answer(time=self.time)
 
@@ -293,9 +276,9 @@ class BindingTask:
         df.to_csv(save_path / f'subject_{self.subject_id}_{self.time}_combined.csv', index=False)
 
 if __name__ == '__main__':
-    subject, current_day = get_subject_info()
+    subject = get_subject_info()
     if subject != "-1":
         task = BindingTask(subject_id=subject)
-        task.main(day=current_day)
+        task.main()
 
 
