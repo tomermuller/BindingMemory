@@ -1,9 +1,32 @@
 import random
 from collections import Counter
+from pathlib import Path
+import numpy as np
+from PIL import Image
 import psychopy
 from psychopy import visual, core, event, parallel
 
 from src.binding_task.enums.Enums import StringEnums, BindingAndTestEnums
+
+def compute_avg_scene_color() -> list:
+    """compute the average RGB color across all scene images and return in PsychoPy [-1, 1] format:
+        1. load all PNGs from the scenes folder
+        2. sum all pixel values across all images
+        3. divide by total pixel count to get mean RGB in [0, 255]
+        4. convert to PsychoPy [-1, 1] range: val / 127.5 - 1
+        output: [r, g, b] list with values in [-1, 1]"""
+    scenes_folder = Path(__file__).parent / "features" / "scenes"
+    pixel_sum = np.zeros(3)
+    pixel_count = 0
+
+    for img_path in scenes_folder.glob("*.png"):
+        img = np.array(Image.open(img_path).convert("RGB"), dtype=float)
+        pixel_sum += img.reshape(-1, 3).sum(axis=0)
+        pixel_count += img.shape[0] * img.shape[1]
+
+    avg_rgb = pixel_sum / pixel_count
+    return list(avg_rgb / 127.5 - 1)
+
 
 def shuffle_trials(items, max_consecutive=2):
     """Shuffle items ensuring no more than max_consecutive identical items in a row.
@@ -109,7 +132,7 @@ def send_to_parallel_port(parallel_port: parallel.ParallelPort, pulse_number):
         1. set data on parallel port (currently commented for testing)
         2. wait 10ms for pulse duration
         3. reset parallel port to 0"""
-    parallel_port.setData(pulse_number)
-    # print(f"pulse_number: {pulse_number}")
+    #parallel_port.setData(pulse_number)
+    print(f"pulse_number: {pulse_number}")
     core.wait(0.01)
-    parallel_port.setData(0)
+    #parallel_port.setData(0)

@@ -46,6 +46,7 @@ class BindingLearning:
                 f. show blank screen for 3 second before next example"""
         for (example_object, color, scene) in BindingAndTestEnums.BINDING_EXAMPLES:
             unified_object = self._create_unified_object(object_image=example_object, color=color, scene_image=scene)
+            Path(Paths.BINDING_EXAMPLE).parent.mkdir(parents=True, exist_ok=True)
             unified_object.save(Paths.BINDING_EXAMPLE)
             unified_object.close()
 
