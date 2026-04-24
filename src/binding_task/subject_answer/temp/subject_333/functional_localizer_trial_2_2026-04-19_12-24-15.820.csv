@@ -1,0 +1,4 @@
+,subject,trial_index,feature,word_question,user_answer,is_right,feature_appear,feature_disappear,question_appear,answer_time
+0,333,0,green,green,right,True,2026-04-19_12-23-53.190,2026-04-19_12-23-54.703,2026-04-19_12-23-56.424,2026-04-19_12-23-57.505
+1,333,1,living_room,living_room,right,True,2026-04-19_12-24-01.587,2026-04-19_12-24-03.099,2026-04-19_12-24-04.518,2026-04-19_12-24-05.536
+2,333,2,yellow,red,left,True,2026-04-19_12-24-10.535,2026-04-19_12-24-12.048,2026-04-19_12-24-13.663,2026-04-19_12-24-15.810

@@ -7,7 +7,7 @@ import psychopy
 from psychopy import visual, core, event, parallel
 from src.binding_task.enums.Enums import StringEnums, ParallelPortEnums, Features, Instruction, TimeAttribute, \
     HebrewEnums, Paths, TaskManage, BindingAndTestEnums
-from src.binding_task.utils import shuffle_trials, show_nothing, show_fixation, show_instruction, send_to_parallel_port
+from src.binding_task.utils import shuffle_trials, show_nothing, show_fixation, show_instruction, send_to_parallel_port, compute_avg_scene_color
 
 class FunctionalLocalizer:
 
@@ -36,6 +36,8 @@ class FunctionalLocalizer:
         self.all_trials = shuffle_trials(items=self.all_trials, max_consecutive=2)
 
         self.feature_to_image_file = {key: value for category in self.category_to_features.values() for key, value in category.items()}
+        self.avg_scene_color = compute_avg_scene_color()
+        self.scene_frame = visual.Rect(self.win, width=1, height=1, fillColor=self.avg_scene_color, lineColor=None)
 
     def run(self):
         """run the functional localizer:
@@ -89,6 +91,8 @@ class FunctionalLocalizer:
         """display the feature image on screen for 1.5 seconds and record timing.
             color features are displayed at size 0.33, all other features at size 1."""
         size = 0.33 if trial_feature in Features.COLOR_TO_IMAGE else 1
+        if trial_feature in Features.COLOR_TO_IMAGE:
+            self.scene_frame.draw()
         img = visual.ImageStim(self.win, image=str(self.feature_to_image_file[trial_feature]), size=size)
         img.draw()
 

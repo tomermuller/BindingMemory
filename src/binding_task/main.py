@@ -6,7 +6,7 @@ from src.binding_task.partial_retrival_test import PartialRetrivalTest
 from src.binding_task.test_phase import TestPhase
 from src.binding_task.break_game import BreakGame
 from datetime import datetime
-from src.binding_task.utils import show_instruction, compute_avg_scene_color
+from src.binding_task.utils import show_instruction
 from pathlib import Path
 import pandas as pd
 
@@ -40,7 +40,7 @@ class BindingTask:
             7. goodbye instruction"""
         self._general_setting()
         show_instruction(win=self.win, instruction=Instruction.WELLCOME)
-        #self._first_stage()
+        self._first_stage()
         binding, test = self._second_stage()
         self._save_unified_file_for_all_data(binding=binding, test=test)
         self._third_stage()
@@ -54,20 +54,13 @@ class BindingTask:
 
     def _first_stage(self):
         """the first part of the experiment:
-            1. set background to average scene color to match the visual context of the test phase
-            2. show the instruction to the first part
-            3. init and call run func of FunctionalLocalizer
-            4. restore original background color"""
-        original_color = list(self.win.color)
-        self.win.color = compute_avg_scene_color()
-
+            1. show the instruction to the first part
+            2. init and call run func of FunctionalLocalizer"""
         show_instruction(win=self.win, instruction=Instruction.FIRST_PHASE_INSTRUCTION)
         functional_localizer = FunctionalLocalizer(categories=Features.ALL_CATEGORIES, win=self.win,
                                                    parallel_port=self.parallel_port, subject_id=self.subject_id)
         functional_localizer.run()
         functional_localizer.save_results(time=self.time)
-
-        self.win.color = original_color
 
     def _second_stage(self):
         """the second part of the experiment:
