@@ -89,10 +89,12 @@ class FunctionalLocalizer:
 
     def _show_feature(self, trial_feature: str, trial_times: dict = None, is_example: bool = False):
         """display the feature image on screen for 1.5 seconds and record timing.
-            color features are displayed at size 0.33, all other features at size 1."""
-        size = 0.33 if trial_feature in Features.COLOR_TO_IMAGE else 1
+            color features are displayed at size 0.5, all other features at size 1."""
         if trial_feature in Features.COLOR_TO_IMAGE:
             self.scene_frame.draw()
+            size = 0.5
+        else:
+            size = 1
         img = visual.ImageStim(self.win, image=str(self.feature_to_image_file[trial_feature]), size=size)
         img.draw()
 
