@@ -28,6 +28,7 @@ class OrPipeline:
         if do_autoreject:
             epochs = self._auto_reject(epochs)
         if do_ica:
+            raw.filter(l_freq=1, h_freq=None) # before ICA need high pass filter
             self._do_ica(epochs)
         self._final_resample_and_filtering(epochs)
         self._save_epochs(epochs)
@@ -59,10 +60,10 @@ class OrPipeline:
         return raw
 
     def _resample_and_filtering(self, raw):
-        raw.resample(ParallelPortDict.PREPRO_ARGS['resample'])
         self._move_out_emg_electrode(raw)
         self._high_pass_filter(raw)
         self._notch_filter(raw)
+        raw.resample(ParallelPortDict.PREPRO_ARGS['resample'])
 
     def _handle_bad_channels(self, raw, do_auto_bad_ch: bool = True, do_bad_channels: bool = True):
         if do_auto_bad_ch:
