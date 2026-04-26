@@ -65,8 +65,8 @@ class TestPhase:
             7. for each reported category (randomized order), ask subject to choose the feature"""
         trial_answers = {}
 
-        self._show_object(image_path=image_path, trial_times=trial_times, is_example=is_example)
-        self._subject_retrival(trial_times=trial_times, trial_answers=trial_answers, is_example=is_example)
+        pressed_during_object = self._show_object(image_path=image_path, trial_times=trial_times, is_example=is_example)
+        self._subject_retrival(trial_times=trial_times, trial_answers=trial_answers, is_example=is_example, pressed_during_object=pressed_during_object)
         show_nothing(win=self.win, min_time=0.5, max_time=0.5)
 
         if not trial_answers.get(StringEnums.RETRIVAL_SUCCESS):
@@ -84,35 +84,54 @@ class TestPhase:
 
         return trial_answers
 
-    def _show_object(self, image_path: Path, trial_times: dict, is_example: bool = False):
-        """display the object image on screen for 2 seconds, record OBJECT_APPEAR timestamp, and send SHOW_OBJECT_IN_TEST_TRIAL trigger"""
+    def _show_object(self, image_path: Path, trial_times: dict, is_example: bool = False) -> bool:
+        """display object for 2s; after 0.5s mandatory viewing, accept a key press.
+           returns True if subject pressed during object display, False otherwise."""
         img = visual.ImageStim(self.win, image=image_path, size=(0.4, 0.4), pos=(0, 0))
         img.draw()
+        self.win.flip()
 
         if not is_example:
             trial_times[TimeAttribute.OBJECT_APPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
             send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.SHOW_OBJECT_IN_TEST_TRIAL)
-        self.win.flip()
-        core.wait(2.0)
 
-    def _subject_retrival(self, trial_times: dict, trial_answers: dict, is_example: bool = False):
-        """show blank screen for up to 3 seconds; stops early if subject presses any arrow key.
-           saves RETRIVAL_TIME to trial_times.
-           returns True if subject pressed a key, False if timed out."""
+        core.wait(0.5)
+
+        if not is_example:
+            trial_times[TimeAttribute.START_RETRIVAL_TIME] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
+            send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.START_RETRIVAL_TIME)
+
+        event.clearEvents()
+        keys = event.waitKeys(maxWait=1.5)
+
+        if keys is not None:
+            if not is_example:
+                trial_times[TimeAttribute.RETRIVAL_TIME] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
+                send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.ANSWER_ON_RETRIVAL_TIME)
+            return True
+        return False
+
+    def _subject_retrival(self, trial_times: dict, trial_answers: dict, is_example: bool = False, pressed_during_object: bool = False):
+        """if subject already pressed during object display, mark success and return.
+           otherwise show fixation for up to 5s and wait for key press."""
+        if pressed_during_object:
+            trial_answers[StringEnums.RETRIVAL_SUCCESS] = True
+            return
+
         text = visual.TextStim(self.win, text="+", font=StringEnums.ARIAL_FONT, pos=(0, 0),
                                height=BindingAndTestEnums.TEXT_HEIGHT, languageStyle='rtl', wrapWidth=1.8)
         text.draw()
 
         if not is_example:
             trial_times[TimeAttribute.OBJECT_DISAPPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
-            trial_times[TimeAttribute.START_RETRIVAL_TIME] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
-            send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.START_RETRIVAL_TIME)
 
         self.win.flip()
-        keys = event.waitKeys(maxWait=3.0)
+        event.clearEvents()
+        keys = event.waitKeys(maxWait=5.0)
+
         if not is_example:
             trial_times[TimeAttribute.RETRIVAL_TIME] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
-            send_to_parallel_port(parallel_port=self.parallel_port,pulse_number=ParallelPortEnums.ANSWER_ON_RETRIVAL_TIME)
+            send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.ANSWER_ON_RETRIVAL_TIME)
         trial_answers[StringEnums.RETRIVAL_SUCCESS] = keys is not None
 
     def _subject_report_retrival_success(self, trial_times: dict, trial_answers: dict, is_example: bool = False) -> list:
