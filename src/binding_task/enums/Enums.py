@@ -162,14 +162,6 @@ class ParallelPortEnums:
     SHOW_BATHROOM = 17
     SHOW_KITCHEN = 18
 
-    STOP_RED = 21
-    STOP_GREEN = 22
-    STOP_YELLOW = 23
-
-    STOP_LIVING_ROOM = 26
-    STOP_BATHROOM = 27
-    STOP_KITCHEN = 28
-
     SHOW_ATTENTION_QUESTION = 31
     ANSWER_ATTENTION_QUESTION = 32
 
@@ -198,13 +190,6 @@ class ParallelPortEnums:
                                   Features.BATHROOM: SHOW_BATHROOM,
                                   Features.KITCHEN: SHOW_KITCHEN}
 
-    FEATURE_STOP_TO_PULSE_CODE = {Features.GREEN: STOP_GREEN,
-                                  Features.YELLOW: STOP_YELLOW,
-                                  Features.RED: STOP_RED,
-                                  Features.LIVING_ROOM: STOP_LIVING_ROOM,
-                                  Features.BATHROOM: STOP_BATHROOM,
-                                  Features.KITCHEN: STOP_KITCHEN}
-
     CATEGORY_ANSWERS_SHOW_TO_PULSE_CODE = {Features.SCENES: SHOW_SCENES_ANSWERS,
                                             Features.COLORS: SHOW_COLORS_ANSWERS}
 
@@ -213,7 +198,6 @@ class ParallelPortEnums:
 
     # partial retrieval phase parallel port numbers
     SHOW_PROBE = 71
-    STOP_PROBE = 72
     SHOW_PARTIAL_RETRIVAL_REMEMBER_QUESTION = 73
     ANSWER_PARTIAL_RETRIVAL_REMEMBER_QUESTION = 74
 

@@ -74,7 +74,7 @@ class PartialRetrivalTest(TestPhase):
             input: retrival_category: the category to probe (Colors or Scenes)
                    trial_times: dict to store timing data
                    is_example: if True, skip EEG triggers
-            records PROBE_APPEAR and PROBE_DISAPPEAR timestamps and sends SHOW_PROBE / STOP_PROBE triggers"""
+            records PROBE_APPEAR and PROBE_DISAPPEAR timestamps and sends SHOW_PROBE trigger"""
         retrival_probe = Features.PROBE_TO_PATH[retrival_category]
         img = visual.ImageStim(self.win, image=retrival_probe, size=(0.4, 0.4), pos=(0, 0))
         img.draw()
@@ -88,7 +88,6 @@ class PartialRetrivalTest(TestPhase):
 
         if not is_example:
             trial_times[TimeAttribute.PROBE_DISAPPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
-            send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.STOP_PROBE)
 
     def _subject_report_retrival_success(self, trial_times: dict, trial_answers: dict, is_example: bool = False) -> bool:
         """show remember / don't remember options (left/right arrow keys):

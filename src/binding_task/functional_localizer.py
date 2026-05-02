@@ -108,7 +108,6 @@ class FunctionalLocalizer:
         # after this function finished, there is a call to show nothing
         if not is_example:
             trial_times[TimeAttribute.FEATURE_DISAPPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
-            send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.FEATURE_STOP_TO_PULSE_CODE[trial_feature])
 
     def _attention_question(self, trial_index: int, trial_feature: str, trial_times: dict):
         """run the attention question for a single trial:
