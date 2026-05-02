@@ -8,6 +8,8 @@ from mne_icalabel import label_components
 from autoreject import AutoReject, Ransac
 from src.analysis.enums.analysis_enums import ParallelPortDict
 import os
+import tkinter as tk
+from tkinter import simpledialog
 
 class OrPipeline:
     def __init__(self, path: Path, subject_id: str):
@@ -19,19 +21,27 @@ class OrPipeline:
         self.results_path.mkdir(parents=True, exist_ok=True)
         self.fig_path.mkdir(parents=True, exist_ok=True)
 
-    def run(self, do_ica: bool = True, do_autoreject: bool = True, do_bad_channels: bool = True, do_auto_bad_ch: bool = False):
+    def run(self, do_ica: bool = True):
+        log_path = self.results_path / f"{self.subject_id}_preprocessing.log"
+        file_handler = logging.FileHandler(log_path)
+        file_handler.setLevel(logging.INFO)
+        logging.getLogger().addHandler(file_handler)
+
         raw = self._load_vhdr()
         self._resample_and_filtering(raw=raw)
-        self._handle_bad_channels(raw, do_auto_bad_ch, do_bad_channels)
+        self._handle_bad_channels(raw)
+        self._log_event_counts(raw)
         epochs = self._make_epochs(raw)
         epochs = self._rereference(epochs)
-        if do_autoreject:
-            epochs = self._auto_reject(epochs)
+        epochs = self._auto_reject(epochs)
         if do_ica:
-            raw.filter(l_freq=1, h_freq=None) # before ICA need high pass filter
+            raw.filter(l_freq=1, h_freq=None)
             self._do_ica(epochs)
         self._final_resample_and_filtering(epochs)
         self._save_epochs(epochs)
+
+        logging.getLogger().removeHandler(file_handler)
+        file_handler.close()
 
     def _load_vhdr(self, EOG_ch=False):
         """" Doc """
@@ -64,17 +74,35 @@ class OrPipeline:
         self._high_pass_filter(raw)
         self._notch_filter(raw)
         raw.resample(ParallelPortDict.PREPRO_ARGS['resample'])
+        logging.info(f"Resampled to {ParallelPortDict.PREPRO_ARGS['resample']} Hz")
 
-    def _handle_bad_channels(self, raw, do_auto_bad_ch: bool = True, do_bad_channels: bool = True):
-        if do_auto_bad_ch:
-            self._auto_detect_bad_channels(raw)
-        elif do_bad_channels:
-            self._manual_bad_channels(raw)
+    def _handle_bad_channels(self, raw):
+        root = tk.Tk()
+        root.withdraw()
+        user_input = simpledialog.askstring("Bad Channels",
+                                            "Enter bad channel names separated by commas (e.g. Fp1,Cz):")
+        root.destroy()
+        bad_channels = [ch.strip() for ch in user_input.split(',')] if user_input else []
+        raw.info['bads'] = bad_channels
+        raw.interpolate_bads(reset_bads=True)
+        logging.info(f"Manual: interpolated bad channels {bad_channels}")
+
+    @staticmethod
+    def _log_event_counts(raw):
+        id_to_name = {v: k for k, v in ParallelPortDict.EVENT_DICT.items()}
+        events, _ = mne.events_from_annotations(raw, verbose=False)
+        unique, counts = np.unique(events[:, 2], return_counts=True)
+        logging.info("--- Trigger counts ---")
+        for event_id, count in zip(unique, counts):
+            name = id_to_name.get(event_id, f"unknown ({event_id})")
+            logging.info(f"  [{event_id:>3}] {name}: {count}")
+        logging.info("----------------------")
 
     @staticmethod
     def _make_epochs(raw):
         events_from_annot, _ = mne.events_from_annotations(raw)
         selected_events = np.array([x for x in events_from_annot if x[2] in ParallelPortDict.EVENT_DICT.values()])
+        logging.info(f"Found {len(selected_events)} events for epoching (tmin={ParallelPortDict.PREPRO_ARGS['tmin']}, tmax={ParallelPortDict.PREPRO_ARGS['tmax']})")
         metadata, _, _ = mne.epochs.make_metadata(selected_events, event_id=ParallelPortDict.EVENT_DICT, tmin=0, tmax=0,
                                                   sfreq=raw.info['sfreq'])
         return mne.Epochs(raw, events=selected_events, event_id=ParallelPortDict.EVENT_DICT,
@@ -84,6 +112,7 @@ class OrPipeline:
 
     @staticmethod
     def _rereference(epochs):
+        logging.info("Applying average reference")
         return mne.set_eeg_reference(epochs)[0]
 
     def _final_resample_and_filtering(self, epochs):
@@ -121,52 +150,12 @@ class OrPipeline:
     @staticmethod
     def _high_pass_filter(raw, l_freq: float = 0.1):
         raw.filter(l_freq=l_freq, h_freq=None)
+        logging.info(f"High-pass filter applied: {l_freq} Hz")
 
     @staticmethod
     def _notch_filter(raw, freqs: float = 50.0):
         raw.notch_filter(freqs=freqs)
-
-    @staticmethod
-    def _auto_detect_bad_channels(raw):
-        epochs_for_ransac = mne.make_fixed_length_epochs(raw, duration=1.0, preload=True)
-        ransac = Ransac(verbose=False, n_jobs=1)
-        ransac.fit(epochs_for_ransac)
-        raw.info['bads'] = ransac.bad_chs_
-        raw.interpolate_bads(reset_bads=True)
-        logging.info(f"RANSAC: interpolated bad channels {ransac.bad_chs_}")
-
-    @staticmethod
-    def _plot_channels_for_inspection(raw, fig_path):
-        eeg_picks = mne.pick_types(raw.info, eeg=True)
-        info_eeg = mne.pick_info(raw.info, eeg_picks)
-        data = raw.get_data(picks='eeg')
-        variances = np.var(data, axis=1)
-        ch_names = info_eeg.ch_names
-
-        fig, axes = plt.subplots(2, 1, figsize=(16, 10))
-
-        axes[0].bar(range(len(ch_names)), variances)
-        axes[0].set_xticks(range(len(ch_names)))
-        axes[0].set_xticklabels([f"{i}:{n}" for i, n in enumerate(ch_names)], rotation=90, fontsize=6)
-        axes[0].set_ylabel('Variance (µV²)')
-        axes[0].set_title('Channel Variance — outliers may be bad channels')
-
-        mne.viz.plot_topomap(variances, info_eeg, axes=axes[1], show=False)
-        axes[1].set_title('Variance Topomap')
-
-        plt.tight_layout()
-        plt.savefig(fig_path / "channel_inspection.png")
-        plt.close()
-
-        print("Channel index → name mapping:")
-        for i, name in enumerate(ch_names):
-            print(f"  {i}: {name}")
-
-    def _manual_bad_channels(self, raw):
-        self._plot_channels_for_inspection(raw, self.fig_path)
-        raw.plot(block=True, title='Click channels to mark as bad, then close the window')
-        raw.interpolate_bads(reset_bads=True)
-        logging.info(f"Manual: interpolated bad channels {raw.info['bads']}")
+        logging.info(f"Notch filter applied: {freqs} Hz")
 
     @staticmethod
     def _fit_ica(epochs):
@@ -177,16 +166,43 @@ class OrPipeline:
 
     def _do_ica(self, epochs):
         ica, epochs_for_ica = self._fit_ica(epochs)
-        labels = label_components(epochs_for_ica, ica, method='iclabel')['labels']
+        ic_labels = label_components(epochs_for_ica, ica, method='iclabel')
+        labels = ic_labels['labels']
+        probs = ic_labels['y_pred_proba']
+
+        self._plot_ica_components_labeled(ica, epochs_for_ica, labels, probs)
+
         exclude_idx = [i for i, lbl in enumerate(labels) if lbl in ParallelPortDict.PREPRO_ARGS['drop ica']]
         ica.apply(epochs, exclude=exclude_idx)
 
         ica.plot_overlay(epochs.average(), exclude=exclude_idx)
         plt.savefig(self.fig_path / "ICA_Evoked_Overlay.png")
-        ica.plot_components(exclude_idx)
-        plt.savefig(self.fig_path / "ICA_Exclude_Comp.png")
+        plt.close()
 
         logging.info(f"ICA: auto rejected {exclude_idx}")
+
+    def _plot_ica_components_labeled(self, ica, epochs_for_ica, labels, probs):
+        n_show = min(20, ica.n_components_)
+        n_cols = 5
+        n_rows = (n_show + n_cols - 1) // n_cols
+        fig, axes = plt.subplots(n_rows, n_cols, figsize=(15, n_rows * 3))
+        axes = axes.flatten()
+
+        components = ica.get_components()
+        for idx in range(n_show):
+            mne.viz.plot_topomap(components[:, idx], epochs_for_ica.info, axes=axes[idx], show=False)
+            lbl = labels[idx]
+            conf = max(probs[idx])
+            color = 'red' if lbl in ParallelPortDict.PREPRO_ARGS['drop ica'] else 'green'
+            axes[idx].set_title(f"IC{idx}: {lbl}\n{conf:.0%}", fontsize=8, color=color)
+
+        for idx in range(n_show, len(axes)):
+            axes[idx].set_visible(False)
+
+        plt.suptitle("ICA Components — red=excluded, green=kept", fontsize=10)
+        plt.tight_layout()
+        plt.savefig(self.fig_path / "ICA_top20_labeled.png", dpi=150)
+        plt.close()
 
     def _plot_ica_for_inspection(self, epochs):
         ica, epochs_for_ica = self._fit_ica(epochs)
@@ -220,15 +236,20 @@ class OrPipeline:
     @staticmethod
     def _low_pass_filter(epochs, h_freq: float = 100.0):
         epochs.filter(l_freq=None, h_freq=h_freq)
+        logging.info(f"Low-pass filter applied: {h_freq} Hz")
 
     @staticmethod
     def _final_resample(epochs, sfreq: float = 500.0):
         epochs.resample(sfreq)
+        logging.info(f"Final resample to {sfreq} Hz")
 
     @staticmethod
     def _move_out_emg_electrode(raw):
         if 'EMG' in raw.ch_names:
             raw.drop_channels(['EMG'])
+            logging.info("Dropped channel: EMG")
+        else:
+            logging.info("No EMG channel found, skipping")
 
     def _auto_reject(self, epochs):
         ar = AutoReject(n_jobs=1, random_state=11, n_interpolate=[1, 2, 3, 4])

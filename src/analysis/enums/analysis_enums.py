@@ -122,7 +122,7 @@ class ParallelPortDict:
     PREPRO_ARGS = {
         'resample': 1000,
         'tmin': -0.4,
-        'tmax': 5,
+        'tmax': 10,
         'baseline': None,
         'drop ica': ['eye blink', 'muscle artifact', 'channel noise']
     }
