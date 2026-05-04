@@ -8,8 +8,7 @@ from mne_icalabel import label_components
 from autoreject import AutoReject, Ransac
 from src.analysis.enums.analysis_enums import ParallelPortDict
 import os
-import tkinter as tk
-from tkinter import simpledialog
+from PyQt5.QtWidgets import QApplication, QInputDialog
 
 class OrPipeline:
     def __init__(self, path: Path, subject_id: str):
@@ -31,9 +30,12 @@ class OrPipeline:
         self._resample_and_filtering(raw=raw)
         self._handle_bad_channels(raw)
         self._log_event_counts(raw)
+        # save here the raw
         epochs = self._make_epochs(raw)
+        # save the epochs
         epochs = self._rereference(epochs)
         epochs = self._auto_reject(epochs)
+        # save
         if do_ica:
             raw.filter(l_freq=1, h_freq=None)
             self._do_ica(epochs)
@@ -77,15 +79,14 @@ class OrPipeline:
         logging.info(f"Resampled to {ParallelPortDict.PREPRO_ARGS['resample']} Hz")
 
     def _handle_bad_channels(self, raw):
-        root = tk.Tk()
-        root.withdraw()
-        user_input = simpledialog.askstring("Bad Channels",
-                                            "Enter bad channel names separated by commas (e.g. Fp1,Cz):")
-        root.destroy()
-        bad_channels = [ch.strip() for ch in user_input.split(',')] if user_input else []
+        raw.plot(block=True)  # inspect channels — close this window to proceed
+        app = QApplication.instance() or QApplication([])
+        text, ok = QInputDialog.getText(None, "Bad Channels", "Enter bad channel names separated by commas (e.g. Fp1,Cz):")
+        bad_channels = [ch.strip() for ch in text.split(',') if ch.strip()] if ok else []
         raw.info['bads'] = bad_channels
         raw.interpolate_bads(reset_bads=True)
         logging.info(f"Manual: interpolated bad channels {bad_channels}")
+        print(f"Interpolated bad channels: {bad_channels}")
 
     @staticmethod
     def _log_event_counts(raw):
@@ -93,10 +94,14 @@ class OrPipeline:
         events, _ = mne.events_from_annotations(raw, verbose=False)
         unique, counts = np.unique(events[:, 2], return_counts=True)
         logging.info("--- Trigger counts ---")
+        print("--- Trigger counts ---")
         for event_id, count in zip(unique, counts):
             name = id_to_name.get(event_id, f"unknown ({event_id})")
-            logging.info(f"  [{event_id:>3}] {name}: {count}")
+            msg = f"  [{event_id:>3}] {name}: {count}"
+            logging.info(msg)
+            print(msg)
         logging.info("----------------------")
+        print("----------------------")
 
     @staticmethod
     def _make_epochs(raw):
@@ -272,4 +277,4 @@ if __name__ == '__main__':
     data_path = Path("/Users/tomermuller/Desktop/data/")
     subject_str = "102"
     pipe = OrPipeline(path = data_path, subject_id=subject_str)
-    pipe.run(do_auto_bad_ch=True)
+    pipe.run()

@@ -84,28 +84,17 @@ class FileFormat:
 
 class ParallelPortDict:
     EVENT_DICT = {
-        'start_record_baseline': 1,
-        'start_functional_localizer': 2,
-        'start_binding_learning_block': 3,
-        'start_test_phase_block': 4,
-        'start_break_game': 5,
-        'start_partial_retrieval': 6,
         'show_red': 11,
         'show_green': 12,
         'show_yellow': 13,
         'show_living_room': 16,
         'show_bathroom': 17,
         'show_kitchen': 18,
-        'stop_red': 21,
-        'stop_green': 22,
-        'stop_yellow': 23,
-        'stop_living_room': 26,
-        'stop_bathroom': 27,
-        'stop_kitchen': 28,
         'show_attention_question': 31,
         'answer_attention_question': 32,
         'show_binding_trials': 41,
         'stop_binding_trials': 42,
+        # what is 42 and 41?
         'show_difficulty_question': 43,
         'answer_difficulty_question': 44,
         'show_object_in_test_trial': 51,
@@ -122,7 +111,7 @@ class ParallelPortDict:
     PREPRO_ARGS = {
         'resample': 1000,
         'tmin': -0.4,
-        'tmax': 10,
+        'tmax': 5,
         'baseline': None,
         'drop ica': ['eye blink', 'muscle artifact', 'channel noise']
     }
