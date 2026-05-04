@@ -37,12 +37,10 @@ class TestPhase:
     def run_block(self, block_index: int):
         """run all test trials in a single block:
             input: block_index: index of the current block
-            1. send START_TESH_PHASE_BLOCK trigger
-            2. for each trial in the block:
+            1. for each trial in the block:
                 a. run the test (show object, ask questions)
                 b. write subject answers to self.subject_answers
                 c. save temporary backup"""
-        send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.START_TESH_PHASE_BLOCK)
 
         for trial_index in range(len(self.blocks[block_index])):
             trial_times = {}

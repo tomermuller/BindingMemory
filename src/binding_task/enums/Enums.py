@@ -147,11 +147,6 @@ class ParallelPortEnums:
 
     # general
     START_RECORD_BASELINE = 1
-    START_FUNCTIONAL_LOCALIZER = 2
-    START_BINDING_LEARNING_BLOCK = 3
-    START_TESH_PHASE_BLOCK = 4
-    START_BREAK_GAME = 5
-    START_PARTIAL_RETRIVAL = 6
 
     # functional localizer parallel port numbers
     SHOW_RED = 11

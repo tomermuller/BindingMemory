@@ -42,12 +42,10 @@ class FunctionalLocalizer:
     def run(self):
         """run the functional localizer:
             1. run the examples
-            2. send START_FUNCTIONAL_LOCALIZER trigger
-            3. run all trials
-            4. show a rest break instruction every 50 trials"""
+            2. run all trials
+            3. show a rest break instruction every 50 trials"""
 
         self._run_examples()
-        send_to_parallel_port(parallel_port=self.parallel_port,pulse_number=ParallelPortEnums.START_FUNCTIONAL_LOCALIZER)
 
         for trial_index, trial_feature in enumerate(self.all_trials):
             self._run_trial(trial_index=trial_index, trial_feature=trial_feature)

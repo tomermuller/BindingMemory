@@ -30,9 +30,7 @@ class PartialRetrivalTest(TestPhase):
 
     def run(self):
         """run all partial retrieval trials:
-            1. send START_PARTIAL_RETRIVAL trigger
-            2. for each trial: run test, write answers, temp save"""
-        send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.START_PARTIAL_RETRIVAL)
+            1. for each trial: run test, write answers, temp save"""
         for trial_index, object_path in enumerate(self.blocks[0]):
             trial_times = {}
             subject_answer = self.run_test(image_path=object_path, trial_times=trial_times)

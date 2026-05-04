@@ -62,14 +62,11 @@ class BindingLearning:
     def run_block(self, block_index: int):
         """run all trials in a single block of the binding learning phase:
             input: block_index: index of the current block (0 to NUMBER_OF_BLOCKS-1)
-            1. send START_BINDING_LEARNING_BLOCK trigger
-            2. for each trial in the block:
+            1. for each trial in the block:
                 a. show binding learning stimulus (fixation + colored object on scene)
                 b. blank screen for 1-2 seconds
                 c. ask difficulty rating (1-5)
                 d. temp save"""
-
-        send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.START_BINDING_LEARNING_BLOCK)
 
         trials_per_block = TaskManage.NUMBER_OF_BINDING_TRIALS // TaskManage.NUMBER_OF_BLOCKS
         for trial_index in range(trials_per_block):

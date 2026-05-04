@@ -47,13 +47,11 @@ class BreakGame:
 
     def run(self):
         """run the break game:
-            1. send START_BREAK_GAME trigger
-            2. show instructions
-            3. for each change interval: show rectangle and set next brightness randomly
-            4. ask subject how many times the rectangle was brighter
-            5. show finish instruction
+            1. show instructions
+            2. for each change interval: show rectangle and set next brightness randomly
+            3. ask subject how many times the rectangle was brighter
+            4. show finish instruction
             output: (subject_answer, brighter_count)"""
-        send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.START_BREAK_GAME)
 
         show_instruction(win=self.win, instruction=Instruction.BREAK_GAME_INSTRUCTION)
         for _ in range(self.num_changes):
