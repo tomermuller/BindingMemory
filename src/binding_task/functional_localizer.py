@@ -37,7 +37,7 @@ class FunctionalLocalizer:
 
         self.feature_to_image_file = {key: value for category in self.category_to_features.values() for key, value in category.items()}
         self.avg_scene_color = compute_avg_scene_color()
-        self.scene_frame = visual.Rect(self.win, width=1, height=1, fillColor=self.avg_scene_color, lineColor=None)
+        self.scene_frame = visual.Rect(self.win, width=0.4, height=0.4, units='height', fillColor=self.avg_scene_color, lineColor=None)
 
     def run(self):
         """run the functional localizer:
@@ -80,8 +80,7 @@ class FunctionalLocalizer:
             2. blank screen for 1 to 2 seconds
             3. show the feature image for 1.5 second
             4. blank screen for 1 to 2 seconds"""
-        show_fixation(win=self.win, min_time=1.0, max_time=1.0)
-        show_nothing(win=self.win, min_time=1.0, max_time=2.0)
+        show_fixation(win=self.win, min_time=1.5, max_time=2.2)
         self._show_feature(trial_feature=trial_feature, trial_times=trial_times, is_example=is_example)
         show_nothing(win=self.win, min_time=1.0, max_time=2.0)
 
@@ -91,9 +90,10 @@ class FunctionalLocalizer:
         if trial_feature in Features.COLOR_TO_IMAGE:
             self.scene_frame.draw()
             size = (0.33, 0.33)
+            img = visual.ImageStim(self.win, image=str(self.feature_to_image_file[trial_feature]), size=size, units='height', pos=(0, 0))
         else:
             size = (1, 1)
-        img = visual.ImageStim(self.win, image=str(self.feature_to_image_file[trial_feature]), size=size, pos=(0, 0))
+            img = visual.ImageStim(self.win, image=str(self.feature_to_image_file[trial_feature]), size=size, pos=(0, 0))
         img.draw()
 
         if not is_example:

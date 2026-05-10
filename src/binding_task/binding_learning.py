@@ -178,7 +178,7 @@ class BindingLearning:
         """color the object in the color input:
             flood-fills background transparent from all 4 corners with a threshold to catch
             near-white pixels, preserves dark outlines (r,g,b < 50), and colors all remaining
-            pixels with the given color at alpha 210"""
+            pixels with the given color at alpha 255"""
         image = Image.open(input_path).convert('RGBA')
         width, height = image.size
 
@@ -194,7 +194,7 @@ class BindingLearning:
                 elif r < 50 and g < 50 and b < 50:
                     continue
                 else:
-                    pixels[i, j] = (*color, 210)
+                    pixels[i, j] = (*color, 255)
 
         return image
 
