@@ -1,10 +1,10 @@
 import logging
+import shutil
 import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
 import mne
 from autoreject import AutoReject
-from PyQt5.QtWidgets import QApplication, QInputDialog
 from src.analysis.enums.analysis_enums import ParallelPortDict
 from src.analysis.pre_processing.metadata_enrichment import MetadataEnricher
 from src.analysis.pre_processing.ica_handler import ICAHandler
@@ -20,10 +20,11 @@ class OrPipeline:
         self.results_path.mkdir(parents=True, exist_ok=True)
         self.fig_path.mkdir(parents=True, exist_ok=True)
 
-    def run(self, do_ica: bool = True):
-        log_path     = self.results_path / f"{self.subject_id}_preprocessing.log"
-        file_handler = logging.FileHandler(log_path)
+    def run(self, do_ica: bool = True, do_auto_reject: bool = False):
+        self._log_path   = self.results_path / f"{self.subject_id}_preprocessing.log"
+        file_handler     = logging.FileHandler(self._log_path)
         file_handler.setLevel(logging.INFO)
+        self._log_handler = file_handler
         logging.getLogger().addHandler(file_handler)
 
         raw = self._load_vhdr()
@@ -35,11 +36,11 @@ class OrPipeline:
         epochs = MetadataEnricher(self.path, self.subject_id).enrich(epochs, raw)
         self._save_epochs(epochs, suffix='initial')
         epochs = self._rereference(epochs)
-        epochs = self._auto_reject(epochs)
+        if do_auto_reject:
+            epochs = self._auto_reject(epochs)
         self._save_epochs(epochs, suffix='after_autoreject')
         if do_ica:
-            raw.filter(l_freq=1, h_freq=None)
-            ICAHandler(self.fig_path, self.results_path).run(epochs)
+            epochs = ICAHandler(epochs, self.fig_path, self.results_path).run()
         self._final_resample_and_filtering(epochs)
         self._save_epochs(epochs)
 
@@ -70,12 +71,10 @@ class OrPipeline:
         raw.resample(ParallelPortDict.PREPRO_ARGS['resample'])
         logging.info(f"Resampled to {ParallelPortDict.PREPRO_ARGS['resample']} Hz")
 
-    def _handle_bad_channels(self, raw: mne.io.BaseRaw) -> None:
+    @staticmethod
+    def _handle_bad_channels(raw: mne.io.BaseRaw) -> None:
         raw.plot(block=True)
-        app = QApplication.instance() or QApplication([])
-        text, ok     = QInputDialog.getText(None, "Bad Channels", "Enter bad channel names separated by commas (e.g. Fp1,Cz):")
-        bad_channels = [ch.strip() for ch in text.split(',') if ch.strip()] if ok else []
-        raw.info['bads'] = bad_channels
+        bad_channels = raw.info['bads']
         raw.interpolate_bads(reset_bads=True)
         logging.info(f"Manual: interpolated bad channels {bad_channels}")
         print(f"Interpolated bad channels: {bad_channels}")
@@ -119,22 +118,44 @@ class OrPipeline:
             print(f"Skipping grab() save due to: {e}")
         reject_log.plot('horizontal')
         plt.savefig(self.fig_path / "Autoreject_Reject_LOG"); plt.close()
-        logging.info(f"Autoreject: removed {sum(reject_log.bad_epochs)} epochs")
+        bad_idx    = np.where(reject_log.bad_epochs)[0].tolist()
+        id_to_name = {v: k for k, v in ParallelPortDict.EVENT_DICT.items()}
+        bad_events = [id_to_name.get(epochs.events[i, 2], f"unknown({epochs.events[i, 2]})") for i in bad_idx]
+        logging.info(f"Autoreject: removed {len(bad_idx)} epochs — indices: {bad_idx}")
+        logging.info(f"Autoreject: removed event types: {bad_events}")
+        self._plot_autoreject_by_condition(bad_events)
         return epochs_ar
 
     def _final_resample_and_filtering(self, epochs: mne.Epochs) -> None:
         self._low_pass_filter(epochs)
         self._final_resample(epochs)
 
+    def _snapshot_log(self, saved_path: Path) -> None:
+        self._log_handler.flush()
+        shutil.copy2(self._log_path, saved_path.with_suffix('.log'))
+
     def _save_raw(self, raw: mne.io.BaseRaw) -> None:
         raw_fname = f'{self.subject_id}_filtered-raw.fif'
-        raw.save(self.results_path / raw_fname, overwrite=True)
-        logging.info(f"Raw saved to {self.results_path / raw_fname}")
+        raw_path  = self.results_path / raw_fname
+        raw.save(raw_path, overwrite=True)
+        logging.info(f"Raw saved to {raw_path}")
+        self._snapshot_log(raw_path)
 
     def _save_epochs(self, epochs: mne.Epochs, suffix: str = 'prepro') -> None:
-        ep_fname = f'{self.subject_id}_{suffix}-epo.fif'
-        epochs.save(self.results_path / ep_fname, overwrite=True)
-        logging.info(f"Epochs saved to {self.results_path / ep_fname}")
+        ep_fname  = f'{self.subject_id}_{suffix}-epo.fif'
+        ep_path   = self.results_path / ep_fname
+        epochs.save(ep_path, overwrite=True)
+        logging.info(f"Epochs saved to {ep_path}")
+        self._snapshot_log(ep_path)
+
+    def _plot_autoreject_by_condition(self, bad_events: list) -> None:
+        unique, counts = np.unique(bad_events, return_counts=True)
+        fig, ax = plt.subplots(figsize=(10, 4))
+        ax.bar(unique, counts)
+        ax.set(xlabel='Event type', ylabel='Rejected epochs', title='Autoreject — rejected epochs per condition')
+        plt.xticks(rotation=45, ha='right')
+        plt.tight_layout()
+        plt.savefig(self.fig_path / "Autoreject_by_condition.png"); plt.close()
 
     def plot_signal_snapshot(self, data, step_name: str) -> None:
         """Save a PSD + time-domain snapshot figure for a given pipeline step."""
