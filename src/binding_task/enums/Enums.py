@@ -162,7 +162,6 @@ class ParallelPortEnums:
 
     # binding learning parallel port numbers
     SHOW_BINDING_TRIALS = 41
-    STOP_BINDING_TRIALS = 42
     SHOW_DIFFICULTY_QUESTION = 43
     ANSWER_DIFFICULTY_QUESTION = 44
 

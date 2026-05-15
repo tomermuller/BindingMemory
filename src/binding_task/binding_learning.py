@@ -93,7 +93,6 @@ class BindingLearning:
 
         # after this function end there is a call to show nothing
         trial_times[TimeAttribute.FEATURE_DISAPPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
-        send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.STOP_BINDING_TRIALS)
 
     def _ask_difficulty_rating(self, trial_num: int, trial_times: dict):
         """ask the subject to rate how hard it was to remember the object (1=easy, 5=hard):
