@@ -34,6 +34,7 @@ class OrPipeline:
         self._save_raw(raw)
         epochs = self._make_epochs(raw)
         epochs = MetadataEnricher(self.path, self.subject_id).enrich(epochs, raw)
+        del raw
         self._save_epochs(epochs, suffix='initial')
         epochs = self._rereference(epochs)
         if do_auto_reject:
