@@ -87,8 +87,7 @@ class BindingLearning:
             3. show binding object (colored object on scene) for 3 seconds,
                recording OBJECT_APPEAR and sending SHOW_BINDING_TRIALS trigger
             4. record FEATURE_DISAPPEAR timestamp and send STOP_BINDING_TRIALS trigger"""
-        show_fixation(win=self.win, min_time=1.0, max_time=1.0)
-        show_nothing(win=self.win, min_time=1.0, max_time=2.0)
+        show_fixation(win=self.win, min_time=0.5, max_time=1.5)
         self._show_binding_object(block_index=block_index, trail_index=trial_index, trial_times=trial_times)
 
         # after this function end there is a call to show nothing

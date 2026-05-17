@@ -7,7 +7,8 @@ from pathlib import Path
 from datetime import datetime
 from src.binding_task.enums.Enums import Features, BindingAndTestEnums, ParallelPortEnums, Paths, StringEnums, \
     HebrewEnums, TimeAttribute
-from src.binding_task.utils import show_nothing, send_to_parallel_port, shuffle_trials
+from src.binding_task.utils import show_nothing, send_to_parallel_port, shuffle_trials, show_fixation
+
 
 class TestPhase:
     def __init__(self, win: psychopy.visual.window.Window, parallel_port: parallel.ParallelPort, categories: list,
@@ -62,9 +63,8 @@ class TestPhase:
             6. blank screen for 0.5 seconds
             7. for each reported category (randomized order), ask subject to choose the feature"""
         trial_answers = {}
-
-        pressed_during_object = self._show_object(image_path=image_path, trial_times=trial_times, is_example=is_example)
-        self._subject_retrival(trial_times=trial_times, trial_answers=trial_answers, is_example=is_example, pressed_during_object=pressed_during_object)
+        show_fixation(win=self.win, min_time=0.5, max_time=1.5)
+        self._show_object(image_path=image_path, trial_times=trial_times, trial_answers=trial_answers, is_example=is_example)
         show_nothing(win=self.win, min_time=0.5, max_time=0.5)
 
         if not trial_answers.get(StringEnums.RETRIVAL_SUCCESS):
@@ -82,9 +82,9 @@ class TestPhase:
 
         return trial_answers
 
-    def _show_object(self, image_path: Path, trial_times: dict, is_example: bool = False) -> bool:
-        """display object for 2s; after 0.5s mandatory viewing, accept a key press.
-           returns True if subject pressed during object display, False otherwise."""
+    def _show_object(self, image_path: Path, trial_times: dict, trial_answers: dict, is_example: bool = False) -> None:
+        """display object for 5s; after 0.5s mandatory viewing, accept a key press.
+           sets RETRIVAL_SUCCESS in trial_answers."""
         img = visual.ImageStim(self.win, image=image_path, size=(0.4, 0.4), pos=(0, 0))
         img.draw()
         self.win.flip()
@@ -100,37 +100,15 @@ class TestPhase:
             send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.START_RETRIVAL_TIME)
 
         event.clearEvents()
-        keys = event.waitKeys(maxWait=1.5)
+        keys = event.waitKeys(maxWait=5)
 
-        if keys is not None:
-            if not is_example:
-                trial_times[TimeAttribute.RETRIVAL_TIME] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
-                send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.ANSWER_ON_RETRIVAL_TIME)
-            return True
-        return False
-
-    def _subject_retrival(self, trial_times: dict, trial_answers: dict, is_example: bool = False, pressed_during_object: bool = False):
-        """if subject already pressed during object display, mark success and return.
-           otherwise show fixation for up to 5s and wait for key press."""
-        if pressed_during_object:
-            trial_answers[StringEnums.RETRIVAL_SUCCESS] = True
-            return
-
-        text = visual.TextStim(self.win, text="+", font=StringEnums.ARIAL_FONT, pos=(0, 0),
-                               height=BindingAndTestEnums.TEXT_HEIGHT, languageStyle='rtl', wrapWidth=1.8)
-        text.draw()
-
+        trial_answers[StringEnums.RETRIVAL_SUCCESS] = keys is not None
         if not is_example:
             trial_times[TimeAttribute.OBJECT_DISAPPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
-
-        self.win.flip()
-        event.clearEvents()
-        keys = event.waitKeys(maxWait=5.0)
-
-        if not is_example:
-            trial_times[TimeAttribute.RETRIVAL_TIME] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
-            send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.ANSWER_ON_RETRIVAL_TIME)
-        trial_answers[StringEnums.RETRIVAL_SUCCESS] = keys is not None
+            if keys is not None:
+                trial_times[TimeAttribute.RETRIVAL_TIME] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
+                send_to_parallel_port(parallel_port=self.parallel_port,
+                                      pulse_number=ParallelPortEnums.ANSWER_ON_RETRIVAL_TIME)
 
     def _subject_report_retrival_success(self, trial_times: dict, trial_answers: dict, is_example: bool = False) -> list:
         """show 3 options for what the subject remembers (color / scene / both).

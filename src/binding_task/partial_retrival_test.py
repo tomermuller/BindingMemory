@@ -9,7 +9,7 @@ import random
 from src.binding_task.enums.Enums import Features, Paths, StringEnums, BindingAndTestEnums, \
     ParallelPortEnums, TimeAttribute
 from src.binding_task.test_phase import TestPhase
-from src.binding_task.utils import show_nothing, send_to_parallel_port
+from src.binding_task.utils import show_nothing, send_to_parallel_port, show_fixation
 
 
 class PartialRetrivalTest(TestPhase):
@@ -53,10 +53,10 @@ class PartialRetrivalTest(TestPhase):
         retrival_category = random.choice(self.categories)
         trial_answers = {StringEnums.PROBE: retrival_category}
 
+        show_fixation(win=self.win, min_time=0.5, max_time=1.5)
         self._show_probe(retrival_category=retrival_category, trial_times=trial_times, is_example=is_example)
         show_nothing(win=self.win, min_time=0.3, max_time=0.3)
-        pressed_during_object = self._show_object(image_path=image_path, trial_times=trial_times, is_example=is_example)
-        self._subject_retrival(trial_times=trial_times, trial_answers=trial_answers, is_example=is_example, pressed_during_object=pressed_during_object)
+        self._show_object(image_path=image_path, trial_times=trial_times, trial_answers=trial_answers, is_example=is_example)
         show_nothing(win=self.win, min_time=0.5, max_time=0.5)
 
         if not trial_answers.get(StringEnums.RETRIVAL_SUCCESS):

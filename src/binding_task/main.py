@@ -1,5 +1,5 @@
 from psychopy import visual, event, parallel, gui
-from src.binding_task.enums.Enums import Features, Instruction, StringEnums, TaskManage
+from src.binding_task.enums.Enums import Features, Instruction, StringEnums, TaskManage, MemoryStrategyEnums, Paths
 from src.binding_task.binding_learning import BindingLearning
 from src.binding_task.functional_localizer import FunctionalLocalizer
 from src.binding_task.partial_retrival_test import PartialRetrivalTest
@@ -40,10 +40,11 @@ class BindingTask:
             7. goodbye instruction"""
         self._general_setting()
         show_instruction(win=self.win, instruction=Instruction.WELLCOME)
-        self._first_stage()
+        #self._first_stage()
         binding, test = self._second_stage()
         self._save_unified_file_for_all_data(binding=binding, test=test)
         self._third_stage()
+        self._ask_memory_strategy()
         show_instruction(win=self.win, instruction=Instruction.GOODBYE, time=10)
 
     @staticmethod
@@ -117,6 +118,45 @@ class BindingTask:
         break_game = BreakGame(win=self.win, parallel_port=self.parallel_port)
         break_game.run()
         test.run_block(block_index=block)
+
+    def _ask_memory_strategy(self) -> None:
+        event.Mouse(visible=True)
+        title, labels, sliders = self._build_strategy_ui()
+        confirm = visual.TextStim(self.win, text="לחץ על כל מקש לאישור", pos=(0, -0.85),
+                                  font=StringEnums.ARIAL_FONT, languageStyle='rtl')
+        confirmed = False
+        while not confirmed:
+            title.draw()
+            for lbl in labels: lbl.draw()
+            for slider in sliders: slider.draw()
+            if all(s.rating is not None for s in sliders):
+                confirm.draw()
+                if event.getKeys(): confirmed = True
+            self.win.flip()
+        ratings = {MemoryStrategyEnums.VISUALIZATION_MEMORY: sliders[0].rating,
+                   MemoryStrategyEnums.SEMANTIC_MEMORY:      sliders[1].rating,
+                   MemoryStrategyEnums.ASSOCIATION_MEMORY:   sliders[2].rating}
+        self._save_strategy(ratings)
+
+    def _save_strategy(self, ratings: dict) -> None:
+        save_path = Path(f"{Paths.SAVE_DATA_FOLDER}subject_{self.subject_id}/strategy/")
+        save_path.mkdir(parents=True, exist_ok=True)
+        pd.DataFrame([ratings]).to_csv(save_path / f"strategy_{self.subject_id}.csv", index=False)
+
+    def _build_strategy_ui(self):
+        title     = visual.TextStim(self.win, text=MemoryStrategyEnums.TITLE, pos=(0, 0.9),
+                                    height=0.06, languageStyle='rtl', font=StringEnums.ARIAL_FONT)
+        questions   = [MemoryStrategyEnums.VISUALIZATION_MEMORY,
+                       MemoryStrategyEnums.SEMANTIC_MEMORY,
+                       MemoryStrategyEnums.ASSOCIATION_MEMORY]
+        y_positions = [0.55, 0.0, -0.55]
+        labels, sliders = [], []
+        for q, y in zip(questions, y_positions):
+            labels.append(visual.TextStim(self.win, text=q, pos=(0, y + 0.15), height=0.05,
+                                          languageStyle='rtl', font=StringEnums.ARIAL_FONT))
+            sliders.append(visual.Slider(self.win, ticks=range(1, 11), labels=['1', '10'],
+                                         granularity=1, style='rating', pos=(0, y), size=(1.2, 0.07)))
+        return title, labels, sliders
 
     def _save_unified_file_for_all_data(self, binding: BindingLearning, test: TestPhase):
         """Save a single combined CSV with one row per binding trial, merging binding and test data.

@@ -265,6 +265,16 @@ class Instruction:
     GOODBYE = "תודה רבה על השתתפותך בניסוי. נא לקרוא למריץ הניסוי. ניתן לשאול אותו/ה שאלות על הניסויֿ"
 
 
+class MemoryStrategyEnums:
+    TITLE                = ("אנא בחר מ1-10 עד כמה את/ה מזדהה עם כל אחד מהמשפטים\n"
+                            " הבאים לגבי אסטרטגיית הזכרון בה השתמשת/ה")
+    VISUALIZATION_MEMORY = "דמיינתי מחדש את התמונה שהופיעה לי בזמן הלמידה"
+    SEMANTIC_MEMORY      = ("שיננתי את הפריטים שמרכיבים את האובייקט.\n"
+                            " לדוגמא: רובוט-אדום-סלון רובוט-אדום-סלון רובוט-אדום-סלון")
+    ASSOCIATION_MEMORY   = ("המצאתי סיפור עבור 3 הפריטים.\n"
+                            " לדוגמא: הirobot האדום מנקה את הסלון")
+
+
 class BreakGameEnums:
     GAME_DURATION = 100  # seconds
     CHANGE_INTERVAL = 10  # seconds
