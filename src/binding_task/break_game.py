@@ -24,15 +24,34 @@ class BreakGame:
         self.num_changes = self.game_duration // self.change_interval
         self.rect = visual.Rect(self.win, width=0.5, height=0.5, fillColor=[self.brightness] * 3)
 
+    def run_example(self):
+        """run a 10-second example of the break game:
+            show one brighter change then one darker change (5 seconds each),
+            then ask the subject how many times it was brighter"""
+        show_instruction(win=self.win, instruction=Instruction.BREAK_GAME_EXAMPLE_INSTRUCTION)
+
+        for brightness in [BreakGameEnums.BASE_BRIGHTNESS + BreakGameEnums.TRIAL_CHANGE,
+                           BreakGameEnums.BASE_BRIGHTNESS - BreakGameEnums.TRIAL_CHANGE]:
+            self.rect.fillColor = [brightness] * 3
+            self.rect.draw()
+            self.win.flip()
+            core.wait(0.5)
+            self.rect.fillColor = [BreakGameEnums.BASE_BRIGHTNESS] * 3
+            self.rect.draw()
+            self.win.flip()
+            core.wait(4.5)
+
+        self.subject_answer = 1
+        self._get_subject_answer_in_break_game()
+        show_instruction(win=self.win, instruction=Instruction.BREAK_GAME_FINISH)
+
     def run(self):
         """run the break game:
-            1. send START_BREAK_GAME trigger
-            2. show instructions
-            3. for each change interval: show rectangle and set next brightness randomly
-            4. ask subject how many times the rectangle was brighter
-            5. show finish instruction
+            1. show instructions
+            2. for each change interval: show rectangle and set next brightness randomly
+            3. ask subject how many times the rectangle was brighter
+            4. show finish instruction
             output: (subject_answer, brighter_count)"""
-        send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.START_BREAK_GAME)
 
         show_instruction(win=self.win, instruction=Instruction.BREAK_GAME_INSTRUCTION)
         for _ in range(self.num_changes):

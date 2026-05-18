@@ -7,7 +7,8 @@ from pathlib import Path
 from datetime import datetime
 from src.binding_task.enums.Enums import Features, BindingAndTestEnums, ParallelPortEnums, Paths, StringEnums, \
     HebrewEnums, TimeAttribute
-from src.binding_task.utils import show_nothing, send_to_parallel_port, shuffle_trials
+from src.binding_task.utils import show_nothing, send_to_parallel_port, shuffle_trials, show_fixation
+
 
 class TestPhase:
     def __init__(self, win: psychopy.visual.window.Window, parallel_port: parallel.ParallelPort, categories: list,
@@ -37,12 +38,10 @@ class TestPhase:
     def run_block(self, block_index: int):
         """run all test trials in a single block:
             input: block_index: index of the current block
-            1. send START_TESH_PHASE_BLOCK trigger
-            2. for each trial in the block:
+            1. for each trial in the block:
                 a. run the test (show object, ask questions)
                 b. write subject answers to self.subject_answers
                 c. save temporary backup"""
-        send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.START_TESH_PHASE_BLOCK)
 
         for trial_index in range(len(self.blocks[block_index])):
             trial_times = {}
@@ -64,9 +63,8 @@ class TestPhase:
             6. blank screen for 0.5 seconds
             7. for each reported category (randomized order), ask subject to choose the feature"""
         trial_answers = {}
-
-        self._show_object(image_path=image_path, trial_times=trial_times, is_example=is_example)
-        self._subject_retrival(trial_times=trial_times, trial_answers=trial_answers, is_example=is_example)
+        show_fixation(win=self.win, min_time=0.5, max_time=1.5)
+        self._show_object(image_path=image_path, trial_times=trial_times, trial_answers=trial_answers, is_example=is_example)
         show_nothing(win=self.win, min_time=0.5, max_time=0.5)
 
         if not trial_answers.get(StringEnums.RETRIVAL_SUCCESS):
@@ -84,36 +82,33 @@ class TestPhase:
 
         return trial_answers
 
-    def _show_object(self, image_path: Path, trial_times: dict, is_example: bool = False):
-        """display the object image on screen for 2 seconds, record OBJECT_APPEAR timestamp, and send SHOW_OBJECT_IN_TEST_TRIAL trigger"""
+    def _show_object(self, image_path: Path, trial_times: dict, trial_answers: dict, is_example: bool = False) -> None:
+        """display object for 5s; after 0.5s mandatory viewing, accept a key press.
+           sets RETRIVAL_SUCCESS in trial_answers."""
         img = visual.ImageStim(self.win, image=image_path, size=(0.4, 0.4), pos=(0, 0))
         img.draw()
+        self.win.flip()
 
         if not is_example:
             trial_times[TimeAttribute.OBJECT_APPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
             send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.SHOW_OBJECT_IN_TEST_TRIAL)
-        self.win.flip()
-        core.wait(2.0)
 
-    def _subject_retrival(self, trial_times: dict, trial_answers: dict, is_example: bool = False):
-        """show blank screen for up to 3 seconds; stops early if subject presses any arrow key.
-           saves RETRIVAL_TIME to trial_times.
-           returns True if subject pressed a key, False if timed out."""
-        text = visual.TextStim(self.win, text="+", font=StringEnums.ARIAL_FONT, pos=(0, 0),
-                               height=BindingAndTestEnums.TEXT_HEIGHT, languageStyle='rtl', wrapWidth=1.8)
-        text.draw()
+        core.wait(0.5)
 
         if not is_example:
-            trial_times[TimeAttribute.OBJECT_DISAPPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
             trial_times[TimeAttribute.START_RETRIVAL_TIME] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
             send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.START_RETRIVAL_TIME)
 
-        self.win.flip()
-        keys = event.waitKeys(maxWait=3.0)
-        if not is_example:
-            trial_times[TimeAttribute.RETRIVAL_TIME] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
-            send_to_parallel_port(parallel_port=self.parallel_port,pulse_number=ParallelPortEnums.ANSWER_ON_RETRIVAL_TIME)
+        event.clearEvents()
+        keys = event.waitKeys(maxWait=5)
+
         trial_answers[StringEnums.RETRIVAL_SUCCESS] = keys is not None
+        if not is_example:
+            trial_times[TimeAttribute.OBJECT_DISAPPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
+            if keys is not None:
+                trial_times[TimeAttribute.RETRIVAL_TIME] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
+                send_to_parallel_port(parallel_port=self.parallel_port,
+                                      pulse_number=ParallelPortEnums.ANSWER_ON_RETRIVAL_TIME)
 
     def _subject_report_retrival_success(self, trial_times: dict, trial_answers: dict, is_example: bool = False) -> list:
         """show 3 options for what the subject remembers (color / scene / both).

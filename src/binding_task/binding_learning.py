@@ -46,6 +46,7 @@ class BindingLearning:
                 f. show blank screen for 3 second before next example"""
         for (example_object, color, scene) in BindingAndTestEnums.BINDING_EXAMPLES:
             unified_object = self._create_unified_object(object_image=example_object, color=color, scene_image=scene)
+            Path(Paths.BINDING_EXAMPLE).parent.mkdir(parents=True, exist_ok=True)
             unified_object.save(Paths.BINDING_EXAMPLE)
             unified_object.close()
 
@@ -61,14 +62,11 @@ class BindingLearning:
     def run_block(self, block_index: int):
         """run all trials in a single block of the binding learning phase:
             input: block_index: index of the current block (0 to NUMBER_OF_BLOCKS-1)
-            1. send START_BINDING_LEARNING_BLOCK trigger
-            2. for each trial in the block:
+            1. for each trial in the block:
                 a. show binding learning stimulus (fixation + colored object on scene)
                 b. blank screen for 1-2 seconds
                 c. ask difficulty rating (1-5)
                 d. temp save"""
-
-        send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.START_BINDING_LEARNING_BLOCK)
 
         trials_per_block = TaskManage.NUMBER_OF_BINDING_TRIALS // TaskManage.NUMBER_OF_BLOCKS
         for trial_index in range(trials_per_block):
@@ -89,13 +87,11 @@ class BindingLearning:
             3. show binding object (colored object on scene) for 3 seconds,
                recording OBJECT_APPEAR and sending SHOW_BINDING_TRIALS trigger
             4. record FEATURE_DISAPPEAR timestamp and send STOP_BINDING_TRIALS trigger"""
-        show_fixation(win=self.win, min_time=1.0, max_time=1.0)
-        show_nothing(win=self.win, min_time=1.0, max_time=2.0)
+        show_fixation(win=self.win, min_time=0.5, max_time=1.5)
         self._show_binding_object(block_index=block_index, trail_index=trial_index, trial_times=trial_times)
 
         # after this function end there is a call to show nothing
         trial_times[TimeAttribute.FEATURE_DISAPPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
-        send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.STOP_BINDING_TRIALS)
 
     def _ask_difficulty_rating(self, trial_num: int, trial_times: dict):
         """ask the subject to rate how hard it was to remember the object (1=easy, 5=hard):
@@ -180,7 +176,7 @@ class BindingLearning:
         """color the object in the color input:
             flood-fills background transparent from all 4 corners with a threshold to catch
             near-white pixels, preserves dark outlines (r,g,b < 50), and colors all remaining
-            pixels with the given color at alpha 210"""
+            pixels with the given color at alpha 255"""
         image = Image.open(input_path).convert('RGBA')
         width, height = image.size
 
@@ -196,7 +192,7 @@ class BindingLearning:
                 elif r < 50 and g < 50 and b < 50:
                     continue
                 else:
-                    pixels[i, j] = (*color, 210)
+                    pixels[i, j] = (*color, 255)
 
         return image
 

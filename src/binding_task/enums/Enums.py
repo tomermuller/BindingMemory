@@ -146,12 +146,8 @@ class HebrewEnums:
 class ParallelPortEnums:
 
     # general
-    START_RECORD_BASELINE = 1
-    START_FUNCTIONAL_LOCALIZER = 2
-    START_BINDING_LEARNING_BLOCK = 3
-    START_TESH_PHASE_BLOCK = 4
-    START_BREAK_GAME = 5
-    START_PARTIAL_RETRIVAL = 6
+    START_RECORD_REST = 1
+    REST_NO_FIXATION      = 2
 
     # functional localizer parallel port numbers
     SHOW_RED = 11
@@ -162,20 +158,11 @@ class ParallelPortEnums:
     SHOW_BATHROOM = 17
     SHOW_KITCHEN = 18
 
-    STOP_RED = 21
-    STOP_GREEN = 22
-    STOP_YELLOW = 23
-
-    STOP_LIVING_ROOM = 26
-    STOP_BATHROOM = 27
-    STOP_KITCHEN = 28
-
     SHOW_ATTENTION_QUESTION = 31
     ANSWER_ATTENTION_QUESTION = 32
 
     # binding learning parallel port numbers
     SHOW_BINDING_TRIALS = 41
-    STOP_BINDING_TRIALS = 42
     SHOW_DIFFICULTY_QUESTION = 43
     ANSWER_DIFFICULTY_QUESTION = 44
 
@@ -198,13 +185,6 @@ class ParallelPortEnums:
                                   Features.BATHROOM: SHOW_BATHROOM,
                                   Features.KITCHEN: SHOW_KITCHEN}
 
-    FEATURE_STOP_TO_PULSE_CODE = {Features.GREEN: STOP_GREEN,
-                                  Features.YELLOW: STOP_YELLOW,
-                                  Features.RED: STOP_RED,
-                                  Features.LIVING_ROOM: STOP_LIVING_ROOM,
-                                  Features.BATHROOM: STOP_BATHROOM,
-                                  Features.KITCHEN: STOP_KITCHEN}
-
     CATEGORY_ANSWERS_SHOW_TO_PULSE_CODE = {Features.SCENES: SHOW_SCENES_ANSWERS,
                                             Features.COLORS: SHOW_COLORS_ANSWERS}
 
@@ -213,7 +193,6 @@ class ParallelPortEnums:
 
     # partial retrieval phase parallel port numbers
     SHOW_PROBE = 71
-    STOP_PROBE = 72
     SHOW_PARTIAL_RETRIVAL_REMEMBER_QUESTION = 73
     ANSWER_PARTIAL_RETRIVAL_REMEMBER_QUESTION = 74
 
@@ -226,9 +205,11 @@ class Instruction:
                 "3.שלב המבחן החלקי.\n\n"
                 "(אנא לחץ/י על כל כפתור כדי להתחיל את הדוגמאות)")
 
-    BASELINE = ("אך קודם, ב5 דקות הקרובות אנחנו נקליט את גלי המוח שלך במצב מנוחה\n"
-                "אנא השתדל להתמקד ב + שיופיע על המסך. לאחר מכן יתחיל הניסוי\n\n"
-                "(אנא לחץ/י על כל כפתור כדי להתחיל את הדוגמאות)")
+    REST_RECORD = ("ב6 דקות הקרובות אנחנו נקליט את גלי המוח שלך במצב מנוחה\n"
+                   "למשך 3 דקות יופיע +. נסה להתמקד בו.\n\n"
+                   "לאחר מכן הוא ייעלם ל3 דקות נוספות. \n\n"
+                   "לאחר מכן יתחיל הניסוי\n\n"
+                   "(אנא לחץ/י על כל כפתור כדי להתחיל את ההקלטה)")
 
 
     FIRST_PHASE_INSTRUCTION = ("\n\nבשלב הראשון תראה/י תמונות החוזרות על עצמן."
@@ -249,6 +230,11 @@ class Instruction:
                                "(אנא לחץ/י על כל כפתור כדי להתחיל את הדוגמאות)")
 
     BREAK_GAME_INSTRUCTION = ("להלן משחקון של דקה וחצי: המלבן המשתנה.\n"
+                              "כל כמה שניות המלבן יהפוך להיות כהה או בהיר יותר ויחזור למצב ההתחלה.\n"
+                              "עליך לספור כמה פעמים המלבן הופך להיות בהיר יותר מאשר מצבו בהתחלה.\n"
+                              "אנא לחץ/י על כל כפתור כדי להתחיל.")
+
+    BREAK_GAME_EXAMPLE_INSTRUCTION = ("להלן משחקון של כ10 שניות: המלבן המשתנה.\n"
                               "כל כמה שניות המלבן יהפוך להיות כהה או בהיר יותר ויחזור למצב ההתחלה.\n"
                               "עליך לספור כמה פעמים המלבן הופך להיות בהיר יותר מאשר מצבו בהתחלה.\n"
                               "אנא לחץ/י על כל כפתור כדי להתחיל.")
@@ -277,6 +263,16 @@ class Instruction:
     BREAK = "הפסקה!\n אנא לחץ/י על כל כפתור כאשר אתה מוכן לחזור לניסוי."
 
     GOODBYE = "תודה רבה על השתתפותך בניסוי. נא לקרוא למריץ הניסוי. ניתן לשאול אותו/ה שאלות על הניסויֿ"
+
+
+class MemoryStrategyEnums:
+    TITLE                = ("אנא בחר מ1-10 עד כמה את/ה מזדהה עם כל אחד מהמשפטים\n"
+                            " הבאים לגבי אסטרטגיית הזכרון בה השתמשת/ה")
+    VISUALIZATION_MEMORY = "דמיינתי מחדש את התמונה שהופיעה לי בזמן הלמידה"
+    SEMANTIC_MEMORY      = ("שיננתי את הפריטים שמרכיבים את האובייקט.\n"
+                            " לדוגמא: רובוט-אדום-סלון רובוט-אדום-סלון רובוט-אדום-סלון")
+    ASSOCIATION_MEMORY   = ("המצאתי סיפור עבור 3 הפריטים.\n"
+                            " לדוגמא: הirobot האדום מנקה את הסלון")
 
 
 class BreakGameEnums:

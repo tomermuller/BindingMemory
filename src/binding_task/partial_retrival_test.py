@@ -9,7 +9,7 @@ import random
 from src.binding_task.enums.Enums import Features, Paths, StringEnums, BindingAndTestEnums, \
     ParallelPortEnums, TimeAttribute
 from src.binding_task.test_phase import TestPhase
-from src.binding_task.utils import show_nothing, send_to_parallel_port
+from src.binding_task.utils import show_nothing, send_to_parallel_port, show_fixation
 
 
 class PartialRetrivalTest(TestPhase):
@@ -30,9 +30,7 @@ class PartialRetrivalTest(TestPhase):
 
     def run(self):
         """run all partial retrieval trials:
-            1. send START_PARTIAL_RETRIVAL trigger
-            2. for each trial: run test, write answers, temp save"""
-        send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.START_PARTIAL_RETRIVAL)
+            1. for each trial: run test, write answers, temp save"""
         for trial_index, object_path in enumerate(self.blocks[0]):
             trial_times = {}
             subject_answer = self.run_test(image_path=object_path, trial_times=trial_times)
@@ -55,10 +53,10 @@ class PartialRetrivalTest(TestPhase):
         retrival_category = random.choice(self.categories)
         trial_answers = {StringEnums.PROBE: retrival_category}
 
+        show_fixation(win=self.win, min_time=0.5, max_time=1.5)
         self._show_probe(retrival_category=retrival_category, trial_times=trial_times, is_example=is_example)
         show_nothing(win=self.win, min_time=0.3, max_time=0.3)
-        self._show_object(image_path=image_path, trial_times=trial_times, is_example=is_example)
-        self._subject_retrival(trial_times=trial_times, trial_answers=trial_answers, is_example=is_example)
+        self._show_object(image_path=image_path, trial_times=trial_times, trial_answers=trial_answers, is_example=is_example)
         show_nothing(win=self.win, min_time=0.5, max_time=0.5)
 
         if not trial_answers.get(StringEnums.RETRIVAL_SUCCESS):
@@ -74,7 +72,7 @@ class PartialRetrivalTest(TestPhase):
             input: retrival_category: the category to probe (Colors or Scenes)
                    trial_times: dict to store timing data
                    is_example: if True, skip EEG triggers
-            records PROBE_APPEAR and PROBE_DISAPPEAR timestamps and sends SHOW_PROBE / STOP_PROBE triggers"""
+            records PROBE_APPEAR and PROBE_DISAPPEAR timestamps and sends SHOW_PROBE trigger"""
         retrival_probe = Features.PROBE_TO_PATH[retrival_category]
         img = visual.ImageStim(self.win, image=retrival_probe, size=(0.4, 0.4), pos=(0, 0))
         img.draw()
@@ -88,7 +86,6 @@ class PartialRetrivalTest(TestPhase):
 
         if not is_example:
             trial_times[TimeAttribute.PROBE_DISAPPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
-            send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.STOP_PROBE)
 
     def _subject_report_retrival_success(self, trial_times: dict, trial_answers: dict, is_example: bool = False) -> bool:
         """show remember / don't remember options (left/right arrow keys):

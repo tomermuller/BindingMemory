@@ -7,7 +7,7 @@ import psychopy
 from psychopy import visual, core, event, parallel
 from src.binding_task.enums.Enums import StringEnums, ParallelPortEnums, Features, Instruction, TimeAttribute, \
     HebrewEnums, Paths, TaskManage, BindingAndTestEnums
-from src.binding_task.utils import shuffle_trials, show_nothing, show_fixation, show_instruction, send_to_parallel_port
+from src.binding_task.utils import shuffle_trials, show_nothing, show_fixation, show_instruction, send_to_parallel_port, compute_avg_scene_color
 
 class FunctionalLocalizer:
 
@@ -36,16 +36,16 @@ class FunctionalLocalizer:
         self.all_trials = shuffle_trials(items=self.all_trials, max_consecutive=2)
 
         self.feature_to_image_file = {key: value for category in self.category_to_features.values() for key, value in category.items()}
+        self.avg_scene_color = compute_avg_scene_color()
+        self.scene_frame = visual.Rect(self.win, width=0.4, height=0.4, units='height', fillColor=self.avg_scene_color, lineColor=None)
 
     def run(self):
         """run the functional localizer:
             1. run the examples
-            2. send START_FUNCTIONAL_LOCALIZER trigger
-            3. run all trials
-            4. show a rest break instruction every 50 trials"""
+            2. run all trials
+            3. show a rest break instruction every 50 trials"""
 
         self._run_examples()
-        send_to_parallel_port(parallel_port=self.parallel_port,pulse_number=ParallelPortEnums.START_FUNCTIONAL_LOCALIZER)
 
         for trial_index, trial_feature in enumerate(self.all_trials):
             self._run_trial(trial_index=trial_index, trial_feature=trial_feature)
@@ -80,16 +80,20 @@ class FunctionalLocalizer:
             2. blank screen for 1 to 2 seconds
             3. show the feature image for 1.5 second
             4. blank screen for 1 to 2 seconds"""
-        show_fixation(win=self.win, min_time=1.0, max_time=1.0)
-        show_nothing(win=self.win, min_time=1.0, max_time=2.0)
+        show_fixation(win=self.win, min_time=0.5, max_time=1.5)
         self._show_feature(trial_feature=trial_feature, trial_times=trial_times, is_example=is_example)
         show_nothing(win=self.win, min_time=1.0, max_time=2.0)
 
     def _show_feature(self, trial_feature: str, trial_times: dict = None, is_example: bool = False):
         """display the feature image on screen for 1.5 seconds and record timing.
-            color features are displayed at size 0.33, all other features at size 1."""
-        size = 0.33 if trial_feature in Features.COLOR_TO_IMAGE else 1
-        img = visual.ImageStim(self.win, image=str(self.feature_to_image_file[trial_feature]), size=size)
+            color features are displayed at size 0.5, all other features at size 1."""
+        if trial_feature in Features.COLOR_TO_IMAGE:
+            self.scene_frame.draw()
+            size = (0.33, 0.33)
+            img = visual.ImageStim(self.win, image=str(self.feature_to_image_file[trial_feature]), size=size, units='height', pos=(0, 0))
+        else:
+            size = (1, 1)
+            img = visual.ImageStim(self.win, image=str(self.feature_to_image_file[trial_feature]), size=size, pos=(0, 0))
         img.draw()
 
         if not is_example:
@@ -102,7 +106,6 @@ class FunctionalLocalizer:
         # after this function finished, there is a call to show nothing
         if not is_example:
             trial_times[TimeAttribute.FEATURE_DISAPPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
-            send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.FEATURE_STOP_TO_PULSE_CODE[trial_feature])
 
     def _attention_question(self, trial_index: int, trial_feature: str, trial_times: dict):
         """run the attention question for a single trial:
@@ -198,6 +201,21 @@ class FunctionalLocalizer:
 
         answer_df = self.convert_answer_to_df()
         answer_df.to_csv(f'{functional_localizer_folder}subject_{self.subject_id}_{time}_function_localizer_stage.csv')
+
+    def save_feature_screenshots(self, save_folder: str = "features"):
+        """render each feature exactly as it appears in the localizer and save a screenshot:
+            for each unique feature: draw the stimulus (with scene_frame if color), capture, and save to save_folder"""
+        Path(save_folder).mkdir(parents=True, exist_ok=True)
+        for feature, image_file in self.feature_to_image_file.items():
+            if feature in Features.COLOR_TO_IMAGE:
+                self.scene_frame.draw()
+                size = (0.33, 0.33)
+            else:
+                size = (1, 1)
+            visual.ImageStim(self.win, image=str(image_file), size=size, pos=(0, 0)).draw()
+            self.win.flip()
+            self.win.getMovieFrame()
+            self.win.saveMovieFrames(str(Path(save_folder) / f"{feature}_frame_full_size.png"))
 
     def convert_answer_to_df(self):
         """convert correctness_score list to pandas DataFrame with one row per trial"""
