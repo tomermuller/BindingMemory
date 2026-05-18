@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 import mne
-from src.analysis.enums.analysis_enums import MetadataConfig, StageEnum
+from src.analysis.enums.analysis_enums import MetadataConfig, StageEnum, Paths
 
 
 class MetadataEnricher:
@@ -22,7 +22,7 @@ class MetadataEnricher:
 
     def _load_behavioral_csvs(self) -> tuple:
         """Load and sort the three behavioral DataFrames for this subject."""
-        meta_path = self.path / f"subject {self.subject_id}" / "META DATA"
+        meta_path = self.path / f"subject {self.subject_id}" / Paths.META_DATA_FOLDER
         fl_df     = self._read_first_csv(meta_path / MetadataConfig.FL_CSV_FOLDER)
         fl_df     = fl_df.sort_values(MetadataConfig.FL_SORT_COL).reset_index(drop=True)
         combined  = self._read_first_csv(meta_path / MetadataConfig.COMBINED_CSV_FOLDER)
