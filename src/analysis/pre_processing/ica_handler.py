@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 import mne
 from mne_icalabel import label_components
-from src.analysis.enums.analysis_enums import ParallelPortDict
+from src.analysis.enums.analysis_enums import PreproArgs
 
 
 class ICAHandler:
@@ -27,7 +27,7 @@ class ICAHandler:
         return self.epochs
 
     def _auto_apply(self, ica: mne.preprocessing.ICA, labels: list) -> None:
-        exclude_idx = [i for i, lbl in enumerate(labels) if lbl in ParallelPortDict.PREPRO_ARGS['drop ica']]
+        exclude_idx = [i for i, lbl in enumerate(labels) if lbl in PreproArgs.DROP_ICA]
         ica.apply(self.epochs, exclude=exclude_idx)
         ica.plot_overlay(self.epochs.average(), exclude=exclude_idx)
         plt.savefig(self.fig_path / "ICA_Evoked_Overlay.png"); plt.close()
@@ -37,7 +37,7 @@ class ICAHandler:
                       probs: list, epochs_for_ica: mne.Epochs) -> None:
         for i, (lbl, prob) in enumerate(zip(labels, probs)):
             print(f"  IC{i:>2}: {lbl} ({float(np.max(np.atleast_1d(prob))):.0%})")
-        ica.exclude = [i for i, lbl in enumerate(labels) if lbl in ParallelPortDict.PREPRO_ARGS['drop ica']]
+        ica.exclude = [i for i, lbl in enumerate(labels) if lbl in PreproArgs.DROP_ICA]
         plt.show(block=True)
         plt.close()
         ica.plot_sources(epochs_for_ica, block=True)
@@ -82,7 +82,7 @@ class ICAHandler:
         for idx in range(n_show):
             mne.viz.plot_topomap(components[:, idx], epochs_for_ica.info, axes=axes[idx], show=False)
             lbl   = labels[idx]
-            color = 'red' if lbl in ParallelPortDict.PREPRO_ARGS['drop ica'] else 'green'
+            color = 'red' if lbl in PreproArgs.DROP_ICA else 'green'
             conf = float(np.max(np.atleast_1d(probs[idx])))
             axes[idx].set_title(f"IC{idx}: {lbl}\n{conf:.0%}", fontsize=8, color=color)
         for idx in range(n_show, len(axes)):

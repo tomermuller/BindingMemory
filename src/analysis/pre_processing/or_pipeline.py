@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 import mne
 from autoreject import AutoReject
-from src.analysis.enums.analysis_enums import ParallelPortDict
+from src.analysis.enums.analysis_enums import ParallelPortDict, PreproArgs
 from src.analysis.pre_processing.metadata_enrichment import MetadataEnricher
 from src.analysis.pre_processing.ica_handler import ICAHandler
 
@@ -17,12 +17,13 @@ class OrPipeline:
         self.eeg_path     = self.path / f"subject {self.subject_id}" / "EEG" / "experiment"
         self.results_path = self.path / f"subject {self.subject_id}" / "post process"
         self.fig_path     = self.path / f"subject {self.subject_id}" / "figures"
+        self._log_path = self.results_path / f"{self.subject_id}_preprocessing.log"
+        self._log_handler = None
         self.results_path.mkdir(parents=True, exist_ok=True)
         self.fig_path.mkdir(parents=True, exist_ok=True)
 
     def run(self, do_ica: bool = True, do_auto_reject: bool = False):
-        self._log_path   = self.results_path / f"{self.subject_id}_preprocessing.log"
-        file_handler     = logging.FileHandler(self._log_path)
+        file_handler = logging.FileHandler(self._log_path)
         file_handler.setLevel(logging.INFO)
         self._log_handler = file_handler
         logging.getLogger().addHandler(file_handler)
@@ -69,8 +70,8 @@ class OrPipeline:
         self._move_out_emg_electrode(raw)
         self._high_pass_filter(raw)
         self._notch_filter(raw)
-        raw.resample(ParallelPortDict.PREPRO_ARGS['resample'])
-        logging.info(f"Resampled to {ParallelPortDict.PREPRO_ARGS['resample']} Hz")
+        raw.resample(PreproArgs.RESAMPLE)
+        logging.info(f"Resampled to {PreproArgs.RESAMPLE} Hz")
 
     @staticmethod
     def _handle_bad_channels(raw: mne.io.BaseRaw) -> None:
@@ -95,12 +96,14 @@ class OrPipeline:
     def _make_epochs(raw: mne.io.BaseRaw) -> mne.Epochs:
         events_from_annot, _ = mne.events_from_annotations(raw)
         selected_events = np.array([x for x in events_from_annot if x[2] in ParallelPortDict.EVENT_DICT.values()])
-        logging.info(f"Found {len(selected_events)} events for epoching (tmin={ParallelPortDict.PREPRO_ARGS['tmin']}, tmax={ParallelPortDict.PREPRO_ARGS['tmax']})")
         metadata, _, _ = mne.epochs.make_metadata(selected_events, event_id=ParallelPortDict.EVENT_DICT,
                                                    tmin=0, tmax=0, sfreq=raw.info['sfreq'])
+
+        logging.info(f"Found {len(selected_events)} events for epoching (tmin={PreproArgs.TMIN}, tmax={PreproArgs.TMAX})")
+
         return mne.Epochs(raw, events=selected_events, event_id=ParallelPortDict.EVENT_DICT,
-                          tmin=ParallelPortDict.PREPRO_ARGS['tmin'], tmax=ParallelPortDict.PREPRO_ARGS['tmax'],
-                          baseline=ParallelPortDict.PREPRO_ARGS['baseline'], preload=True,
+                          tmin=PreproArgs.TMIN, tmax=PreproArgs.TMAX,
+                          baseline=PreproArgs.BASELINE, preload=True,
                           detrend=0, metadata=metadata, on_missing='warn')
 
     @staticmethod
@@ -157,22 +160,6 @@ class OrPipeline:
         plt.xticks(rotation=45, ha='right')
         plt.tight_layout()
         plt.savefig(self.fig_path / "Autoreject_by_condition.png"); plt.close()
-
-    def plot_signal_snapshot(self, data, step_name: str) -> None:
-        """Save a PSD + time-domain snapshot figure for a given pipeline step."""
-        fig, axes = plt.subplots(1, 2, figsize=(16, 4))
-        data.compute_psd().plot(axes=axes[0], show=False)
-        axes[0].set_title(f'PSD — {step_name}')
-        if isinstance(data, mne.io.BaseRaw):
-            segment = data.get_data(picks='eeg', start=0, stop=int(data.info['sfreq'] * 10))
-            times   = np.linspace(0, 10, segment.shape[1])
-        else:
-            segment = data.get_data(picks='eeg').mean(axis=0)
-            times   = data.times
-        axes[1].plot(times, segment.T, color='steelblue', alpha=0.3, linewidth=0.5)
-        axes[1].set(xlabel='Time (s)', ylabel='Amplitude (V)', title=f'Signal — {step_name}')
-        plt.tight_layout()
-        plt.savefig(self.fig_path / f"snapshot_{step_name.replace(' ', '_')}.png"); plt.close()
 
     @staticmethod
     def _high_pass_filter(raw: mne.io.BaseRaw, l_freq: float = 0.1) -> None:

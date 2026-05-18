@@ -202,21 +202,6 @@ class FunctionalLocalizer:
         answer_df = self.convert_answer_to_df()
         answer_df.to_csv(f'{functional_localizer_folder}subject_{self.subject_id}_{time}_function_localizer_stage.csv')
 
-    def save_feature_screenshots(self, save_folder: str = "features"):
-        """render each feature exactly as it appears in the localizer and save a screenshot:
-            for each unique feature: draw the stimulus (with scene_frame if color), capture, and save to save_folder"""
-        Path(save_folder).mkdir(parents=True, exist_ok=True)
-        for feature, image_file in self.feature_to_image_file.items():
-            if feature in Features.COLOR_TO_IMAGE:
-                self.scene_frame.draw()
-                size = (0.33, 0.33)
-            else:
-                size = (1, 1)
-            visual.ImageStim(self.win, image=str(image_file), size=size, pos=(0, 0)).draw()
-            self.win.flip()
-            self.win.getMovieFrame()
-            self.win.saveMovieFrames(str(Path(save_folder) / f"{feature}_frame_full_size.png"))
-
     def convert_answer_to_df(self):
         """convert correctness_score list to pandas DataFrame with one row per trial"""
         rows = []
