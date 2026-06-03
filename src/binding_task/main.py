@@ -62,6 +62,7 @@ class BindingTask:
                                                    parallel_port=self.parallel_port, subject_id=self.subject_id)
         functional_localizer.run()
         functional_localizer.save_results(time=self.time)
+        show_instruction(win=self.win, instruction=Instruction.FIRST_PHASE_END, call_experimenter=True)
 
     def _second_stage(self):
         """the second part of the experiment:
@@ -87,7 +88,7 @@ class BindingTask:
 
         binding.save_subject(time=self.time)
         test.save_subject_answer(time=self.time)
-        show_instruction(win=self.win, instruction=Instruction.SECOND_PHASE_END)
+        show_instruction(win=self.win, instruction=Instruction.SECOND_PHASE_END, call_experimenter=True)
 
         return binding, test
 
