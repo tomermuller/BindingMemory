@@ -104,20 +104,24 @@ def shuffle_trials(items, max_consecutive=2):
 
     return result
 
-def show_instruction(win: psychopy.visual.window.Window, instruction: str, time: float = None):
+def show_instruction(win: psychopy.visual.window.Window, instruction: str, time: float = None,
+                     call_experimenter: bool = False):
     """display instruction text on screen and wait for keypress or time:
         input: win: psychopy window to display on
                instruction: text string to display
                time: optional duration in seconds (if None, waits for keypress; 0 returns immediately)
+               call_experimenter: if True, waits only for the 'l' key instead of any key
         1. create text stimulus with RTL support for Hebrew
         2. draw and flip to screen
-        3. if time provided, wait for that duration; otherwise wait for any keypress"""
+        3. if time provided, wait for that duration; otherwise wait for any keypress (or 'l' if call_experimenter)"""
     text = visual.TextStim(win, text=instruction, font=StringEnums.ARIAL_FONT, pos=(0, 0),
                            height=BindingAndTestEnums.TEXT_HEIGHT, languageStyle='rtl', wrapWidth=1.8)
     text.draw()
     win.flip()
     if time is not None:
         core.wait(time)
+    elif call_experimenter:
+        event.waitKeys(keyList=['l'])
     else:
         event.waitKeys()
 
