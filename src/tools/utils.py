@@ -1,0 +1,170 @@
+import random
+import shutil
+from collections import Counter
+from datetime import datetime
+from pathlib import Path
+import numpy as np
+from PIL import Image, ImageEnhance
+import psychopy
+from psychopy import visual, core, event, parallel, gui
+
+from src.enums.Enums import StringEnums, BindingAndTestEnums
+
+def compute_avg_scene_color() -> list:
+    """compute the average RGB color across all scene images and return in PsychoPy [-1, 1] format:
+        1. load all PNGs from the scenes folder
+        2. sum all pixel values across all images
+        3. divide by total pixel count to get mean RGB in [0, 255]
+        4. convert to PsychoPy [-1, 1] range: val / 127.5 - 1
+        output: [r, g, b] list with values in [-1, 1]"""
+    scenes_folder = Path(__file__).parent / "features" / "scenes"
+    pixel_sum = np.zeros(3)
+    pixel_count = 0
+
+    for img_path in scenes_folder.glob("*.png"):
+        img = np.array(Image.open(img_path).convert("RGB"), dtype=float)
+        pixel_sum += img.reshape(-1, 3).sum(axis=0)
+        pixel_count += img.shape[0] * img.shape[1]
+
+    avg_rgb = pixel_sum / pixel_count
+    return list(avg_rgb / 127.5 - 1)
+
+
+def darken_scenes(brightness_factor: float = 0.6):
+    """backup all scene images with a timestamp, then darken them in place:
+        1. copy each scene PNG to features/scenes/backup/<timestamp>/ so you know when the backup was made
+        2. apply brightness_factor to each image (1.0 = original, 0.0 = black)
+        3. overwrite the original scene files with the darkened versions
+        input: brightness_factor: float in [0, 1] controlling how dark the result is (default 0.6)"""
+    scenes_folder = Path(__file__).parent / "features" / "scenes"
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    backup_folder = scenes_folder / "backup" / timestamp
+    backup_folder.mkdir(parents=True, exist_ok=True)
+
+    for img_path in scenes_folder.glob("*.png"):
+        shutil.copy2(img_path, backup_folder / img_path.name)
+        darkened = ImageEnhance.Brightness(Image.open(img_path)).enhance(brightness_factor)
+        darkened.save(img_path)
+
+
+def shuffle_trials(items, max_consecutive=2):
+    """Shuffle items ensuring no more than max_consecutive identical items in a row.
+
+    Uses a greedy algorithm with a mandatory-placement safety check: before doing a
+    random weighted pick, it detects whether any available item *must* be placed now
+    (because skipping it would make its remaining count impossible to fit later).
+    This prevents the greedy from painting itself into a corner and guarantees a valid
+    arrangement is always found whenever one mathematically exists.
+
+    The feasibility limit per step is: floor(remaining * k / (k+1))
+    where k = max_consecutive. Any item whose count exceeds this limit must be placed
+    immediately.
+
+    input:  items          - list of items to shuffle (may contain duplicates)
+            max_consecutive - max allowed identical items in a row (default 2)
+    output: shuffled list satisfying the constraint
+    raises: ValueError if no valid arrangement exists (e.g. one item dominates too much)
+    """
+    counts = Counter(items)
+    n = len(items)
+    result = []
+
+    while len(result) < n:
+        remaining = n - len(result)
+
+        forbidden = None
+        if len(result) >= max_consecutive and len(set(result[-max_consecutive:])) == 1:
+            forbidden = result[-1]
+
+        available = [(item, cnt) for item, cnt in counts.items()
+                     if cnt > 0 and item != forbidden]
+
+        if not available:
+            raise ValueError("Cannot arrange items within the max_consecutive constraint — impossible input")
+
+        # Safety check: if any item's count exceeds the maximum it could ever occupy
+        # in the remaining slots, we MUST place it now, or we'll never fit all of them.
+        # Maximum slots one item can fill in `remaining-1` future positions = floor((remaining-1+1)*k/(k+1))
+        # simplified to floor(remaining * k / (k+1)).
+        limit = (remaining * max_consecutive) // (max_consecutive + 1)
+        must_place = None
+        for item, cnt in sorted(available, key=lambda x: -x[1]):
+            if cnt > limit:
+                must_place = item
+                break  # only the single most-frequent item can exceed the limit
+
+        if must_place is not None:
+            chosen = must_place
+        else:
+            chosen = random.choices([i for i, _ in available],
+                                    weights=[c for _, c in available])[0]
+
+        result.append(chosen)
+        counts[chosen] -= 1
+
+    return result
+
+def show_instruction(win: psychopy.visual.window.Window, instruction: str, time: float = None,
+                     call_experimenter: bool = False):
+    """display instruction text on screen and wait for keypress or time:
+        input: win: psychopy window to display on
+               instruction: text string to display
+               time: optional duration in seconds (if None, waits for keypress; 0 returns immediately)
+               call_experimenter: if True, waits only for the 'l' key instead of any key
+        1. create text stimulus with RTL support for Hebrew
+        2. draw and flip to screen
+        3. if time provided, wait for that duration; otherwise wait for any keypress (or 'l' if call_experimenter)"""
+    text = visual.TextStim(win, text=instruction, font=StringEnums.ARIAL_FONT, pos=(0, 0),
+                           height=BindingAndTestEnums.TEXT_HEIGHT, languageStyle='rtl', wrapWidth=1.8)
+    text.draw()
+    win.flip()
+    if time is not None:
+        core.wait(time)
+    elif call_experimenter:
+        event.waitKeys(keyList=['l'])
+    else:
+        event.waitKeys()
+
+def show_fixation(win: psychopy.visual.window.Window, min_time: float, max_time: float):
+    """display fixation cross (+) on screen for random duration:
+        input: win: psychopy window to display on
+               min_time: minimum duration in seconds
+               max_time: maximum duration in seconds
+        1. create white fixation cross text stimulus
+        2. draw and flip to screen
+        3. wait for random duration between min_time and max_time"""
+    fixation = visual.TextStim(win, text='+', pos=(0, 0), height=0.1, color='white')
+    fixation.draw()
+    win.flip()
+    core.wait(random.uniform(min_time, max_time))
+
+def show_nothing(win: psychopy.visual.window.Window, min_time: float, max_time: float):
+    """display blank screen for random duration:
+        input: win: psychopy window to display on
+               min_time: minimum duration in seconds
+               max_time: maximum duration in seconds
+        1. flip window to show blank screen
+        2. wait for random duration between min_time and max_time"""
+    win.flip()
+    core.wait(random.uniform(min_time, max_time))
+
+def send_to_parallel_port(parallel_port: parallel.ParallelPort, pulse_number):
+    """send trigger pulse to parallel port for EEG/fMRI synchronization:
+        input: parallel_port: psychopy ParallelPort object
+               pulse_number: integer code to send (defined in ParallelPortEnums)
+        1. set data on parallel port (currently commented for testing)
+        2. wait 10ms for pulse duration
+        3. reset parallel port to 0"""
+    #parallel_port.setData(pulse_number)
+    core.wait(0.01)
+    #parallel_port.setData(0)
+
+
+def get_subject_info() -> str:
+    """open GUI window to get subject ID, return subject_id (or '-1' if cancelled)"""
+    info = {StringEnums.SUBJECT_ID: ''}
+    dlg = gui.DlgFromDict(dictionary=info, title=StringEnums.EXPERIMENT_TITLE)
+    if dlg.OK:
+        return str(info[StringEnums.SUBJECT_ID])
+    else:
+        return "-1"

@@ -5,9 +5,9 @@ from psychopy import visual, event, parallel, core
 import random
 from pathlib import Path
 from datetime import datetime
-from src.binding_task.enums.Enums import Features, BindingAndTestEnums, ParallelPortEnums, Paths, StringEnums, \
+from src.enums import Features, BindingAndTestEnums, ParallelPortEnums, Paths, StringEnums, \
     HebrewEnums, TimeAttribute
-from src.binding_task.utils import show_nothing, send_to_parallel_port, shuffle_trials, show_fixation
+from src.tools.utils import show_nothing, send_to_parallel_port, shuffle_trials, show_fixation
 
 
 class TestPhase:
@@ -198,7 +198,7 @@ class TestPhase:
 
     def save_subject_answer(self, time):
         """save final subject answers to JSON and CSV files"""
-        subject_answer_folder = f"{Paths.SAVE_DATA_FOLDER}subject_{self.subject_id}/{StringEnums.SUBJECT_ANSWER}/"
+        subject_answer_folder = f"{Paths.BINDING_SAVE_DATA_FOLDER}subject_{self.subject_id}/{StringEnums.SUBJECT_ANSWER}/"
         Path(subject_answer_folder).mkdir(parents=True, exist_ok=True)
 
         with open(f'{subject_answer_folder}subject_{self.subject_id}_{time}_{StringEnums.SUBJECT_ANSWER}.json', 'w') as f:
@@ -209,7 +209,7 @@ class TestPhase:
 
     def _temp_save(self, trial: int):
         """save temporary backup after each trial for crash recovery"""
-        temp_save_path = f'{Paths.SAVE_TEMP_FOLDER}subject_{self.subject_id}/'
+        temp_save_path = f'{Paths.BINDING_SAVE_TEMP_FOLDER}subject_{self.subject_id}/'
 
         Path(temp_save_path).mkdir(parents=True, exist_ok=True)
         curr_time = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]

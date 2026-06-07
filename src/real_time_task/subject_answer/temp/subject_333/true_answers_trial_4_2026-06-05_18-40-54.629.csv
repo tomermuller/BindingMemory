@@ -1,0 +1,5 @@
+,subject,trial,verb,colors,block_index,trial_index_in_block,verb_appear,img_path_colors,feature_appear_colors,response_colors,answer_time_colors
+0,333,1,cook,yellow,0,0,2026-06-05_18-40-21.982,features/colors/yellow_image.png,2026-06-05_18-40-24.132,timeout,2026-06-05_18-40-29.142
+1,333,2,eat,red,0,1,2026-06-05_18-40-30.040,features/colors/red_image.png,2026-06-05_18-40-32.688,timeout,2026-06-05_18-40-37.698
+2,333,3,call,yellow,0,2,2026-06-05_18-40-38.687,features/colors/yellow_image.png,2026-06-05_18-40-41.102,timeout,2026-06-05_18-40-46.112
+3,333,4,sing,red,0,3,2026-06-05_18-40-46.639,features/colors/red_image.png,2026-06-05_18-40-49.609,timeout,2026-06-05_18-40-54.619

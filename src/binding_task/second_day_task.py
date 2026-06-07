@@ -5,9 +5,9 @@ import pandas as pd
 import psychopy
 from psychopy import parallel
 
-from src.binding_task.enums.Enums import Features, Paths, StringEnums
+from src.enums import Features, Paths
 from src.binding_task.test_phase import TestPhase
-from src.binding_task.utils import shuffle_trials
+from src.tools.utils import shuffle_trials
 
 
 class SecondDayTask(TestPhase):
@@ -42,7 +42,7 @@ class SecondDayTask(TestPhase):
 
     def save_subject_answer(self, time):
         """save final subject answers to JSON and CSV files in subject_answer/final_data/subject_<id>/second_day/"""
-        save_folder = f"{Paths.SAVE_DATA_FOLDER}subject_{self.subject_id}/second_day/"
+        save_folder = f"{Paths.BINDING_SAVE_DATA_FOLDER}subject_{self.subject_id}/second_day/"
         Path(save_folder).mkdir(parents=True, exist_ok=True)
 
         with open(f'{save_folder}subject_{self.subject_id}_{time}_second_day.json', 'w') as f:
@@ -55,7 +55,7 @@ class SecondDayTask(TestPhase):
     def _load_partial_retrival_objects(subject_id: str) -> list:
         """load object paths from the most recent partial_retrival CSV, shuffled with max 1 consecutive repeat:
             output: list containing one block (list of shuffled Path objects)"""
-        partial_retrival_folder = Path(Paths.SAVE_DATA_FOLDER) / f"subject_{subject_id}" / "partial_retrival"
+        partial_retrival_folder = Path(Paths.BINDING_SAVE_DATA_FOLDER) / f"subject_{subject_id}" / "partial_retrival"
         csv_files = sorted(partial_retrival_folder.glob("*.csv"), key=lambda f: f.stat().st_mtime)
         df = pd.read_csv(csv_files[-1])
         object_paths = [Path(Paths.OBJECT_PATH.format(obj)) for obj in df[Features.OBJECT].tolist()]

@@ -1,0 +1,2 @@
+,subject,trial,verb,colors,block_index,trial_index_in_block,verb_appear,img_path_colors,feature_appear_colors,response_colors,answer_time_colors
+0,333,1,cook,yellow,0,0,2026-06-05_18-40-21.982,features/colors/yellow_image.png,2026-06-05_18-40-24.132,timeout,2026-06-05_18-40-29.142

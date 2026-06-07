@@ -1,0 +1,10 @@
+,subject,trial,verb,colors,block_index,trial_index_in_block,verb_appear,img_path_colors,feature_appear_colors,response_colors,answer_time_colors
+0,444,1,jump,yellow,0,0,2026-06-07_12-16-21.988,features/colors/yellow_image.png,2026-06-07_12-16-24.926,timeout,2026-06-07_12-16-29.936
+1,444,2,cook,red,0,1,2026-06-07_12-16-31.200,features/colors/red_image.png,2026-06-07_12-16-33.480,timeout,2026-06-07_12-16-38.490
+2,444,3,drink,yellow,0,2,2026-06-07_12-16-39.443,features/colors/yellow_image.png,2026-06-07_12-16-42.331,timeout,2026-06-07_12-16-47.341
+3,444,4,run,yellow,0,3,2026-06-07_12-16-48.509,features/colors/yellow_image.png,2026-06-07_12-16-51.305,timeout,2026-06-07_12-16-56.316
+4,444,5,swim,green,0,4,2026-06-07_12-16-57.238,features/colors/green_image.png,2026-06-07_12-16-59.531,timeout,2026-06-07_12-17-04.541
+5,444,6,eat,yellow,0,5,2026-06-07_12-17-05.435,features/colors/yellow_image.png,2026-06-07_12-17-08.241,timeout,2026-06-07_12-17-13.251
+6,444,7,write,red,0,6,2026-06-07_12-17-14.237,features/colors/red_image.png,2026-06-07_12-17-17.176,up,2026-06-07_12-17-19.539
+7,444,8,להתקשר,red,0,7,2026-06-07_12-17-20.298,features/colors/red_image.png,2026-06-07_12-17-23.137,up,2026-06-07_12-17-25.325
+8,444,9,drive,green,0,8,2026-06-07_12-17-26.146,features/colors/green_image.png,2026-06-07_12-17-28.538,up,2026-06-07_12-17-30.698

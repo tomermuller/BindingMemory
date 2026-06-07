@@ -1,24 +1,14 @@
-from psychopy import visual, event, parallel, gui
-from src.binding_task.enums.Enums import Features, Instruction, StringEnums, TaskManage, MemoryStrategyEnums, Paths
+from psychopy import visual, event, parallel
+from src.enums import Features, Instruction, StringEnums, TaskManage, MemoryStrategyEnums, Paths, ExperimentType
 from src.binding_task.binding_learning import BindingLearning
-from src.binding_task.functional_localizer import FunctionalLocalizer
+from src.tools.functional_localizer import FunctionalLocalizer
 from src.binding_task.partial_retrival_test import PartialRetrivalTest
 from src.binding_task.test_phase import TestPhase
-from src.binding_task.break_game import BreakGame
+from src.tools.break_game import BreakGame
 from datetime import datetime
-from src.binding_task.utils import show_instruction
+from src.tools.utils import show_instruction, get_subject_info
 from pathlib import Path
 import pandas as pd
-
-
-def get_subject_info() -> str:
-    """open GUI window to get subject ID, return subject_id (or '-1' if cancelled)"""
-    info = {StringEnums.SUBJECT_ID: ''}
-    dlg = gui.DlgFromDict(dictionary=info, title=StringEnums.EXPERIMENT_TITLE)
-    if dlg.OK:
-        return str(info[StringEnums.SUBJECT_ID])
-    else:
-        return "-1"
 
 
 class BindingTask:
@@ -28,6 +18,7 @@ class BindingTask:
         self.win = visual.Window(fullscr=True)
         self.parallel_port = parallel.ParallelPort(address=0x5EFC)
         self.time = datetime.now().strftime(StringEnums.MINUTE_FORMAT)
+        self.category = Features.BINDING_CATEGORIES
 
     def main(self):
         """run the experiment:
@@ -40,7 +31,7 @@ class BindingTask:
             7. goodbye instruction"""
         self._general_setting()
         show_instruction(win=self.win, instruction=Instruction.WELLCOME)
-        #self._first_stage()
+        self._first_stage()
         binding, test = self._second_stage()
         self._save_unified_file_for_all_data(binding=binding, test=test)
         self._third_stage()
@@ -58,8 +49,9 @@ class BindingTask:
             1. show the instruction to the first part
             2. init and call run func of FunctionalLocalizer"""
         show_instruction(win=self.win, instruction=Instruction.FIRST_PHASE_INSTRUCTION)
-        functional_localizer = FunctionalLocalizer(categories=Features.ALL_CATEGORIES, win=self.win,
-                                                   parallel_port=self.parallel_port, subject_id=self.subject_id)
+        functional_localizer = FunctionalLocalizer(categories=self.category, win=self.win,
+                                                   parallel_port=self.parallel_port, subject_id=self.subject_id,
+                                                   exp=ExperimentType.BINDING)
         functional_localizer.run()
         functional_localizer.save_results(time=self.time)
         show_instruction(win=self.win, instruction=Instruction.FIRST_PHASE_END, call_experimenter=True)
@@ -73,9 +65,9 @@ class BindingTask:
         5. save the results"""
 
         show_instruction(win=self.win, instruction=Instruction.SECOND_PHASE_INSTRUCTION)
-        binding = BindingLearning(win=self.win, parallel_port=self.parallel_port, categories=Features.ALL_CATEGORIES,
+        binding = BindingLearning(win=self.win, parallel_port=self.parallel_port, categories=self.category,
                                   subject_id=self.subject_id)
-        test = TestPhase(win=self.win, parallel_port=self.parallel_port, categories=Features.ALL_CATEGORIES,
+        test = TestPhase(win=self.win, parallel_port=self.parallel_port, categories=self.category,
                          objects=binding.objects, subject_id=self.subject_id)
 
         binding.run_examples()
@@ -101,7 +93,7 @@ class BindingTask:
             5. save results"""
         show_instruction(win=self.win, instruction = Instruction.THIRD_STAGE_INSTRUCTION)
         partial_retrival = PartialRetrivalTest(win=self.win, parallel_port=self.parallel_port,
-                                               categories=Features.ALL_CATEGORIES, subject_id=self.subject_id)
+                                               categories=self.category, subject_id=self.subject_id)
         partial_retrival.run_examples()
         show_instruction(win=self.win, instruction=Instruction.FINISH_EXAMPLES)
         partial_retrival.run()
@@ -118,6 +110,7 @@ class BindingTask:
         binding.run_block(block_index=block)
         break_game = BreakGame(win=self.win, parallel_port=self.parallel_port)
         break_game.run()
+        show_instruction(win=self.win, instruction=Instruction.BEFORE_TEST_PHASE)
         test.run_block(block_index=block)
 
     def _ask_memory_strategy(self) -> None:
@@ -140,7 +133,7 @@ class BindingTask:
         self._save_strategy(ratings)
 
     def _save_strategy(self, ratings: dict) -> None:
-        save_path = Path(f"{Paths.SAVE_DATA_FOLDER}subject_{self.subject_id}/strategy/")
+        save_path = Path(f"{Paths.BINDING_SAVE_DATA_FOLDER}subject_{self.subject_id}/strategy/")
         save_path.mkdir(parents=True, exist_ok=True)
         pd.DataFrame([ratings]).to_csv(save_path / f"strategy_{self.subject_id}.csv", index=False)
 
