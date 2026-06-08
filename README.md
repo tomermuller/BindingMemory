@@ -1,132 +1,109 @@
-# Binding Memory Retrieval (BMR)
+# BMR — Binding Memory Retrieval
 
-A PsychoPy-based neuroscience experiment for studying how subjects encode and retrieve bindings between objects and contextual features (color and scene). Designed for EEG/fMRI recording, with parallel port triggers for neural synchronization.
-
-The experiment is in Hebrew (RTL).
+A PsychoPy-based EEG experiment suite for studying how subjects encode and retrieve memory bindings between verbs/objects and visual features (color, scene, animacy). All instructions are in Hebrew (RTL).
 
 ---
 
-## Experiment Overview
-
-The experiment consists of 3 stages:
-
-### Stage 1 — Functional Localizer
-- Subjects view repeating images of colors and scenes
-- After each image, a Hebrew word appears
-- Subject presses an arrow key to judge whether the word matches the image
-- 70 trials per feature × 5 features = 350 trials total
-- Break every 50 trials
-
-### Stage 2 — Binding Learning & Test (5 blocks)
-Each block has two phases:
-
-**Learning phase:**
-- Subject sees an object colored and placed on a scene background for 3 seconds
-- Rates difficulty of remembering (1 = easy, 5 = hard)
-
-**Break game** (between learning and test):
-- Subject counts how many times a rectangle becomes brighter (~100 seconds)
-
-**Test phase:**
-- Subject sees the plain object for 2 seconds
-- Has 3 seconds to press a key if they remember the binding
-- If no press → automatically moves to the next trial
-- If pressed → asked what they remember: color / scene / both
-- Then asked to select the specific feature for each reported category
-
-After all 5 blocks, a unified CSV is generated combining learning and test data.
-
-### Stage 3 — Partial Retrieval Test
-- Only objects correctly retrieved (both color and scene) in Stage 2 are used
-- Each trial shows a probe image (color or scene cue) followed by the object
-- Subject has 3 seconds to press if they remember
-- If pressed → asked to choose the specific feature for the probed category
-
----
-
-## Project Structure
+## Repository structure
 
 ```
-src/binding_task/
-├── main.py                     # Entry point and BindingTask orchestrator
-├── functional_localizer.py     # Stage 1
-├── binding_learning.py         # Stage 2 — learning phase
-├── test_phase.py               # Stage 2 — test phase (base class)
-├── partial_retrival_test.py    # Stage 3 (inherits TestPhase)
-├── break_game.py               # Break activity between blocks
-├── second_day_task.py          # Optional second-day re-test
-├── utils.py                    # Shared helpers (fixation, shuffle, triggers, etc.)
-├── enums/
-│   └── Enums.py                # All experiment parameters and constants
-└── features/
-    ├── objects/                 # Object PNG images
-    ├── colors/                  # Color feature images
-    ├── scenes/                  # Scene background images
-    ├── probes/                  # Probe cue images
-    ├── binding_photos/          # Generated stimuli (object on scene)
-    └── object example/          # Example images (fork, robot)
+src/
+├── enums/                  # Shared constants, enums, and image paths (used by all tasks)
+├── binding_task/           # Binding learning + test paradigm (main EEG experiment)
+├── real_time_task/         # Real-time verb–feature association experiment
+├── tools/                  # Shared utilities: functional localizer, break game, display helpers
+└── analysis/               # EEG preprocessing pipeline (MNE-based)
+
+src/binding_task/features/  # All stimulus images (colors, scenes, animacy, objects, probes)
+requirements.txt
 ```
 
 ---
 
-## Output Data
+## Tasks
 
-All data is saved under `subject_answer/`:
+### Binding Task
+Subjects learn object–color–scene bindings and are tested on their memory across 5 blocks.
+See [`src/binding_task/README.md`](src/binding_task/README.md) for full details.
 
-```
-subject_answer/
-├── final_data/subject_<id>/
-│   ├── functional_localizer/       # Stage 1 results
-│   ├── true_answers/               # Correct binding answers + difficulty ratings
-│   ├── subject_answer/             # Subject test responses
-│   ├── combined_data/              # Merged binding + test CSV (main output)
-│   └── partial_retrival/           # Stage 3 results
-└── temp/subject_<id>/              # Trial-by-trial crash recovery backups
-```
+**Stages:**
+1. Functional localizer (color + scene images with attention questions)
+2. Binding learning + test (5 blocks, break game between phases)
+3. Partial retrieval test (probe-cued recall)
 
-**Key columns in `combined_data`:**
-- `object`, `colors`, `scenes`, `difficulty`
-- `subject_color`, `subject_scene` (answers given)
-- `color_correct`, `scene_correct`, `both_correct`
-- `color_rt_ms`, `scene_rt_ms`
-- Timestamps for all events
+**Entry point:** `src/binding_task/main.py`
 
 ---
 
-## Key Parameters (`enums/Enums.py`)
+### Real-Time Task
+Subjects learn verb–feature associations in real time and are later tested on recall.
+See [`src/real_time_task/README.md`](src/real_time_task/README.md) for full details.
 
-| Parameter | Value |
+**Stages:**
+1. Functional localizer
+2. Couple learning — verb shown → subject imagines action → feature image shown (5 blocks)
+3. Retrieval — verb cue → subject recalls and selects correct feature
+
+**Entry point:** `src/real_time_task/real_time_task.py`
+
+---
+
+## Setup
+
+```bash
+pip install -r requirements.txt
+```
+
+Run from the **project root**:
+
+```bash
+python src/binding_task/main.py
+python src/real_time_task/real_time_task.py
+```
+
+A GUI dialog will prompt for the subject ID.
+
+---
+
+## EEG integration
+
+Triggers are sent via parallel port at address `0x5EFC` at all key events (stimulus onset, response, etc.). All trigger codes are defined in `src/enums/Enums.py`:
+- Binding task: `ParallelPortEnums`
+- Real-time task: `RealTimeTaskTriggers`
+
+---
+
+## Data output
+
+| Task | Output folder |
 |---|---|
-| Number of blocks | 5 |
-| Binding trials total | 45 (9 per block) |
-| Functional localizer trials per feature | 70 |
-| Colors used | Red, Green, Yellow |
-| Scenes used | Living Room, Bathroom, Kitchen |
-| Difficulty scale | 1 (easy) – 5 (hard) |
-| Object size on scene | 40% of scene dimensions |
-| Retrieval window | 3 seconds |
+| Binding | `src/binding_task/subject_answer/` |
+| Real-Time | `src/real_time_task/subject_answer/` |
+
+Each folder contains:
+- `final_data/subject_<id>/` — full JSON + CSV results per stage
+- `temp/subject_<id>/` — per-trial crash-recovery backups
+
+---
+
+## Key parameters
+
+| Parameter | Binding Task | Real-Time Task |
+|---|---|---|
+| Blocks | 5 | 5 |
+| Trials per block | 9 | 12 verbs |
+| Functional localizer trials/feature | 70 | 50 |
+| Categories | colors, scenes | colors, animacy (configurable) |
+| Language | Hebrew (RTL) | Hebrew (RTL) |
 
 ---
 
 ## Dependencies
 
-- [PsychoPy](https://www.psychopy.org/) — stimulus presentation and input
-- [Pillow (PIL)](https://pillow.readthedocs.io/) — image generation (coloring objects, compositing)
+- [PsychoPy](https://www.psychopy.org/) — stimulus presentation and keyboard input
+- [Pillow](https://pillow.readthedocs.io/) — image processing
 - [pandas](https://pandas.pydata.org/) — data saving and CSV generation
-- [numpy](https://numpy.org/)
-
----
-
-## Running the Experiment
-
-```bash
-python -m src.binding_task.main
-```
-
-A GUI dialog will appear asking for the subject ID. The experiment then runs automatically.
-
----
-
-## EEG/fMRI Integration
-
-Parallel port triggers are sent at all key events (stimulus onset/offset, question appearance, subject response). Trigger codes are defined in `ParallelPortEnums` in `Enums.py`. The parallel port address is `0x5EFC`.
+- [numpy](https://numpy.org/) — numerical operations
+- [MNE](https://mne.tools/) — EEG preprocessing and analysis
+- [autoreject](https://autoreject.github.io/) — automated artifact rejection
+- [mne-icalabel](https://mne.tools/mne-icalabel/) — ICA component classification

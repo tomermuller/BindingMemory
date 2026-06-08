@@ -1,16 +1,15 @@
 from datetime import datetime
 
-import numpy as np
 import pandas as pd
 import psychopy
 from PIL import Image, ImageDraw
-from src.binding_task.enums.Enums import (ParallelPortEnums, BindingAndTestEnums, Features, Paths, StringEnums,
-                                          Instruction, TimeAttribute, TaskManage)
+from src.enums import (ParallelPortEnums, BindingAndTestEnums, Features, Paths, StringEnums,
+                       Instruction, TimeAttribute, TaskManage)
 import random
 from pathlib import Path
 from psychopy import visual, core, parallel, event
 import json
-from src.binding_task.utils import show_instruction, send_to_parallel_port, show_fixation, show_nothing, shuffle_trials
+from src.tools.utils import show_instruction, send_to_parallel_port, show_fixation, show_nothing, shuffle_trials
 from collections import defaultdict
 
 class BindingLearning:
@@ -250,7 +249,7 @@ class BindingLearning:
 
     def save_subject(self, time):
         """save final subject data (answers, difficulty ratings) to JSON and CSV files"""
-        true_answer_folder = f"{Paths.SAVE_DATA_FOLDER}subject_{self.subject_id}/{StringEnums.TRUE_ANSWERS}/"
+        true_answer_folder = f"{Paths.BINDING_SAVE_DATA_FOLDER}subject_{self.subject_id}/{StringEnums.TRUE_ANSWERS}/"
         Path(true_answer_folder).mkdir(parents=True, exist_ok=True)
 
         with open(f'{true_answer_folder}subject_{self.subject_id}_{time}_{StringEnums.TRUE_ANSWERS}.json', 'w') as f:
@@ -264,7 +263,7 @@ class BindingLearning:
 
     def _temp_save(self, trial: int):
         """save temporary backup after each trial for crash recovery"""
-        temp_save_path = f'{Paths.SAVE_TEMP_FOLDER}subject_{self.subject_id}/'
+        temp_save_path = f'{Paths.BINDING_SAVE_TEMP_FOLDER}subject_{self.subject_id}/'
         Path(temp_save_path).mkdir(parents=True, exist_ok=True)
         curr_time = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
 

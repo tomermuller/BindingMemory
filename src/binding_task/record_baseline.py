@@ -1,6 +1,6 @@
 from psychopy import parallel, visual
-from src.binding_task.enums.Enums import StringEnums, ParallelPortEnums, Instruction
-from src.binding_task.utils import show_instruction, send_to_parallel_port, show_fixation, show_nothing
+from src.enums import ParallelPortEnums, Instruction
+from src.tools.utils import show_instruction, send_to_parallel_port, show_fixation, show_nothing
 
 THREE_MINUTES = 180
 

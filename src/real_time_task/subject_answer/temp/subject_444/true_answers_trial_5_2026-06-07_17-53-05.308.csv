@@ -1,0 +1,6 @@
+,subject,trial,verb,animacy,block_index,trial_index_in_block,verb_appear,img_path_animacy,feature_appear_animacy,response_animacy,answer_time_animacy
+0,444,1,drink,animate,0,0,2026-06-07_17-52-22.350,/Users/tomermuller/Desktop/BMR/BindingMemoryRetrival/src/binding_task/features/animacy/animate_03.jpg,2026-06-07_17-52-25.165,timeout,2026-06-07_17-52-30.173
+1,444,2,climb,animate,0,1,2026-06-07_17-52-31.629,/Users/tomermuller/Desktop/BMR/BindingMemoryRetrival/src/binding_task/features/animacy/animate_01.jpg,2026-06-07_17-52-34.235,timeout,2026-06-07_17-52-39.244
+2,444,3,swim,animate,0,2,2026-06-07_17-52-40.501,/Users/tomermuller/Desktop/BMR/BindingMemoryRetrival/src/binding_task/features/animacy/animate_03.jpg,2026-06-07_17-52-43.153,timeout,2026-06-07_17-52-48.162
+3,444,4,jump,inanimate,0,3,2026-06-07_17-52-48.703,/Users/tomermuller/Desktop/BMR/BindingMemoryRetrival/src/binding_task/features/animacy/inanimate_02.jpg,2026-06-07_17-52-51.371,timeout,2026-06-07_17-52-56.381
+4,444,5,sing,inanimate,0,4,2026-06-07_17-52-57.284,/Users/tomermuller/Desktop/BMR/BindingMemoryRetrival/src/binding_task/features/animacy/inanimate_03.jpg,2026-06-07_17-53-00.288,timeout,2026-06-07_17-53-05.298

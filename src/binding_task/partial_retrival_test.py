@@ -6,10 +6,10 @@ import psychopy
 from psychopy import parallel, visual, core, event
 import random
 
-from src.binding_task.enums.Enums import Features, Paths, StringEnums, BindingAndTestEnums, \
+from src.enums import Features, Paths, StringEnums, BindingAndTestEnums, \
     ParallelPortEnums, TimeAttribute
 from src.binding_task.test_phase import TestPhase
-from src.binding_task.utils import show_nothing, send_to_parallel_port, show_fixation
+from src.tools.utils import show_nothing, send_to_parallel_port, show_fixation
 
 
 class PartialRetrivalTest(TestPhase):
@@ -155,7 +155,7 @@ class PartialRetrivalTest(TestPhase):
 
     def save_subject_answer(self, time):
         """save final subject answers to JSON and CSV files in subject_answer/final_data/subject_<id>/partial_retrival/"""
-        save_folder = f"{Paths.SAVE_DATA_FOLDER}subject_{self.subject_id}/partial_retrival/"
+        save_folder = f"{Paths.BINDING_SAVE_DATA_FOLDER}subject_{self.subject_id}/partial_retrival/"
         Path(save_folder).mkdir(parents=True, exist_ok=True)
 
         with open(f'{save_folder}subject_{self.subject_id}_{time}_partial_retrival.json', 'w') as f:
@@ -168,7 +168,7 @@ class PartialRetrivalTest(TestPhase):
     def _load_correct_objects(subject_id: str) -> list:
         """load object paths that were correctly retrieved in both color and scene from the most recent combined_data CSV:
             output: list of Path objects for correctly retrieved objects"""
-        combined_data_path = Path(Paths.SAVE_DATA_FOLDER) / f"subject_{subject_id}" / "combined_data"
+        combined_data_path = Path(Paths.BINDING_SAVE_DATA_FOLDER) / f"subject_{subject_id}" / "combined_data"
         csv_files = sorted(combined_data_path.glob("*.csv"), key=lambda f: f.stat().st_mtime)
         df = pd.read_csv(csv_files[-1])
         only_correct = df[df[StringEnums.BOTH_CORRECT] == True]

@@ -1,0 +1,13 @@
+,subject,trial,verb,animacy,block_index,trial_index_in_block,verb_appear,img_path_animacy,feature_appear_animacy,response_animacy,answer_time_animacy
+0,5555,1,לטפס,animate,0,0,2026-06-07_23-11-15.046,/Users/tomermuller/Desktop/BMR/BindingMemoryRetrival/src/binding_task/features/animacy/animate_03.jpg,2026-06-07_23-11-17.675,up,2026-06-07_23-11-20.039
+1,5555,2,לבשל,inanimate,0,1,2026-06-07_23-11-20.579,/Users/tomermuller/Desktop/BMR/BindingMemoryRetrival/src/binding_task/features/animacy/inanimate_01.jpg,2026-06-07_23-11-22.994,timeout,2026-06-07_23-11-28.004
+2,5555,3,לשתות,inanimate,0,2,2026-06-07_23-11-28.890,/Users/tomermuller/Desktop/BMR/BindingMemoryRetrival/src/binding_task/features/animacy/inanimate_02.jpg,2026-06-07_23-11-30.965,timeout,2026-06-07_23-11-35.975
+3,5555,4,לנסוע,animate,0,3,2026-06-07_23-11-37.407,/Users/tomermuller/Desktop/BMR/BindingMemoryRetrival/src/binding_task/features/animacy/animate_03.jpg,2026-06-07_23-11-39.866,timeout,2026-06-07_23-11-44.876
+4,5555,5,לקפוץ,animate,0,4,2026-06-07_23-11-46.225,/Users/tomermuller/Desktop/BMR/BindingMemoryRetrival/src/binding_task/features/animacy/animate_02.jpg,2026-06-07_23-11-49.165,timeout,2026-06-07_23-11-54.175
+5,5555,6,לרוץ,inanimate,0,5,2026-06-07_23-11-54.783,/Users/tomermuller/Desktop/BMR/BindingMemoryRetrival/src/binding_task/features/animacy/inanimate_03.jpg,2026-06-07_23-11-56.814,timeout,2026-06-07_23-12-01.824
+6,5555,7,לשחות,animate,0,6,2026-06-07_23-12-02.971,/Users/tomermuller/Desktop/BMR/BindingMemoryRetrival/src/binding_task/features/animacy/animate_02.jpg,2026-06-07_23-12-05.839,timeout,2026-06-07_23-12-10.849
+7,5555,8,להתקשר,animate,0,7,2026-06-07_23-12-11.592,/Users/tomermuller/Desktop/BMR/BindingMemoryRetrival/src/binding_task/features/animacy/animate_01.jpg,2026-06-07_23-12-14.587,timeout,2026-06-07_23-12-19.598
+8,5555,9,לשיר,animate,0,8,2026-06-07_23-12-20.399,/Users/tomermuller/Desktop/BMR/BindingMemoryRetrival/src/binding_task/features/animacy/animate_01.jpg,2026-06-07_23-12-23.401,timeout,2026-06-07_23-12-28.411
+9,5555,10,לקרוא,inanimate,0,9,2026-06-07_23-12-29.407,/Users/tomermuller/Desktop/BMR/BindingMemoryRetrival/src/binding_task/features/animacy/inanimate_01.jpg,2026-06-07_23-12-31.955,timeout,2026-06-07_23-12-36.965
+10,5555,11,לאכול,inanimate,0,10,2026-06-07_23-12-37.818,/Users/tomermuller/Desktop/BMR/BindingMemoryRetrival/src/binding_task/features/animacy/inanimate_02.jpg,2026-06-07_23-12-40.151,timeout,2026-06-07_23-12-45.161
+11,5555,12,לכתוב,inanimate,0,11,2026-06-07_23-12-46.310,/Users/tomermuller/Desktop/BMR/BindingMemoryRetrival/src/binding_task/features/animacy/inanimate_03.jpg,2026-06-07_23-12-49.038,timeout,2026-06-07_23-12-54.048
