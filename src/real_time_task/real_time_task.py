@@ -10,11 +10,11 @@ from src.tools.utils import show_instruction, get_subject_info
 
 
 class RealTimeTask:
-    def __init__(self, subject_id: str):
+    def __init__(self, subject_id: str, use_parallel_port: bool = True):
         """initialize the experiment with a subject ID, psychopy window, parallel port, and timestamp"""
         self.subject_id = subject_id
         self.win = visual.Window(fullscr=True)
-        self.parallel_port = parallel.ParallelPort(address=0x5EFC)
+        self.parallel_port = parallel.ParallelPort(address=0x5EFC) if use_parallel_port else None
         self.time = datetime.now().strftime(StringEnums.MINUTE_FORMAT)
 
     def main(self):
@@ -28,8 +28,8 @@ class RealTimeTask:
                     7. goodbye instruction"""
         self._general_setting()
         show_instruction(win=self.win, instruction=RealTimeInstruction.WELLCOME)
-        categories = ["animacy"]
-        #self._functional_localizer(categories=categories)
+        categories = ["colors"]
+        self._functional_localizer(categories=categories)
         self._main_task(categories=categories)
         show_instruction(win=self.win, instruction=Instruction.GOODBYE, time=10)
 
@@ -80,7 +80,7 @@ class RealTimeTask:
 
 
 if __name__ == '__main__':
-    subject = get_subject_info()
+    subject, use_parallel = get_subject_info()
     if subject != "-1":
-        task = RealTimeTask(subject_id=subject)
+        task = RealTimeTask(subject_id=subject, use_parallel_port=use_parallel)
         task.main()

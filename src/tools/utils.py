@@ -148,23 +148,25 @@ def show_nothing(win: psychopy.visual.window.Window, min_time: float, max_time: 
     win.flip()
     core.wait(random.uniform(min_time, max_time))
 
-def send_to_parallel_port(parallel_port: parallel.ParallelPort, pulse_number):
+def send_to_parallel_port(parallel_port, pulse_number):
     """send trigger pulse to parallel port for EEG/fMRI synchronization:
-        input: parallel_port: psychopy ParallelPort object
+        input: parallel_port: psychopy ParallelPort object (or None to skip)
                pulse_number: integer code to send (defined in ParallelPortEnums)
         1. set data on parallel port (currently commented for testing)
         2. wait 10ms for pulse duration
         3. reset parallel port to 0"""
-    #parallel_port.setData(pulse_number)
+    if parallel_port is None:
+        return
+    parallel_port.setData(pulse_number)
     core.wait(0.01)
-    #parallel_port.setData(0)
+    parallel_port.setData(0)
 
 
-def get_subject_info() -> str:
-    """open GUI window to get subject ID, return subject_id (or '-1' if cancelled)"""
-    info = {StringEnums.SUBJECT_ID: ''}
+def get_subject_info() -> tuple[str, bool]:
+    """open GUI window to get subject ID and parallel port flag, return (subject_id, use_parallel_port)"""
+    info = {StringEnums.SUBJECT_ID: '', 'Use Parallel Port': True}
     dlg = gui.DlgFromDict(dictionary=info, title=StringEnums.EXPERIMENT_TITLE)
     if dlg.OK:
-        return str(info[StringEnums.SUBJECT_ID])
+        return str(info[StringEnums.SUBJECT_ID]), info['Use Parallel Port']
     else:
-        return "-1"
+        return "-1", False

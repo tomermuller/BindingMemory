@@ -54,26 +54,17 @@ class RetrivalCouple:
             trial_times[TimeAttribute.CUE_VERB_APPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
             send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=RealTimeTaskTriggers.SHOW_CUE_VERB)
 
-        keys = self._wait_for_recall(verb_stim)
+        event.clearEvents()
+        keys = event.waitKeys(maxWait=7.0, keyList=['up'])
         if not is_example:
             trial_times[StringEnums.RECALLED] = keys is not None
             trial_times[TimeAttribute.RECALL_KEY_TIME] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
             send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=RealTimeTaskTriggers.ANSWER_CUE_VERB)
 
-        core.wait(2.0)
+        if keys is not None:
+            core.wait(2.0)
         if not is_example:
             trial_times[TimeAttribute.CUE_VERB_DISAPPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
-
-    def _wait_for_recall(self, verb_stim, max_wait: float = 7.0):
-        clock = core.Clock()
-        event.clearEvents()
-        while clock.getTime() < max_wait:
-            verb_stim.draw()
-            self.win.flip()
-            keys = event.getKeys(keyList=['up'])
-            if keys:
-                return keys
-        return None
 
     def _ask_feature_question(self, category: str, trial_times: dict, is_example: bool = False):
         features = list(Features.CATEGORY_TO_FEATURES[category].keys())
