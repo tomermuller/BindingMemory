@@ -12,11 +12,11 @@ import pandas as pd
 
 
 class BindingTask:
-    def __init__(self, subject_id: str):
+    def __init__(self, subject_id: str, use_parallel_port: bool = True):
         """initialize the experiment with a subject ID, psychopy window, parallel port, and timestamp"""
         self.subject_id = subject_id
         self.win = visual.Window(fullscr=True)
-        self.parallel_port = parallel.ParallelPort(address=0x5EFC)
+        self.parallel_port = parallel.ParallelPort(address=0x5EFC) if use_parallel_port else None
         self.time = datetime.now().strftime(StringEnums.MINUTE_FORMAT)
         self.category = Features.BINDING_CATEGORIES
 
@@ -310,9 +310,9 @@ class BindingTask:
         df.to_csv(save_path / f'subject_{self.subject_id}_{self.time}_combined.csv', index=False)
 
 if __name__ == '__main__':
-    subject = get_subject_info()
+    subject, is_send_triggers = get_subject_info()
     if subject != "-1":
-        task = BindingTask(subject_id=subject)
+        task = BindingTask(subject_id=subject, use_parallel_port=is_send_triggers)
         task.main()
 
 
