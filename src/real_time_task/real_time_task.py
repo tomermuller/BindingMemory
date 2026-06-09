@@ -28,8 +28,8 @@ class RealTimeTask:
                     7. goodbye instruction"""
         self._general_setting()
         show_instruction(win=self.win, instruction=RealTimeInstruction.WELLCOME)
-        categories = ["colors"]
-        self._functional_localizer(categories=categories)
+        categories = ["animacy"]
+        #self._functional_localizer(categories=categories)
         self._main_task(categories=categories)
         show_instruction(win=self.win, instruction=Instruction.GOODBYE, time=10)
 

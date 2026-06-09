@@ -10,7 +10,7 @@ class ExperimentType:
 class TaskManage:
     NUMBER_OF_TRIALS_PER_FEATURE = {
         ExperimentType.BINDING: 70,
-        ExperimentType.REAL_TIME: 50,
+        ExperimentType.REAL_TIME: 2,
     }
     NUMBER_OF_BLOCKS = 5
     NUMBER_OF_BINDING_TRIALS = 45
@@ -389,7 +389,7 @@ class MemoryStrategyEnums:
 
 
 class BreakGameEnums:
-    GAME_DURATION = 100  # seconds
+    GAME_DURATION = 30  # seconds
     CHANGE_INTERVAL = 10  # seconds
     BASE_BRIGHTNESS = 0.5
     TRIAL_CHANGE = 0.2

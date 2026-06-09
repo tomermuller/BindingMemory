@@ -5,6 +5,7 @@ from src.enums import Features, Paths, StringEnums, TimeAttribute, RealTimeTaskT
 import random
 from pathlib import Path
 from psychopy import visual, core, parallel, event
+from PIL import Image as PILImage
 import json
 from src.tools.utils import send_to_parallel_port, show_fixation, show_instruction
 from src.tools.break_game import BreakGame
@@ -104,7 +105,11 @@ class CoupleLearning:
         if category == Features.COLORS:
             img = visual.ImageStim(self.win, image=str(feature_image_path), size=(0.33, 0.33), units='height', pos=(0, 0))
         else:
-            img = visual.ImageStim(self.win, image=str(feature_image_path), size=1)
+            pil_img = PILImage.open(str(feature_image_path))
+            w, h = pil_img.size
+            aspect = w / h
+            size = (aspect * 0.6, 0.6) if aspect <= 1 else (0.6, 0.6 / aspect)
+            img = visual.ImageStim(self.win, image=str(feature_image_path), size=size)
         img.draw()
         self.win.flip()
         if not is_example:
