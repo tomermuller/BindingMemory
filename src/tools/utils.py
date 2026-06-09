@@ -8,7 +8,8 @@ from PIL import Image, ImageEnhance
 import psychopy
 from psychopy import visual, core, event, parallel, gui
 
-from src.enums.Enums import StringEnums, BindingAndTestEnums
+from src.enums.Enums import StringEnums, BindingAndTestEnums, Paths
+
 
 def compute_avg_scene_color() -> list:
     """compute the average RGB color across all scene images and return in PsychoPy [-1, 1] format:
@@ -17,7 +18,7 @@ def compute_avg_scene_color() -> list:
         3. divide by total pixel count to get mean RGB in [0, 255]
         4. convert to PsychoPy [-1, 1] range: val / 127.5 - 1
         output: [r, g, b] list with values in [-1, 1]"""
-    scenes_folder = Path(__file__).parent / "features" / "scenes"
+    scenes_folder = Path(Paths.SCENE_IMAGE_FOLDER)
     pixel_sum = np.zeros(3)
     pixel_count = 0
 

@@ -42,6 +42,8 @@ class Paths:
     SCENE_IMAGE_PATH = str(_FEATURES / 'scenes' / '{}_image.png')
     ANIMACY_IMAGE_PATH = str(_FEATURES / 'animacy' / '{}.jpg')
 
+    SCENE_IMAGE_FOLDER = str(_FEATURES / 'scenes')
+
     OBJECT_PATH = str(_FEATURES / 'objects' / '{}.png')
 
     SAVE_DATA_FOLDER = {
