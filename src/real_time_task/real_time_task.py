@@ -66,7 +66,7 @@ class RealTimeTask:
                         Instruction.START_X_BLOCK + str(block_idx + 1) + "/" + str(RealTimeTaskEnums.NUMBER_OF_BLOCKS)))
 
             couple_learning.run_block()
-            BreakGame(win=self.win, parallel_port=self.parallel_port).run()
+            #BreakGame(win=self.win, parallel_port=self.parallel_port).run()
             couple_learning.run_block()
             BreakGame(win=self.win, parallel_port=self.parallel_port).run()
             retrival_couple.run_block()
