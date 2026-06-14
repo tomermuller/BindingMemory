@@ -52,7 +52,7 @@ class RetrivalCouple:
         self.win.flip()
         if not is_example:
             trial_times[TimeAttribute.CUE_VERB_APPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
-            send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=RealTimeTaskTriggers.SHOW_CUE_VERB)
+            send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=RealTimeTaskTriggers.RETRIEVAL_VERB_TO_TRIGGER[verb])
 
         event.clearEvents()
         keys = event.waitKeys(maxWait=7.0, keyList=['up'])

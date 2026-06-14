@@ -1,0 +1,8 @@
+,subject,trial_index,feature,word_question,user_answer,is_right,image_name,feature_appear,feature_disappear
+0,333,0,inanimate,blue,red,True,inanimate_03,2026-06-12_18-36-28.395,2026-06-12_18-36-29.898
+1,333,1,animate,blue,red,True,animate_02,2026-06-12_18-36-31.111,2026-06-12_18-36-32.613
+2,333,2,inanimate,blue,red,True,inanimate_02,2026-06-12_18-36-34.391,2026-06-12_18-36-35.894
+3,333,3,animate,blue,red,True,animate_02,2026-06-12_18-36-38.188,2026-06-12_18-36-39.692
+4,333,4,animate,blue,red,True,animate_03,2026-06-12_18-36-40.991,2026-06-12_18-36-42.494
+5,333,5,inanimate,blue,red,True,inanimate_03,2026-06-12_18-36-45.020,2026-06-12_18-36-46.523
+6,333,6,animate,blue,red,True,animate_03,2026-06-12_18-36-49.370,2026-06-12_18-36-50.873

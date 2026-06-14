@@ -1,0 +1,4 @@
+,subject,trial_index,feature,word_question,user_answer,is_right,image_name,feature_appear,feature_disappear,question_appear,answer_time
+0,333,0,green,red,left,True,green_image,2026-06-12_19-09-42.172,2026-06-12_19-09-43.674,2026-06-12_19-09-45.554,2026-06-12_19-09-46.244
+1,333,1,green,red,left,True,green_image,2026-06-12_19-09-48.543,2026-06-12_19-09-50.045,2026-06-12_19-09-51.648,2026-06-12_19-09-52.228
+2,333,2,red,red,right,True,red_image,2026-06-12_19-09-55.409,2026-06-12_19-09-56.911,2026-06-12_19-09-57.996,2026-06-12_19-09-58.467

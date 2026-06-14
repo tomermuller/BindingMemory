@@ -1,0 +1,2 @@
+,subject,trial,verb,animacy,block_index,trial_index_in_block,verb_appear,img_path_animacy,feature_appear_animacy,response_animacy,answer_time_animacy
+0,333,1,לשתות,animate,0,0,2026-06-12_18-57-47.047,/Users/tomermuller/Desktop/BMR/BindingMemoryRetrival/src/binding_task/features/animacy/animate_02.jpg,2026-06-12_18-57-49.595,timeout,2026-06-12_18-57-54.595

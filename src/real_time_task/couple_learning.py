@@ -20,19 +20,11 @@ class CoupleLearning:
         self.subject_id = subject_id
         self.categories = categories
         self.verb_list = verb_list
-        self.blocks_number = RealTimeTaskEnums.NUMBER_OF_BLOCKS
         self.answers = {}
-        self.blocks = []
+        self.block_counter = 0
         self.verb_to_feature = {}
         self.verb_to_image = {}
-        self._create_blocks()
         self._create_verb_to_feature_dict()
-
-    def _create_blocks(self) -> None:
-        for block in range(self.blocks_number):
-            block_verb_list = self.verb_list.copy()
-            random.shuffle(block_verb_list)
-            self.blocks.append(block_verb_list)
 
     def _create_verb_to_feature_dict(self) -> None:
         all_verbs = self.verb_list + RealTimeTaskEnums.EXAMPLE_VERB_LIST
@@ -73,13 +65,15 @@ class CoupleLearning:
                 self._show_category_to_verb(verb=verb, category=category, trial_times={}, is_example=True)
         show_instruction(win=self.win, instruction=Instruction.FINISH_EXAMPLES)
 
-    def run_block(self, block_index: int) -> None:
-        for trial_index, verb in enumerate(self.blocks[block_index]):
+    def run_block(self) -> None:
+        shuffled_verbs = self.verb_list.copy()
+        random.shuffle(shuffled_verbs)
+        for trial_index, verb in enumerate(shuffled_verbs):
             trial_times = {
-                'block_index': block_index,
+                'block_index': self.block_counter,
                 'trial_index_in_block': trial_index,
             }
-            trial_num = block_index * len(self.blocks[block_index]) + trial_index + 1
+            trial_num = self.block_counter * len(self.verb_list) + trial_index + 1
 
             show_fixation(win=self.win, min_time=0.5, max_time=1.5)
             self._show_verb(verb=verb, trial_times=trial_times)
@@ -89,6 +83,7 @@ class CoupleLearning:
 
             self._write_answers(verb=verb, trial_num=trial_num, trial_times=trial_times)
             self._temp_save(trial_num=trial_num)
+        self.block_counter += 1
 
     def _show_verb(self, verb: str, trial_times: dict, is_example: bool = False):
         verb_stim = visual.TextStim(self.win, text=verb, pos=(0, 0), height=0.1, color='white',
@@ -97,7 +92,7 @@ class CoupleLearning:
         self.win.flip()
         if not is_example:
             trial_times[TimeAttribute.VERB_APPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
-            send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=RealTimeTaskTriggers.SHOW_VERB)
+            send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=RealTimeTaskTriggers.LEARNING_VERB_TO_TRIGGER[verb])
         core.wait(1.5)
 
     def _show_category_to_verb(self, verb: str, category: str, trial_times: dict, is_example: bool = False) -> None:
@@ -115,7 +110,9 @@ class CoupleLearning:
         if not is_example:
             trial_times[f"img_path_{category}"] = str(feature_image_path)
             trial_times[f"feature_appear_{category}"] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
-            send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=RealTimeTaskTriggers.SHOW_FEATURE)
+            image_stem = Path(feature_image_path).stem
+            pulse = RealTimeTaskTriggers.LEARNING_IMAGE_TO_TRIGGER.get(image_stem, RealTimeTaskTriggers.SHOW_FEATURE)
+            send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=pulse)
         event.clearEvents()
         core.wait(2.0)
         keys = event.waitKeys(maxWait=3.0, keyList=['up'])

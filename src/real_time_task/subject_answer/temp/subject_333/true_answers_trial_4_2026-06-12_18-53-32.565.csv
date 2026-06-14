@@ -1,0 +1,5 @@
+,subject,trial,verb,animacy,block_index,trial_index_in_block,verb_appear,img_path_animacy,feature_appear_animacy,response_animacy,answer_time_animacy
+0,333,1,לטפס,inanimate,0,0,2026-06-12_18-52-59.644,/Users/tomermuller/Desktop/BMR/BindingMemoryRetrival/src/binding_task/features/animacy/inanimate_01.jpg,2026-06-12_18-53-02.028,timeout,2026-06-12_18-53-07.028
+1,333,2,לקרוא,animate,0,1,2026-06-12_18-53-08.200,/Users/tomermuller/Desktop/BMR/BindingMemoryRetrival/src/binding_task/features/animacy/animate_01.jpg,2026-06-12_18-53-10.309,timeout,2026-06-12_18-53-15.309
+2,333,3,לאכול,inanimate,0,2,2026-06-12_18-53-16.650,/Users/tomermuller/Desktop/BMR/BindingMemoryRetrival/src/binding_task/features/animacy/inanimate_02.jpg,2026-06-12_18-53-18.767,timeout,2026-06-12_18-53-23.767
+3,333,4,לנסוע,animate,0,3,2026-06-12_18-53-24.605,/Users/tomermuller/Desktop/BMR/BindingMemoryRetrival/src/binding_task/features/animacy/animate_03.jpg,2026-06-12_18-53-27.565,timeout,2026-06-12_18-53-32.565

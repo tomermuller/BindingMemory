@@ -1,0 +1,2 @@
+,subject,trial,verb,animacy,block_index,trial_index_in_block,verb_appear,img_path_animacy,feature_appear_animacy,response_animacy,answer_time_animacy
+0,333,1,לרוץ,inanimate,0,0,2026-06-12_18-55-25.168,/Users/tomermuller/Desktop/BMR/BindingMemoryRetrival/src/binding_task/features/animacy/inanimate_03.jpg,2026-06-12_18-55-28.145,timeout,2026-06-12_18-55-33.145

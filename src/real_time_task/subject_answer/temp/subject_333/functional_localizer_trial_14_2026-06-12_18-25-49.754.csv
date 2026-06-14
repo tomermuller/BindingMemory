@@ -1,0 +1,16 @@
+,subject,trial_index,feature,word_question,user_answer,is_right,image_name,feature_appear,feature_disappear
+0,333,0,inanimate,blue,red,True,inanimate_02,2026-06-12_18-24-58.039,2026-06-12_18-24-59.542
+1,333,1,animate,blue,red,True,animate_01,2026-06-12_18-25-01.655,2026-06-12_18-25-03.159
+2,333,2,animate,blue,red,True,animate_02,2026-06-12_18-25-04.937,2026-06-12_18-25-06.441
+3,333,3,inanimate,blue,red,True,inanimate_01,2026-06-12_18-25-08.712,2026-06-12_18-25-10.215
+4,333,4,animate,blue,red,True,animate_03,2026-06-12_18-25-12.948,2026-06-12_18-25-14.452
+5,333,5,inanimate,blue,red,True,inanimate_01,2026-06-12_18-25-16.811,2026-06-12_18-25-18.314
+6,333,6,inanimate,blue,red,True,inanimate_02,2026-06-12_18-25-19.359,2026-06-12_18-25-20.862
+7,333,7,animate,blue,red,True,animate_01,2026-06-12_18-25-23.597,2026-06-12_18-25-25.101
+8,333,8,animate,blue,red,True,animate_03,2026-06-12_18-25-27.928,2026-06-12_18-25-29.431
+9,333,9,inanimate,blue,red,True,inanimate_03,2026-06-12_18-25-31.324,2026-06-12_18-25-32.827
+10,333,10,animate,blue,red,True,animate_02,2026-06-12_18-25-34.516,2026-06-12_18-25-36.019
+11,333,11,inanimate,blue,red,True,inanimate_03,2026-06-12_18-25-37.125,2026-06-12_18-25-38.628
+12,333,12,inanimate,blue,red,True,inanimate_03,2026-06-12_18-25-39.675,2026-06-12_18-25-41.177
+13,333,13,animate,blue,red,True,animate_03,2026-06-12_18-25-43.877,2026-06-12_18-25-45.380
+14,333,14,inanimate,blue,red,True,inanimate_02,2026-06-12_18-25-48.251,2026-06-12_18-25-49.754

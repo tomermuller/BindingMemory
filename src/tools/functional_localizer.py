@@ -37,8 +37,20 @@ class FunctionalLocalizer:
         self.all_trials = shuffle_trials(items=self.all_trials, max_consecutive=2)
 
         self.feature_to_image_file = {key: value for category in self.category_to_features.values() for key, value in category.items()}
+        self.feature_image_queue = self._build_feature_image_queue()
         self.avg_scene_color = compute_avg_scene_color()
         self.scene_frame = visual.Rect(self.win, width=0.4, height=0.4, units='height', fillColor=self.avg_scene_color, lineColor=None)
+
+    def _build_feature_image_queue(self) -> dict:
+        """for each feature, build a balanced shuffled list of images so each image appears floor(N/k) or ceil(N/k) times"""
+        n = TaskManage.NUMBER_OF_TRIALS_PER_FEATURE[self.exp]
+        queue = {}
+        for feature, images in self.feature_to_image_file.items():
+            m = len(images)
+            pool = list(images) * (n // m) + list(images)[:n % m]
+            random.shuffle(pool)
+            queue[feature] = pool
+        return queue
 
     def run(self):
         """run the functional localizer:
@@ -67,10 +79,17 @@ class FunctionalLocalizer:
 
     def _run_examples(self):
         """Run one example trial per category, alternating true/false."""
-        for (feature, word_question, is_true) in self._build_examples():
+        for category, features in self.category_to_features.items():
+            feature = random.choice(list(features.keys()))
             self._fixation_and_show_feature(trial_feature=feature, trial_times={}, is_example=True)
-            self._show_attention_question(word_question=word_question, trial_times={}, is_example=True)
-            self._get_subject_answer(is_true=is_true, trial_times={}, is_example=True)
+            if len(features) == 2:
+                shown_features = self._show_two_feature_question(category=category, trial_times={}, is_example=True)
+                self._get_two_feature_answer(features=shown_features, trial_times={}, is_example=True)
+            else:
+                is_true = random.choice([True, False])
+                word_question = self._get_word_question(is_true=is_true, trial_feature=feature)
+                self._show_attention_question(word_question=word_question, trial_times={}, is_example=True)
+                self._get_subject_answer(is_true=is_true, trial_times={}, is_example=True)
             show_nothing(win=self.win, min_time=1.0, max_time=3.0)
 
         show_instruction(win=self.win, instruction=Instruction.FINISH_EXAMPLES)
@@ -94,26 +113,31 @@ class FunctionalLocalizer:
             3. show the feature image for 1.5 second
             4. blank screen for 1 to 2 seconds"""
         show_fixation(win=self.win, min_time=0.5, max_time=1.5)
-        print("1111")
         self._show_feature(trial_feature=trial_feature, trial_times=trial_times, is_example=is_example)
         show_nothing(win=self.win, min_time=1.0, max_time=2.0)
 
     def _show_feature(self, trial_feature: str, trial_times: dict = None, is_example: bool = False):
         """display the feature image on screen for 1.5 seconds and record timing.
             color features are displayed at size 0.5, all other features at size 1."""
+        if is_example:
+            image_path = random.choice(self.feature_to_image_file[trial_feature])
+        else:
+            image_path = self.feature_image_queue[trial_feature].pop(0)
         if trial_feature in Features.COLOR_TO_IMAGE:
             if self.exp == ExperimentType.BINDING:
                 self.scene_frame.draw()
             size = (0.33, 0.33)
-            img = visual.ImageStim(self.win, image=str(random.choice(self.feature_to_image_file[trial_feature])), size=size, units='height', pos=(0, 0))
+            img = visual.ImageStim(self.win, image=str(image_path), size=size, units='height', pos=(0, 0))
         else:
             size = (1, 1)
-            img = visual.ImageStim(self.win, image=str(random.choice(self.feature_to_image_file[trial_feature])), size=size, pos=(0, 0))
+            img = visual.ImageStim(self.win, image=str(image_path), size=size, pos=(0, 0))
         img.draw()
 
         if not is_example:
+            trial_times[TimeAttribute.IMAGE_NAME] = Path(image_path).stem
             trial_times[TimeAttribute.FEATURE_APPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
-            send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.FEATURE_SHOW_TO_PULSE_CODE[trial_feature])
+            trigger_key = Path(image_path).stem if Path(image_path).stem in ParallelPortEnums.FEATURE_SHOW_TO_PULSE_CODE else trial_feature
+            send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.FEATURE_SHOW_TO_PULSE_CODE[trigger_key])
 
         self.win.flip()
         core.wait(1.5)
@@ -123,17 +147,55 @@ class FunctionalLocalizer:
             trial_times[TimeAttribute.FEATURE_DISAPPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
 
     def _attention_question(self, trial_index: int, trial_feature: str, trial_times: dict):
-        """run the attention question for a single trial:
-            1. randomly decide whether to show a true or false word
-            2. pick the word based on the decision
-            3. display the attention question screen
-            4. get subject answer and save the result to correctness_score"""
+        category = [cat for cat, features in self.category_to_features.items() if trial_feature in features][0]
+        if len(self.category_to_features[category]) == 2:
+            self._two_feature_attention_question(trial_index=trial_index, trial_feature=trial_feature,
+                                                 category=category, trial_times=trial_times)
+        else:
+            self._word_attention_question(trial_index=trial_index, trial_feature=trial_feature,
+                                          trial_times=trial_times)
+
+    def _word_attention_question(self, trial_index: int, trial_feature: str, trial_times: dict):
         is_true = random.choice([True, False])
         word_question = self._get_word_question(is_true=is_true, trial_feature=trial_feature)
         self._show_attention_question(word_question=word_question, trial_times=trial_times)
         is_right, user_answer = self._get_subject_answer(is_true=is_true, trial_times=trial_times)
         self._update_subject_score(trial_feature=trial_feature, is_right=is_right, word_question=word_question,
                                    user_answer=user_answer, trial_index=trial_index, trial_times=trial_times)
+
+    def _two_feature_attention_question(self, trial_index: int, trial_feature: str, category: str, trial_times: dict):
+        features = self._show_two_feature_question(category=category, trial_times=trial_times)
+        chosen_feature, key = self._get_two_feature_answer(features=features, trial_times=trial_times)
+        is_right = (chosen_feature == trial_feature)
+        if not is_right:
+            show_instruction(win=self.win, instruction=Instruction.MISTAKE, time=3.0)
+        self._update_subject_score(trial_feature=trial_feature, is_right=is_right, word_question=chosen_feature,
+                                   user_answer=key, trial_index=trial_index, trial_times=trial_times)
+
+    def _show_two_feature_question(self, category: str, trial_times: dict, is_example: bool = False) -> list:
+        features = list(self.category_to_features[category].keys())
+        random.shuffle(features)
+        positions = BindingAndTestEnums.FEATURE_QUESTION_POSITIONS[:2]
+        stims = [visual.TextStim(self.win, text=HebrewEnums.TRANSLATE[f], pos=pos,
+                                 font=StringEnums.ARIAL_FONT, languageStyle='rtl')
+                 for f, pos in zip(features, positions)]
+        for stim in stims:
+            stim.draw()
+        if not is_example:
+            trial_times[TimeAttribute.QUESTION_APPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
+            send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.SHOW_ATTENTION_QUESTION)
+        self.win.flip()
+        return features
+
+    def _get_two_feature_answer(self, features: list, trial_times: dict, is_example: bool = False) -> tuple:
+        event.clearEvents()
+        key = event.waitKeys(keyList=[StringEnums.LEFT, StringEnums.RIGHT])[0]
+        if not is_example:
+            trial_times[TimeAttribute.ANSWER_TIME] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
+            send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=ParallelPortEnums.ANSWER_ATTENTION_QUESTION)
+        chosen_feature = features[BindingAndTestEnums.ARROW_TO_LOCATION[key]]
+        return chosen_feature, key
+
 
     def _get_word_question(self, is_true: bool, trial_feature: str) -> str:
         """if is_true: return the word of the photo

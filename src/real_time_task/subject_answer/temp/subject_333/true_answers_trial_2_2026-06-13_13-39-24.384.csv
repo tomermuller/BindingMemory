@@ -1,0 +1,3 @@
+,subject,trial,verb,animacy,block_index,trial_index_in_block,verb_appear,img_path_animacy,feature_appear_animacy,response_animacy,answer_time_animacy
+0,333,1,לאכול,animate,0,0,2026-06-13_13-39-10.883,/Users/tomermuller/Desktop/BMR/BindingMemoryRetrival/src/binding_task/features/animacy/animate_02.jpg,2026-06-13_13-39-13.478,up,2026-06-13_13-39-15.672
+1,333,2,לרוץ,animate,0,1,2026-06-13_13-39-16.749,/Users/tomermuller/Desktop/BMR/BindingMemoryRetrival/src/binding_task/features/animacy/animate_01.jpg,2026-06-13_13-39-19.384,timeout,2026-06-13_13-39-24.384

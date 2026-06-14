@@ -10,15 +10,17 @@ class ExperimentType:
 class TaskManage:
     NUMBER_OF_TRIALS_PER_FEATURE = {
         ExperimentType.BINDING: 70,
-        ExperimentType.REAL_TIME: 2,
+        ExperimentType.REAL_TIME: 30,
     }
     NUMBER_OF_BLOCKS = 5
     NUMBER_OF_BINDING_TRIALS = 45
 
 class RealTimeTaskEnums:
-    VERB_LIST = ["להתקשר", "לרוץ", "לקפוץ", "לאכול", "לשתות", "לכתוב", "לקרוא", "לשחות", "לטפס", "לבשל", "לנסוע", "לשיר"]
+    #VERB_LIST = ["להתקשר", "לרוץ", "לקפוץ", "לאכול", "לשתות", "לכתוב", "לקרוא", "לשחות", "לטפס", "לבשל", "לנסוע", "לשיר"]
+    VERB_LIST = ["להתקשר", "לרוץ", "לקפוץ", "לאכול", "לשתות", "לכתוב"]
+
     EXAMPLE_VERB_LIST = ["ללכת", "לישון"]
-    NUMBER_OF_BLOCKS = 5
+    NUMBER_OF_BLOCKS = 3
     NUMBER_OF_TRIALS_PER_BLOCK = 12
 
 
@@ -229,6 +231,13 @@ class ParallelPortEnums:
     SHOW_ANIMATE = 21
     SHOW_INANIMATE = 22
 
+    SHOW_ANIMATE_01 = 111
+    SHOW_ANIMATE_02 = 112
+    SHOW_ANIMATE_03 = 113
+    SHOW_INANIMATE_01 = 116
+    SHOW_INANIMATE_02 = 117
+    SHOW_INANIMATE_03 = 118
+
     SHOW_ATTENTION_QUESTION = 31
     ANSWER_ATTENTION_QUESTION = 32
 
@@ -256,7 +265,13 @@ class ParallelPortEnums:
                                   Features.BATHROOM: SHOW_BATHROOM,
                                   Features.KITCHEN: SHOW_KITCHEN,
                                   Features.ANIMATE: SHOW_ANIMATE,
-                                  Features.INANIMATE: SHOW_INANIMATE}
+                                  Features.INANIMATE: SHOW_INANIMATE,
+                                  Features.ANIMATE01: SHOW_ANIMATE_01,
+                                  Features.ANIMATE02: SHOW_ANIMATE_02,
+                                  Features.ANIMATE03: SHOW_ANIMATE_03,
+                                  Features.INANIMATE01: SHOW_INANIMATE_01,
+                                  Features.INANIMATE02: SHOW_INANIMATE_02,
+                                  Features.INANIMATE03: SHOW_INANIMATE_03}
 
     CATEGORY_ANSWERS_SHOW_TO_PULSE_CODE = {Features.SCENES: SHOW_SCENES_ANSWERS,
                                             Features.COLORS: SHOW_COLORS_ANSWERS}
@@ -283,6 +298,17 @@ class RealTimeTaskTriggers:
     ANSWER_ANIMATE_QUESTION = 87
     SHOW_FEATURE_QUESTION = 88
     ANSWER_FEATURE_QUESTION = 89
+
+    # per-verb triggers: learning (201-206), retrieval (221-226)
+    LEARNING_VERB_TO_TRIGGER = {verb: 201 + i for i, verb in enumerate(RealTimeTaskEnums.VERB_LIST)}
+    RETRIEVAL_VERB_TO_TRIGGER = {verb: 221 + i for i, verb in enumerate(RealTimeTaskEnums.VERB_LIST)}
+
+    # per-image triggers in learning (211-219)
+    LEARNING_IMAGE_TO_TRIGGER = {
+        Features.ANIMATE01: 211, Features.ANIMATE02: 212, Features.ANIMATE03: 213,
+        Features.INANIMATE01: 214, Features.INANIMATE02: 215, Features.INANIMATE03: 216,
+        f"{Features.RED}_image": 217, f"{Features.GREEN}_image": 218, f"{Features.YELLOW}_image": 219,
+    }
 
 
 class Instruction:
@@ -465,6 +491,7 @@ class TimeAttribute:
     CUE_VERB_DISAPPEAR = "cue_verb_disappear"
     ANIMATE_QUESTION_APPEAR = "animate_question_appear"
     ANIMATE_ANSWER_TIME = "animate_answer_time"
+    IMAGE_NAME = "image_name"
 
 
 

@@ -156,6 +156,7 @@ def send_to_parallel_port(parallel_port, pulse_number):
         2. wait 10ms for pulse duration
         3. reset parallel port to 0"""
     if parallel_port is None:
+        print(pulse_number)
         return
     parallel_port.setData(pulse_number)
     core.wait(0.01)

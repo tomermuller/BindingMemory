@@ -56,27 +56,29 @@ class RealTimeTask:
         couple_learning = CoupleLearning(win=self.win, parallel_port=self.parallel_port,
                                          categories=categories, subject_id=self.subject_id,
                                          verb_list=RealTimeTaskEnums.VERB_LIST)
-
         retrival_couple = RetrivalCouple(win=self.win, parallel_port=self.parallel_port,
                                          subject_id=self.subject_id,
                                          verb_list=RealTimeTaskEnums.VERB_LIST, categories=categories)
-
-        couple_learning.run_examples()
-        BreakGame(win=self.win, parallel_port=self.parallel_port).run_example()
-        retrival_couple.run_examples()
-        show_instruction(win=self.win, instruction=Instruction.FINISH_EXAMPLES)
-
+        self._main_task_example(couple_learning=couple_learning, retrival_couple=retrival_couple)
 
         for block_idx in range(RealTimeTaskEnums.NUMBER_OF_BLOCKS):
             show_instruction(win=self.win, instruction=(
                         Instruction.START_X_BLOCK + str(block_idx + 1) + "/" + str(RealTimeTaskEnums.NUMBER_OF_BLOCKS)))
 
-            couple_learning.run_block(block_index=block_idx)
+            couple_learning.run_block()
+            BreakGame(win=self.win, parallel_port=self.parallel_port).run()
+            couple_learning.run_block()
             BreakGame(win=self.win, parallel_port=self.parallel_port).run()
             retrival_couple.run_block()
 
         couple_learning.save_subject(self.time)
         retrival_couple.save_subject(self.time)
+
+    def _main_task_example(self, couple_learning: CoupleLearning, retrival_couple: RetrivalCouple):
+        couple_learning.run_examples()
+        BreakGame(win=self.win, parallel_port=self.parallel_port).run_example()
+        retrival_couple.run_examples()
+        show_instruction(win=self.win, instruction=Instruction.FINISH_EXAMPLES)
 
 
 if __name__ == '__main__':
