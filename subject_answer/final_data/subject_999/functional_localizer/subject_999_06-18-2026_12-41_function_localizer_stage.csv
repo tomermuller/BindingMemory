@@ -1,0 +1,5 @@
+,subject,trial_index,feature,word_question,user_answer,is_right,image_name,feature_appear,feature_disappear,question_appear,answer_time
+0,999,0,inanimate,inanimate,left,True,inanimate_01,2026-06-18_12-42-07.516,2026-06-18_12-42-09.039,2026-06-18_12-42-10.794,2026-06-18_12-42-13.112
+1,999,1,animate,animate,right,True,animate_02,2026-06-18_12-42-17.065,2026-06-18_12-42-18.580,2026-06-18_12-42-20.099,2026-06-18_12-42-20.497
+2,999,2,animate,animate,right,True,animate_01,2026-06-18_12-42-23.688,2026-06-18_12-42-25.203,2026-06-18_12-42-26.526,2026-06-18_12-42-26.905
+3,999,3,inanimate,inanimate,right,True,inanimate_02,2026-06-18_12-42-29.749,2026-06-18_12-42-31.275,2026-06-18_12-42-32.585,2026-06-18_12-42-33.217

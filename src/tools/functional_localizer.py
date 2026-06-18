@@ -5,6 +5,7 @@ from datetime import datetime
 import pandas as pd
 import psychopy
 from psychopy import visual, core, event, parallel
+from PIL import Image as PILImage
 from src.enums.Enums import StringEnums, ParallelPortEnums, Features, Instruction, TimeAttribute, \
     HebrewEnums, Paths, TaskManage, BindingAndTestEnums, ExperimentType
 from src.tools.utils import shuffle_trials, show_nothing, show_fixation, show_instruction, send_to_parallel_port, compute_avg_scene_color
@@ -129,8 +130,11 @@ class FunctionalLocalizer:
             size = (0.33, 0.33)
             img = visual.ImageStim(self.win, image=str(image_path), size=size, units='height', pos=(0, 0))
         else:
-            size = (1, 1)
-            img = visual.ImageStim(self.win, image=str(image_path), size=size, pos=(0, 0))
+            pil_img = PILImage.open(str(image_path))
+            w, h = pil_img.size
+            aspect = w / h
+            size = (aspect * 0.6, 0.6) if aspect <= 1 else (0.6, 0.6 / aspect)
+            img = visual.ImageStim(self.win, image=str(image_path), size=size)
         img.draw()
 
         if not is_example:

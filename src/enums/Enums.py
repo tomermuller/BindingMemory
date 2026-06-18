@@ -10,7 +10,7 @@ class ExperimentType:
 class TaskManage:
     NUMBER_OF_TRIALS_PER_FEATURE = {
         ExperimentType.BINDING: 70,
-        ExperimentType.REAL_TIME: 30,
+        ExperimentType.REAL_TIME: 2,
     }
     NUMBER_OF_BLOCKS = 5
     NUMBER_OF_BINDING_TRIALS = 45
