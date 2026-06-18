@@ -20,7 +20,7 @@ class RealTimeTaskEnums:
     VERB_LIST = ["לחפש", "לדחוף", "לקפוץ", "להוריד", "להרים", "לסובב"]
 
     EXAMPLE_VERB_LIST = ["ללכת", "לאכול"]
-    NUMBER_OF_BLOCKS = 3
+    NUMBER_OF_BLOCKS = 1
     NUMBER_OF_TRIALS_PER_BLOCK = 12
 
 
