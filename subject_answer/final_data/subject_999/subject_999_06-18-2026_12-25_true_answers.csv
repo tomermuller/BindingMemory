@@ -1,0 +1,13 @@
+,subject,trial,verb,animacy,block_index,trial_index_in_block,verb_appear,img_path_animacy,feature_appear_animacy,response_animacy,answer_time_animacy
+0,999,1,לסובב,animate,0,0,2026-06-18_12-26-29.622,C:\real-time decoding task\BindingMemory\src\binding_task\features\animacy\animate_01.jpg,2026-06-18_12-26-31.706,timeout,2026-06-18_12-26-36.719
+1,999,2,לדחוף,animate,0,1,2026-06-18_12-26-37.345,C:\real-time decoding task\BindingMemory\src\binding_task\features\animacy\animate_02.jpg,2026-06-18_12-26-39.980,up,2026-06-18_12-26-44.288
+2,999,3,לקפוץ,inanimate,0,2,2026-06-18_12-26-45.618,C:\real-time decoding task\BindingMemory\src\binding_task\features\animacy\inanimate_02.jpg,2026-06-18_12-26-48.473,up,2026-06-18_12-26-50.737
+3,999,4,להוריד,inanimate,0,3,2026-06-18_12-26-51.975,C:\real-time decoding task\BindingMemory\src\binding_task\features\animacy\inanimate_01.jpg,2026-06-18_12-26-54.992,up,2026-06-18_12-26-57.538
+4,999,5,לחפש,inanimate,0,4,2026-06-18_12-26-58.813,C:\real-time decoding task\BindingMemory\src\binding_task\features\animacy\inanimate_03.jpg,2026-06-18_12-27-01.482,timeout,2026-06-18_12-27-06.486
+5,999,6,להרים,animate,0,5,2026-06-18_12-27-07.504,C:\real-time decoding task\BindingMemory\src\binding_task\features\animacy\animate_03.jpg,2026-06-18_12-27-09.808,timeout,2026-06-18_12-27-14.812
+6,999,7,לסובב,animate,1,0,2026-06-18_12-27-16.045,C:\real-time decoding task\BindingMemory\src\binding_task\features\animacy\animate_01.jpg,2026-06-18_12-27-18.631,up,2026-06-18_12-27-23.461
+7,999,8,להרים,animate,1,1,2026-06-18_12-27-24.151,C:\real-time decoding task\BindingMemory\src\binding_task\features\animacy\animate_03.jpg,2026-06-18_12-27-27.105,up,2026-06-18_12-27-29.757
+8,999,9,לחפש,inanimate,1,2,2026-06-18_12-27-30.426,C:\real-time decoding task\BindingMemory\src\binding_task\features\animacy\inanimate_03.jpg,2026-06-18_12-27-33.243,up,2026-06-18_12-27-36.173
+9,999,10,להוריד,inanimate,1,3,2026-06-18_12-27-37.715,C:\real-time decoding task\BindingMemory\src\binding_task\features\animacy\inanimate_01.jpg,2026-06-18_12-27-40.483,up,2026-06-18_12-27-43.054
+10,999,11,לדחוף,animate,1,4,2026-06-18_12-27-43.870,C:\real-time decoding task\BindingMemory\src\binding_task\features\animacy\animate_02.jpg,2026-06-18_12-27-46.289,timeout,2026-06-18_12-27-51.291
+11,999,12,לקפוץ,inanimate,1,5,2026-06-18_12-27-51.925,C:\real-time decoding task\BindingMemory\src\binding_task\features\animacy\inanimate_02.jpg,2026-06-18_12-27-54.612,timeout,2026-06-18_12-27-59.619
