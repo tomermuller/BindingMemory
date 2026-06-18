@@ -17,9 +17,9 @@ class TaskManage:
 
 class RealTimeTaskEnums:
     #VERB_LIST = ["להתקשר", "לרוץ", "לקפוץ", "לאכול", "לשתות", "לכתוב", "לקרוא", "לשחות", "לטפס", "לבשל", "לנסוע", "לשיר"]
-    VERB_LIST = ["להתקשר", "לרוץ", "לקפוץ", "לאכול", "לשתות", "לכתוב"]
+    VERB_LIST = ["לחפש", "לדחוף", "לקפוץ", "להוריד", "להרים", "לסובב"]
 
-    EXAMPLE_VERB_LIST = ["ללכת", "לישון"]
+    EXAMPLE_VERB_LIST = ["ללכת", "לאכול"]
     NUMBER_OF_BLOCKS = 3
     NUMBER_OF_TRIALS_PER_BLOCK = 12
 
