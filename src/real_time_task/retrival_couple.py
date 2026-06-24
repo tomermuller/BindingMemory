@@ -54,17 +54,28 @@ class RetrivalCouple:
             trial_times[TimeAttribute.CUE_VERB_APPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
             send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=RealTimeTaskTriggers.RETRIEVAL_VERB_TO_TRIGGER[verb])
 
+        onset_clock = core.Clock()
+        core.wait(2.0)  # mandatory viewing — no response accepted
+
+        remaining = 7.0 - onset_clock.getTime()
         event.clearEvents()
-        keys = event.waitKeys(maxWait=7.0, keyList=['up'])
+        keys = event.waitKeys(maxWait=max(0, remaining), keyList=['up'])
+
         if not is_example:
             trial_times[StringEnums.RECALLED] = keys is not None
             trial_times[TimeAttribute.RECALL_KEY_TIME] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
-            send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=RealTimeTaskTriggers.ANSWER_CUE_VERB)
+            if keys is not None:
+                send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=RealTimeTaskTriggers.RECALL_KEY_PRESS)
 
         if keys is not None:
-            core.wait(2.0)
+            self.win.flip()  # blank screen — verb disappears immediately
+            remaining_blank = 7.0 - onset_clock.getTime()
+            if remaining_blank > 0:
+                core.wait(remaining_blank)
+
         if not is_example:
             trial_times[TimeAttribute.CUE_VERB_DISAPPEAR] = datetime.now().strftime(StringEnums.MILI_SEC_FORMAT)[:-3]
+            send_to_parallel_port(parallel_port=self.parallel_port, pulse_number=RealTimeTaskTriggers.ANSWER_CUE_VERB)
 
     def _ask_feature_question(self, category: str, trial_times: dict, is_example: bool = False):
         features = list(Features.CATEGORY_TO_FEATURES[category].keys())

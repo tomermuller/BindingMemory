@@ -297,6 +297,7 @@ class RealTimeTaskTriggers:
     # real-time task retrieval phase
     SHOW_CUE_VERB = 84
     ANSWER_CUE_VERB = 85
+    RECALL_KEY_PRESS = 9
     SHOW_ANIMATE_QUESTION = 86
     ANSWER_ANIMATE_QUESTION = 87
     SHOW_FEATURE_QUESTION = 88
