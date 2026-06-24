@@ -216,8 +216,11 @@ class HebrewEnums:
 class ParallelPortEnums:
 
     # general
-    START_RECORD_REST = 1
-    REST_NO_FIXATION      = 2
+    REST_DURATION = 180
+    REST_FIXATION_START = 1
+    REST_FIXATION_END = 2
+    REST_NO_FIXATION_START = 3
+    REST_NO_FIXATION_END = 4
 
     # functional localizer parallel port numbers
     SHOW_RED = 11
