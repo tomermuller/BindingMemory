@@ -1,0 +1,2 @@
+,subject,trial,object,probe,retrival_success,is_remember,subject_answer,probe_appear,probe_disappear,object_appear,start_retrival_time,object_disappear,retrival_time,colors_question_appear,colors_answer_time
+0,004,trial_1,clock,colors,True,True,red,2026-06-11_12-55-20.410,2026-06-11_12-55-21.425,2026-06-11_12-55-21.775,2026-06-11_12-55-22.287,2026-06-11_12-55-22.806,2026-06-11_12-55-22.806,2026-06-11_12-55-23.334,2026-06-11_12-55-24.342

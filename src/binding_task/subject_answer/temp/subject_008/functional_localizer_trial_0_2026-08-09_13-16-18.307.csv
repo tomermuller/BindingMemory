@@ -1,0 +1,2 @@
+,subject,trial_index,feature,word_question,user_answer,is_right,feature_appear,feature_disappear,question_appear,answer_time
+0,008,0,kitchen,bathroom,left,True,2026-08-09_13-16-14.493,2026-08-09_13-16-16.017,2026-08-09_13-16-17.499,2026-08-09_13-16-18.295

@@ -1,0 +1,2 @@
+,subject,trial_index,feature,word_question,user_answer,is_right,feature_appear,feature_disappear,question_appear,answer_time
+0,010,0,kitchen,living_room,left,True,2026-10-25_13-45-50.042,2026-10-25_13-45-51.567,2026-10-25_13-45-53.046,2026-10-25_13-45-54.155

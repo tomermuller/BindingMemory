@@ -1,0 +1,2 @@
+,subject,trial,object,colors,scenes,retrival_success,retrival_report_color,retrival_report_scene,object_appear,start_retrival_time,object_disappear,retrival_time,retrival_question_appear,retrival_report_time,scenes_question_appear,scenes_answer_time,colors_question_appear,colors_answer_time
+0,9,trial_1,laptop,red,bathroom,True,True,True,2026-08-27_12-42-05.975,2026-08-27_12-42-06.487,2026-08-27_12-42-07.060,2026-08-27_12-42-07.060,2026-08-27_12-42-07.584,2026-08-27_12-42-08.540,2026-08-27_12-42-09.074,2026-08-27_12-42-10.253,2026-08-27_12-42-11.278,2026-08-27_12-42-12.380

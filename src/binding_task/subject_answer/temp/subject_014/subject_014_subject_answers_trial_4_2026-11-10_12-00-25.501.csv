@@ -1,0 +1,6 @@
+,subject,trial,object,colors,scenes,retrival_success,retrival_report_color,retrival_report_scene,object_appear,start_retrival_time,object_disappear,retrival_time,retrival_question_appear,retrival_report_time,scenes_question_appear,scenes_answer_time
+0,014,trial_1,sock,,,False,,,2026-11-10_11-58-48.157,2026-11-10_11-58-48.670,2026-11-10_11-58-53.680,,,,,
+1,014,trial_2,ladder,,,False,,,2026-11-10_11-58-55.557,2026-11-10_11-58-56.069,2026-11-10_11-59-01.080,,,,,
+2,014,trial_3,tie,,,False,,,2026-11-10_11-59-03.092,2026-11-10_11-59-03.604,2026-11-10_11-59-08.614,,,,,
+3,014,trial_4,air conditioner,,,False,,,2026-11-10_11-59-09.716,2026-11-10_11-59-10.229,2026-11-10_11-59-15.239,,,,,
+4,014,trial_5,man,,living_room,True,False,True,2026-11-10_11-59-16.491,2026-11-10_11-59-17.002,2026-11-10_11-59-20.599,2026-11-10_11-59-20.599,2026-11-10_11-59-21.126,2026-11-10_12-00-20.303,2026-11-10_12-00-20.827,2026-11-10_12-00-24.486

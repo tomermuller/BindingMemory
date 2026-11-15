@@ -94,7 +94,6 @@ class FunctionalLocalizer:
             3. show the feature image for 1.5 second
             4. blank screen for 1 to 2 seconds"""
         show_fixation(win=self.win, min_time=0.5, max_time=1.5)
-        print("1111")
         self._show_feature(trial_feature=trial_feature, trial_times=trial_times, is_example=is_example)
         show_nothing(win=self.win, min_time=1.0, max_time=2.0)
 

@@ -1,0 +1,3 @@
+,subject,trial_index,feature,word_question,user_answer,is_right,feature_appear,feature_disappear,question_appear,answer_time
+0,015,0,red,green,left,True,2026-11-15_11-46-18.891,2026-11-15_11-46-20.406,2026-11-15_11-46-21.777,2026-11-15_11-46-22.754
+1,015,1,red,yellow,left,True,2026-11-15_11-46-25.430,2026-11-15_11-46-26.948,2026-11-15_11-46-28.608,2026-11-15_11-46-29.275

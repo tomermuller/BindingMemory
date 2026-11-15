@@ -1,0 +1,2 @@
+subject,trial,object,probe,retrival_success,is_remember,subject_answer,probe_appear,probe_disappear,object_appear,start_retrival_time,object_disappear
+006,trial_1,apple,scenes,False,,,2026-06-24_12-44-03.525,2026-06-24_12-44-04.541,2026-06-24_12-44-04.897,2026-06-24_12-44-05.410,2026-06-24_12-44-10.419

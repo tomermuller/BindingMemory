@@ -1,0 +1,2 @@
+,subject,trial,object,colors,scenes,retrival_success,retrival_report_color,retrival_report_scene,object_appear,start_retrival_time,object_disappear,retrival_time,retrival_question_appear,retrival_report_time,colors_question_appear,colors_answer_time
+0,013,trial_1,dog,red,,True,True,False,2026-11-05_11-40-13.620,2026-11-05_11-40-14.131,2026-11-05_11-40-17.488,2026-11-05_11-40-17.488,2026-11-05_11-40-18.021,2026-11-05_11-40-19.344,2026-11-05_11-40-19.878,2026-11-05_11-40-20.664

@@ -1,0 +1,2 @@
+,subject,trial,object,probe,retrival_success,is_remember,subject_answer,probe_appear,probe_disappear,object_appear,start_retrival_time,object_disappear,retrival_time,scenes_question_appear,scenes_answer_time
+0,013,trial_1,air conditioner,scenes,True,True,kitchen,2026-11-05_12-00-54.580,2026-11-05_12-00-55.595,2026-11-05_12-00-55.944,2026-11-05_12-00-56.456,2026-11-05_12-00-57.351,2026-11-05_12-00-57.351,2026-11-05_12-00-57.880,2026-11-05_12-00-58.502

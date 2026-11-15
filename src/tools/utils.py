@@ -17,10 +17,9 @@ def compute_avg_scene_color() -> list:
         3. divide by total pixel count to get mean RGB in [0, 255]
         4. convert to PsychoPy [-1, 1] range: val / 127.5 - 1
         output: [r, g, b] list with values in [-1, 1]"""
-    scenes_folder = Path(__file__).parent / "features" / "scenes"
+    scenes_folder = Path(r"C:\Users\User\Desktop\python tasks repo\BindingMemory\src\binding_task\features\scenes")
     pixel_sum = np.zeros(3)
     pixel_count = 0
-
     for img_path in scenes_folder.glob("*.png"):
         img = np.array(Image.open(img_path).convert("RGB"), dtype=float)
         pixel_sum += img.reshape(-1, 3).sum(axis=0)

@@ -1,0 +1,2 @@
+,subject,trial,object,probe,retrival_success,is_remember,subject_answer,probe_appear,probe_disappear,object_appear,start_retrival_time,object_disappear,retrival_time,colors_question_appear,colors_answer_time
+0,011,trial_1,woman,colors,True,True,green,2026-10-29_15-48-19.801,2026-10-29_15-48-20.819,2026-10-29_15-48-21.177,2026-10-29_15-48-21.688,2026-10-29_15-48-22.941,2026-10-29_15-48-22.941,2026-10-29_15-48-23.475,2026-10-29_15-48-25.301

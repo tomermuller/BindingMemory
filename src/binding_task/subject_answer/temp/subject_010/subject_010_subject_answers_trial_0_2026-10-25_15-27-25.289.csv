@@ -1,0 +1,2 @@
+,subject,trial,object,probe,retrival_success,is_remember,subject_answer,probe_appear,probe_disappear,object_appear,start_retrival_time,object_disappear,retrival_time,colors_question_appear,colors_answer_time
+0,010,trial_1,hat,colors,True,True,yellow,2026-10-25_15-27-19.581,2026-10-25_15-27-20.597,2026-10-25_15-27-20.939,2026-10-25_15-27-21.450,2026-10-25_15-27-22.797,2026-10-25_15-27-22.797,2026-10-25_15-27-23.326,2026-10-25_15-27-24.268

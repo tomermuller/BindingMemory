@@ -1,0 +1,3 @@
+,subject,trial,object,probe,retrival_success,is_remember,subject_answer,probe_appear,probe_disappear,object_appear,start_retrival_time,object_disappear,retrival_time,scenes_question_appear,scenes_answer_time,colors_question_appear,colors_answer_time
+0,013,trial_1,air conditioner,scenes,True,True,kitchen,2026-11-05_12-00-54.580,2026-11-05_12-00-55.595,2026-11-05_12-00-55.944,2026-11-05_12-00-56.456,2026-11-05_12-00-57.351,2026-11-05_12-00-57.351,2026-11-05_12-00-57.880,2026-11-05_12-00-58.502,,
+1,013,trial_2,closet,colors,True,True,green,2026-11-05_12-01-00.076,2026-11-05_12-01-01.096,2026-11-05_12-01-01.453,2026-11-05_12-01-01.965,2026-11-05_12-01-02.910,2026-11-05_12-01-02.910,,,2026-11-05_12-01-03.438,2026-11-05_12-01-04.062

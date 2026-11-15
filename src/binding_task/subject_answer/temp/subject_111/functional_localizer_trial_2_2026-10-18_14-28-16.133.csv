@@ -1,0 +1,4 @@
+,subject,trial_index,feature,word_question,user_answer,is_right,feature_appear,feature_disappear,question_appear,answer_time
+0,111,0,kitchen,kitchen,right,True,2026-10-18_14-27-56.162,2026-10-18_14-27-57.685,2026-10-18_14-27-59.140,2026-10-18_14-27-59.987
+1,111,1,green,green,left,False,2026-10-18_14-28-02.743,2026-10-18_14-28-04.259,2026-10-18_14-28-05.696,2026-10-18_14-28-06.418
+2,111,2,yellow,green,left,True,2026-10-18_14-28-12.536,2026-10-18_14-28-14.052,2026-10-18_14-28-15.374,2026-10-18_14-28-16.122

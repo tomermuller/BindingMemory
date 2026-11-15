@@ -1,0 +1,3 @@
+,subject,trial,object,probe,retrival_success,is_remember,subject_answer,probe_appear,probe_disappear,object_appear,start_retrival_time,object_disappear,retrival_time,colors_question_appear,colors_answer_time,scenes_question_appear,scenes_answer_time
+0,010,trial_1,hat,colors,True,True,yellow,2026-10-25_15-27-19.581,2026-10-25_15-27-20.597,2026-10-25_15-27-20.939,2026-10-25_15-27-21.450,2026-10-25_15-27-22.797,2026-10-25_15-27-22.797,2026-10-25_15-27-23.326,2026-10-25_15-27-24.268,,
+1,010,trial_2,build a bear,scenes,True,True,kitchen,2026-10-25_15-27-26.147,2026-10-25_15-27-27.165,2026-10-25_15-27-27.521,2026-10-25_15-27-28.034,2026-10-25_15-27-29.492,2026-10-25_15-27-29.492,,,2026-10-25_15-27-30.023,2026-10-25_15-27-30.893

@@ -1,0 +1,2 @@
+,subject,trial,object,colors,scenes,retrival_success,retrival_report_color,retrival_report_scene,object_appear,start_retrival_time,object_disappear,retrival_time,retrival_question_appear,retrival_report_time,scenes_question_appear,scenes_answer_time,colors_question_appear,colors_answer_time
+0,015,trial_1,painting,red,kitchen,True,True,True,2026-11-15_12-48-01.559,2026-11-15_12-48-02.071,2026-11-15_12-48-02.870,2026-11-15_12-48-02.870,2026-11-15_12-48-03.395,2026-11-15_12-48-04.622,2026-11-15_12-48-05.163,2026-11-15_12-48-06.574,2026-11-15_12-48-07.600,2026-11-15_12-48-08.398

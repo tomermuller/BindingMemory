@@ -1,0 +1,4 @@
+,subject,trial,object,probe,retrival_success,is_remember,subject_answer,probe_appear,probe_disappear,object_appear,start_retrival_time,object_disappear,retrival_time,colors_question_appear,colors_answer_time,scenes_question_appear,scenes_answer_time
+0,004,trial_1,clock,colors,True,True,red,2026-06-11_12-55-20.410,2026-06-11_12-55-21.425,2026-06-11_12-55-21.775,2026-06-11_12-55-22.287,2026-06-11_12-55-22.806,2026-06-11_12-55-22.806,2026-06-11_12-55-23.334,2026-06-11_12-55-24.342,,
+1,004,trial_2,bucket,colors,True,True,yellow,2026-06-11_12-55-26.661,2026-06-11_12-55-27.684,2026-06-11_12-55-28.042,2026-06-11_12-55-28.553,2026-06-11_12-55-28.959,2026-06-11_12-55-28.959,2026-06-11_12-55-29.484,2026-06-11_12-55-30.599,,
+2,004,trial_3,cat,scenes,True,True,living_room,2026-06-11_12-55-32.910,2026-06-11_12-55-33.925,2026-06-11_12-55-34.275,2026-06-11_12-55-34.786,2026-06-11_12-55-35.295,2026-06-11_12-55-35.295,,,2026-06-11_12-55-35.836,2026-06-11_12-55-36.543

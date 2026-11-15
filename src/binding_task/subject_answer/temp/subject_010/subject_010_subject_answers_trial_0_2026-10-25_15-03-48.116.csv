@@ -1,0 +1,2 @@
+,subject,trial,object,colors,scenes,retrival_success,retrival_report_color,retrival_report_scene,object_appear,start_retrival_time,object_disappear,retrival_time,retrival_question_appear,retrival_report_time,scenes_question_appear,scenes_answer_time
+0,010,trial_1,fan,,kitchen,True,False,True,2026-10-25_15-03-37.963,2026-10-25_15-03-38.475,2026-10-25_15-03-42.110,2026-10-25_15-03-42.110,2026-10-25_15-03-42.646,2026-10-25_15-03-45.742,2026-10-25_15-03-46.272,2026-10-25_15-03-47.094

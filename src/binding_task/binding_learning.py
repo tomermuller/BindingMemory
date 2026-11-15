@@ -162,7 +162,7 @@ class BindingLearning:
             3. open the scene image and paste the object centered on it
             output: PIL Image (scene with object — caller is responsible for saving)"""
         colored_object = self._color_object(object_image, color)
-        scene_image = Image.open(scene_image)
+        scene_image = Image.open(random.choice(scene_image))
         colored_object = colored_object.resize((int(scene_image.width * 0.4), int(scene_image.height * 0.4)))
         x = (scene_image.width - colored_object.width) // 2
         y = (scene_image.height - colored_object.height) // 2
