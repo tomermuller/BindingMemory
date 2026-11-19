@@ -10,8 +10,8 @@ class NoLocalizerConfig:
     """settings of the binding no localizer task.
        trials per block (NUMBER_OF_TRIALS / NUMBER_OF_BLOCKS) must divide by the features per category (2),
        and OBJECTS_PATH must hold NUMBER_OF_TRIALS objects"""
-    NUMBER_OF_BLOCKS = 8
-    NUMBER_OF_TRIALS = 128
+    NUMBER_OF_BLOCKS = 12
+    NUMBER_OF_TRIALS = 120
     OBJECTS_PATH = _TASK_FOLDER / 'objects'
     OBJECTS_EXTENSION = '.jpg'
     BINDING_PHOTOS_FOLDER = _TASK_FOLDER / 'binding_photos'

@@ -1,0 +1,2 @@
+,subject,trial,object,colors,scenes,retrival_success,retrival_report_color,retrival_report_scene,object_appear,start_retrival_time,object_disappear,retrival_time,retrival_question_appear,retrival_report_time,colors_question_appear,colors_answer_time
+0,501,trial_1,inanimate_55,red,,True,True,False,2026-11-15_15-44-40.138,2026-11-15_15-44-40.649,2026-11-15_15-44-42.069,2026-11-15_15-44-42.069,2026-11-15_15-44-42.598,2026-11-15_15-44-43.606,2026-11-15_15-44-44.126,2026-11-15_15-44-44.942
